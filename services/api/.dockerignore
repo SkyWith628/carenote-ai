@@ -1,0 +1,13 @@
+# 빌드 컨텍스트에서 제외 → 빌드 빠르고 비밀정보 유출 방지
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+tests/
+.git/
+.DS_Store

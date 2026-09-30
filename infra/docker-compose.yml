@@ -1,0 +1,108 @@
+# =============================================================================
+# 케어노트AI — docker-compose
+#
+# [What] 로컬 개발 인프라 오케스트레이션.
+# [Why]  postgres(pgvector)+redis 는 오프더셸프라 지금 바로 뜬다.
+#        api·web 은 코드가 TODO 라서 `profiles: [app]` 로 게이트 → 코드를
+#        채운 뒤 `--profile app` 을 붙일 때만 빌드/실행된다.
+# [How]  현업에서도 "인프라는 상시, 앱은 선택 프로파일" 로 나눠 부팅 실패를
+#        격리하고 CI 에서 인프라만 띄운 통합테스트를 돌린다.
+#
+# 사용법:
+#   docker compose -f infra/docker-compose.yml up -d            # 인프라만 (Phase1-①)
+#   docker compose -f infra/docker-compose.yml --profile app up # api·web 까지 (코드 채운 뒤)
+#   ※ 루트에서 `make up` / `make up-app` 으로도 실행 (Makefile 참고)
+# =============================================================================
+
+name: carenote-ai
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL + pgvector — 관계형 DB + 벡터 검색(RAG 임베딩 저장)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg16 # pgvector 확장 내장 공식 이미지
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-carenote}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-carenote} # .env 로 덮어쓰기 (커밋 금지)
+      POSTGRES_DB: ${POSTGRES_DB:-carenote}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # migrations/*.sql 은 최초 부팅 시 알파벳 순으로 1회 자동 실행된다.
+      # (예: 001_init.sql 에 CREATE EXTENSION vector; 부터 넣는다)
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-carenote} -d ${POSTGRES_DB:-carenote}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis — 작업 큐 / 캐시 (fill_job 등)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # API — FastAPI + LangGraph (AI 코어) ★부트캠프 핵심
+  # profiles:[app] → 기본 `up` 에선 제외. 코드 채운 뒤 `--profile app` 로 실행.
+  # ---------------------------------------------------------------------------
+  api:
+    profiles: ["app"]
+    build:
+      context: ../services/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../services/api/.env # TODO: .env.example 복사해서 생성 (커밋 금지)
+    environment:
+      # compose 내부 네트워크에선 서비스명이 호스트명이 된다.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-carenote}:${POSTGRES_PASSWORD:-carenote}@postgres:5432/${POSTGRES_DB:-carenote}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy # DB 준비된 뒤 기동
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s # 앱 부팅 유예
+
+  # ---------------------------------------------------------------------------
+  # Web — Next.js 실무자 SaaS (초안 검토·승인 HITL UI)
+  # ---------------------------------------------------------------------------
+  web:
+    profiles: ["app"]
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # 브라우저→API 호출 주소. 로컬은 호스트 포트로 노출된 api 를 가리킨다.
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:${API_PORT:-8000}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,20 @@
+{
+  "pages": [
+    { "id": "page-a", "name": "시안 A · 웜 그린" },
+    { "id": "page-b", "name": "시안 B · 클린 블루" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 940, "title": "대시보드", "page": "page-a" },
+    { "file": "DraftReview.dc.html", "x": 1520, "y": 0, "w": 1440, "h": 940, "title": "초안 검토", "page": "page-a" },
+    { "file": "RecipientDetail.dc.html", "x": 0, "y": 1020, "w": 1440, "h": 940, "title": "수급자 상세", "page": "page-a" },
+    { "file": "FillJobs.dc.html", "x": 1520, "y": 1020, "w": 1440, "h": 940, "title": "자동채움 대기", "page": "page-a" },
+    { "file": "RiskReport.dc.html", "x": 0, "y": 2040, "w": 1440, "h": 940, "title": "월말 리스크 리포트", "page": "page-a" },
+    { "file": "CleanDashboard.dc.html", "x": 0, "y": 0, "w": 1440, "h": 940, "title": "대시보드 (클린)", "page": "page-b" },
+    { "file": "CleanDraftReview.dc.html", "x": 1520, "y": 0, "w": 1440, "h": 940, "title": "초안 검토 (클린)", "page": "page-b" }
+  ],
+  "annotations": [
+    { "id": "brief", "x": 1520, "y": 2040, "w": 340, "page": "page-a", "text": "케어노트AI SaaS 주요 5화면 (설계 v1 §10 기준)\n\n· 대시보드 → 초안 검토 → 자동채움 대기가 핵심 플로우\n· 데이터는 예시이며 수급자명은 마스킹 규칙(김○○)을 따름\n· 저장/제출은 항상 사용자가 직접 — AI는 초안과 자동채움까지만" },
+    { "id": "brief-b", "x": 0, "y": -160, "w": 380, "page": "page-b", "text": "시안 B — 클린 블루 톤 (토스풍 미니멀)\n\n화이트 카드 + 보더 없는 섀도, 블루 액센트(#3182F6), Noto Sans KR. 핵심 2화면(대시보드·초안 검토)만 먼저 적용 — 이 방향이 마음에 들면 나머지 3화면도 같은 톤으로 확장합니다. 데이터는 시안 A와 동일." }
+  ],
+  "launch": { "view": "canvas", "page": "page-b" }
+}
