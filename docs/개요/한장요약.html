@@ -1,0 +1,160 @@
+<title>케어노트 AI 한눈에 보기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 한 장짜리 보드. 위에서부터 한 줄 정의 → 현장 장면(전/후) → 처리 흐름 → 사용자·범위·기술 3열. */
+:root {
+  --bg: #f0929b;
+  --card: #ffffff;
+  --card-2: #fdf1f1;
+  --ink: #17181c;
+  --muted: #5d5e66;
+  --pink: #f0929b;
+  --pink-soft: #fbd9dc;
+  --heart: #e0825a;
+  --font-display: "Black Han Sans", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181c; --card: #22232a; --card-2: #2b2c34; --ink: #f5eeee; --muted: #a9a9b3;
+    --pink: #f0929b; --pink-soft: #4a2f34; --heart: #e8956f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181c; --card: #22232a; --card-2: #2b2c34; --ink: #f5eeee; --muted: #a9a9b3;
+  --pink: #f0929b; --pink-soft: #4a2f34; --heart: #e8956f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; padding-inline: 16px; padding-block: 28px 48px; }
+h1, h2, h3, p { margin: 0; }
+.board { max-width: 1040px; margin: 0 auto; background: var(--card); border: 3px solid var(--ink); border-radius: 22px; box-shadow: 6px 6px 0 var(--ink); padding: 26px; display: flex; flex-direction: column; gap: 22px; }
+.label { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+.top { display: flex; align-items: center; gap: 22px; padding-bottom: 20px; border-bottom: 3px solid var(--ink); }
+.top svg { width: 96px; height: auto; flex: none; }
+.top > div { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(34px, 6vw, 54px); line-height: 1.05; }
+.def { font-size: 17px; max-width: 60ch; text-wrap: pretty; }
+.def b { background: linear-gradient(transparent 60%, var(--pink) 60%); font-weight: 600; }
+
+.scene { display: grid; grid-template-columns: 1fr 52px 1.25fr; gap: 14px; align-items: stretch; }
+.scene .mid { display: grid; place-items: center; font-family: var(--font-display); font-size: 30px; }
+.paper { border: 3px solid var(--ink); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; background: var(--card-2); }
+.paper.out { background: var(--pink-soft); }
+.paper q { font-size: 18px; font-weight: 500; quotes: none; }
+.paper .who { font-size: 13px; color: var(--muted); }
+.paper mark { background: var(--pink); color: #17181c; padding: 0 3px; border-radius: 3px; }
+
+.flow { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; list-style: none; padding: 0; margin: 0; }
+.flow li { border: 3px solid var(--ink); border-radius: 12px; padding: 10px; background: var(--card-2); display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 13px; position: relative; }
+.flow li b { font-size: 14px; line-height: 1.3; }
+.flow li span { color: var(--muted); }
+.flow li.human { background: var(--ink); color: var(--card); }
+.flow li.human span { color: inherit; opacity: .75; }
+.flow .n { font-family: var(--font-mono); font-size: 11px; opacity: .7; }
+
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.col { border-left: 4px solid var(--pink); padding-left: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.col h3 { font-weight: 600; font-size: 16px; }
+.col ul { margin: 0; padding-left: 18px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+.col li b { color: var(--ink); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--font-mono); font-size: 12px; border: 2px solid var(--ink); border-radius: 99px; padding: 1px 10px; background: var(--card-2); }
+
+.rule { background: var(--ink); color: var(--card); border-radius: 12px; padding: 12px 18px; display: flex; flex-wrap: wrap; gap: 6px 24px; align-items: center; justify-content: space-between; }
+.rule strong { font-family: var(--font-display); font-weight: 400; font-size: 22px; }
+.rule span { font-size: 14px; opacity: .85; }
+
+@media (max-width: 860px) {
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cols { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .board { padding: 18px; border-radius: 18px; box-shadow: 4px 4px 0 var(--ink); }
+  .top { flex-direction: column; align-items: flex-start; }
+  .top svg { width: 72px; }
+  .scene { grid-template-columns: 1fr; }
+  .scene .mid { transform: rotate(90deg); }
+}
+</style>
+
+<main class="board">
+  <header class="top">
+    <svg viewBox="0 0 180 170" role="img" aria-label="두 손이 하트를 받치고 있는 그림">
+      <path d="M90 78 C60 52 38 32 38 14 C38 -2 60 -6 72 8 C80 17 90 26 90 26 C90 26 100 17 108 8 C120 -6 142 -2 142 14 C142 32 120 52 90 78Z" transform="translate(0 28)" fill="var(--heart)" stroke="#17181c" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M10 110 L38 96 C52 100 60 112 66 122 L72 158 L24 150 C12 140 8 126 10 110Z" fill="#fbd9c7" stroke="#17181c" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M170 110 L142 96 C128 100 120 112 114 122 L108 158 L156 150 C168 140 172 126 170 110Z" fill="#fbd9c7" stroke="#17181c" stroke-width="5" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <p class="label">2026 지능정보 SW 아이디어 경진대회 · 발표 10.16</p>
+      <h1>케어노트 AI</h1>
+      <p class="def">요양보호사가 현장에서 남긴 <b>음성</b>을 사실 단위로 확인한 뒤, 사회복지사가 검토할 수 있는 <b>방문요양 기록지 초안</b>으로 바꿔 주는 서비스입니다.</p>
+    </div>
+  </header>
+
+  <section aria-label="현장 장면">
+    <p class="label" style="margin-bottom:10px">풀려는 문제 · 메모를 다시 해석해 정해진 표현으로 옮겨 쓰는 일</p>
+    <div class="scene">
+      <div class="paper">
+        <span class="label">요양보호사 현장 메모</span>
+        <q>점심 거의 안 드시고 걸을 때 어지럽다고 하심</q>
+        <span class="who">음성으로 남김</span>
+      </div>
+      <div class="mid" aria-hidden="true">→</div>
+      <div class="paper out">
+        <span class="label">방문요양 기록지 초안</span>
+        <q><mark>식사량 저하</mark>가 관찰되었으며 <mark>보행 시 어지러움</mark>을 호소함. 상태 재확인 및 보호자 공유가 필요함.</q>
+        <span class="who">사회복지사가 음성·원문·초안을 나란히 보고 승인</span>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="처리 흐름">
+    <p class="label" style="margin-bottom:10px">처리 흐름 · 검은 칸은 사람이 하는 일</p>
+    <ol class="flow">
+      <li class="human"><span class="n">01</span><b>녹음</b><span>모바일 웹, 수급자 선택</span></li>
+      <li><span class="n">02</span><b>전처리</b><span>변환, 구간 분리, VAD</span></li>
+      <li><span class="n">03</span><b>음성인식</b><span>원문, 시각, 신뢰도</span></li>
+      <li><span class="n">04</span><b>위험 판정</b><span>저신뢰 구간은 '확인 필요'</span></li>
+      <li><span class="n">05</span><b>사실 추출</b><span>개인정보 최소화 후 구조화</span></li>
+      <li><span class="n">06</span><b>양식 작성</b><span>초안, 누락 항목, 확인 질문</span></li>
+      <li class="human"><span class="n">07</span><b>검토 · 승인</b><span>수정하고 승인</span></li>
+    </ol>
+  </section>
+
+  <section class="cols" aria-label="사용자, 범위, 기술">
+    <div class="col">
+      <h3>누가 쓰나</h3>
+      <ul>
+        <li><b>요양보호사</b> 현장에서 음성으로 메모</li>
+        <li><b>사회복지사</b> 취합, 작성, 검토, 승인</li>
+        <li><b>센터장</b> 반복 행정과 운영 리스크 감소</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>MVP 범위와 하지 않는 일</h3>
+      <ul>
+        <li>녹음 → 음성 인식 → 항목 분류 → 빈칸 되묻기 → 검토·승인</li>
+        <li>최종 승인과 외부 제출은 AI가 하지 않음</li>
+        <li>진단, 급여판정, 비용산정은 대신하지 않음</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>기술 스택</h3>
+      <div class="chips">
+        <span class="chip">Next.js</span><span class="chip">FastAPI</span><span class="chip">Whisper + LoRA</span><span class="chip">구조화 출력 LLM</span><span class="chip">PostgreSQL</span><span class="chip">Redis</span><span class="chip">Docker</span>
+      </div>
+      <p style="color:var(--muted);font-size:14px">고정 절차와 규칙을 우선하고, 분기·재개가 필요할 때만 LangGraph를 씁니다.</p>
+    </div>
+  </section>
+
+  <footer class="rule">
+    <strong>말하지 않은 것은 기록하지 않는다</strong>
+    <span>AI는 초안까지, 확인·승인은 사람. 코드는 아직 뼈대 단계입니다.</span>
+  </footer>
+</main>
