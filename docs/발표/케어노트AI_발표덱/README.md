@@ -31,8 +31,10 @@ PDF 발표자료(`6조_케어노트AI`, 22장)를 바탕으로 만든 브라우�
 ├─ images/            # 일러스트·화면 캡처 (webp). PDF 를 4000px 로 렌더해 잘라낸 고해상도·투명 배경본
 ├─ fonts/             # 덱에 쓰인 글자만 담은 서브셋 글꼴 (Gothic A1 5종 + IBM Plex Mono, 총 ≈ 210 KB, OFL)
 ├─ tools/build.py     # 서브셋 글꼴 생성 + 단일 파일(standalone) 빌드
-└─ tools/crop_illus.py # (참고) 발표 PDF 렌더(pdftoppm, 4000px)에서 일러스트를 잘라 투명 배경 webp 로 만든 스크립트
+├─ tools/crop_illus.py # (참고) 발표 PDF 렌더(pdftoppm, 4000px)에서 일러스트를 잘라 투명 배경 webp 로 만든 스크립트
+└─ tools/pptx/        # HTML → 애니메이션 PPTX 변환기 (capture.mjs → build.cjs → animate.py)
 ../케어노트AI_발표덱_standalone.html   # 이미지·글꼴을 모두 내장한 단일 파일 (≈ 1.4 MB) ← 발표용
+../케어노트AI_발표덱.pptx              # PowerPoint 판 (≈ 12 MB, 애니메이션 포함)
 ```
 
 내용을 고치려면 `index.html` 을 수정한 뒤 아래를 실행해 standalone 을 다시 만듭니다.
@@ -52,3 +54,20 @@ python3 tools/build.py                # 글꼴 원본이 없으면 Google Fonts 
   PDF 를 4000px 로 다시 렌더해 배경·점선·장식을 제거한 투명 webp 로 교체했습니다(2배 해상도).
 - **넘치지 않는 상자**: 글이 들어가는 상자는 `height` 대신 `min-height` 와 flex 를 써서, 글이 길어지면 상자가 늘어나지 보이지 않게 잘리거나 겹치지 않습니다.
 - **동작 감소 설정 존중**: OS 의 "동작 줄이기" 가 켜져 있으면 모든 등장 애니메이션을 끄고 최종 상태를 바로 보여줍니다.
+
+## PowerPoint 판 (`../케어노트AI_발표덱.pptx`)
+
+HTML 과 똑같이 보이도록, 애니메이션 단위마다 투명 PNG 레이어로 잘라 같은 위치에 놓고 PowerPoint 기본 애니메이션을 입혔습니다.
+
+- **자동 재생**: 슬라이드가 열리면 모든 요소가 HTML 과 같은 순서·지연·길이로 저절로 등장합니다(클릭 불필요). 다음 슬라이드는 클릭·→ 키로 넘깁니다.
+- **효과 대응**: 떠오르기·날아오기(위·아래·좌·우) · 확대(팝) · 나타내기 · 닦아내기(선 그리기·막대·형광펜) · 시계 방향 원형(도넛·빨간 동그라미) · 반복 효과(별 회전, 상담원 일러스트 둥실, 파이프라인 점 이동) · 슬라이드 전환 페이드.
+- **목차 항목 클릭** 시 해당 장으로 이동, **발표 노트** 포함.
+- **한계**: 글자가 이미지라 PowerPoint 에서 문구를 직접 고칠 수 없습니다. 숫자 카운트업(0 → 1,051)은 PowerPoint 에 해당 효과가 없어 숫자가 완성된 채로 등장합니다.
+
+다시 만들기 (덱 폴더에서):
+
+```bash
+node tools/pptx/capture.mjs index.html /tmp/cap          # Playwright 필요
+node tools/pptx/build.cjs /tmp/cap /tmp/raw.pptx         # pptxgenjs 필요 (npm install pptxgenjs)
+python3 tools/pptx/animate.py /tmp/cap/manifest.json /tmp/raw.pptx ../케어노트AI_발표덱.pptx
+```

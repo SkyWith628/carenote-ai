@@ -73,6 +73,10 @@ for name, (p, box, bgs, min_area, max_dim) in SPEC.items():
         sizes = ndimage.sum(fg, flab, range(1, fn + 1))
         keep = np.zeros(fn + 1, bool)
         keep[1:] = sizes >= min_area
+        # 가는 세로선(잘려 들어온 테두리·구분선)도 제거
+        for j, o in enumerate(ndimage.find_objects(flab), 1):
+            if o is not None and (o[1].stop - o[1].start) <= 24 and (o[0].stop - o[0].start) > 80:
+                keep[j] = False
         fg = keep[flab]
         alpha = (fg * 255).astype(np.uint8)
         # 가장자리 1px: 흰색과 섞인 정도만큼 반투명 (흰 테두리 방지)
