@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>케어노트 AI — 음성메모를 기록으로</title>
+<meta name="description" content="한국경제신문 지능정보 SW 아이디어 경진대회 발표자료 · 고려대학교 지능정보 SW 아카데미 8기 6조">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* =====================================================================
+   케어노트 AI 발표 덱 — 단일 HTML 프레젠테이션
+   · 무대(#stage)는 1600×900 고정 좌표계. 창 크기에 맞춰 transform: scale 로만 축소·확대하므로
+     어떤 해상도(16:9, 16:10, 4:3)에서도 슬라이드 내부 배치가 변하지 않는다.
+   · 글꼴은 fonts/fonts.css 에서 서브셋 woff2 로 내장(오프라인에서도 동일한 줄바꿈 보장).
+   · 모든 텍스트 상자는 min-height + flex 로 만들어 글이 길어져도 넘치지 않고 상자가 늘어난다.
+   ===================================================================== */
+:root{
+  --coral:#FF8B96; --ink:#141416; --paper:#FFFFFF;
+  --pink:#FFB3B9; --pink-soft:#FDE1E4; --pink-strong:#EE8F99; --blush:#FEF2F3; --rose:#F5A9B1;
+  --sky:#DFF5FF; --orange:#DD7A52; --red:#E0262F; --cream:#FFF2CF;
+  --gray:#F2F2F4; --line:#D9D9DE; --muted:#6E6E74; --teal:#1F7A6B; --blue:#2AA3E0; --brick:#B9461F;
+  --font:"Gothic A1","Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--coral);color:var(--ink);font-family:var(--font);overflow:hidden;
+  -webkit-font-smoothing:antialiased;user-select:none;word-break:keep-all;overflow-wrap:anywhere}
+/* 창이 1600px 보다 좁아도(노트북 1366·1536px 등) 무대가 항상 정중앙에 오도록 left/top 50% + translate 로 배치.
+   (grid place-items:center 는 항목이 컨테이너보다 크면 트랙이 커져 오른쪽·아래로 밀리는 문제가 있다) */
+#viewport{position:fixed;inset:0;overflow:hidden;background:var(--coral)}
+#stage{width:1600px;height:900px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(1);transform-origin:center center}
+
+/* ---------- card ---------- */
+#card{position:absolute;left:40px;top:28px;width:1520px;height:804px;background:var(--paper);
+  border:3.5px solid var(--ink);border-radius:56px;box-shadow:12px 12px 0 var(--ink);overflow:hidden}
+#hdr{position:absolute;left:0;right:0;top:0;height:118px;border-bottom:3.5px solid var(--ink);
+  transition:transform .55s cubic-bezier(.7,0,.2,1),opacity .4s;z-index:5;background:var(--paper)}
+#card.bare #hdr{transform:translateY(-122px);opacity:0}
+#tab{position:absolute;left:62px;top:-4px;width:58px;height:78px;background:var(--pink);border:3px solid var(--ink);
+  border-radius:0 0 4px 4px;display:grid;place-items:center;font:900 26px/1 var(--font);transform-origin:top center}
+#tab.flip{animation:tabflip .6s cubic-bezier(.5,0,.3,1)}
+@keyframes tabflip{0%{transform:rotateX(0)}45%{transform:rotateX(90deg)}55%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+#hdrTitle{position:absolute;left:150px;top:20px;height:80px;width:1000px;overflow:hidden}
+#hdrTitle .t{position:absolute;left:0;top:0;height:80px;display:flex;align-items:baseline;gap:20px;white-space:nowrap}
+#hdrTitle .t b{font:900 62px/80px var(--font);letter-spacing:-2px}
+#hdrTitle .t i{font:800 30px/80px var(--font);font-style:normal;letter-spacing:-.5px}
+#hdrTitle .t.in{animation:tIn .6s cubic-bezier(.2,.8,.2,1) both}
+#hdrTitle .t.out{animation:tOut .4s cubic-bezier(.6,0,.8,.2) both}
+#hdrTitle .t i.swap{animation:subIn .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes tIn{from{transform:translateY(80px);opacity:0}to{transform:none;opacity:1}}
+@keyframes tOut{to{transform:translateY(-80px);opacity:0}}
+@keyframes subIn{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+#contest{position:absolute;right:60px;top:50px;font:500 17px/1 var(--font);color:var(--muted);letter-spacing:-.3px}
+#bar{position:absolute;left:0;bottom:0;height:5px;background:var(--pink-strong);transition:width .6s cubic-bezier(.2,.8,.2,1);z-index:6}
+
+/* ---------- slides ---------- */
+.slide{position:absolute;left:0;right:0;top:118px;bottom:0;visibility:hidden}
+.slide.bare{top:0}
+.slide.active{visibility:visible;z-index:2}
+.slide.leaving{visibility:visible;z-index:1;animation:leaveL .5s cubic-bezier(.6,0,.6,1) both}
+.slide.leaving.back{animation-name:leaveR}
+@keyframes leaveL{to{opacity:0;transform:translateX(-70px) scale(.98);filter:blur(2px)}}
+@keyframes leaveR{to{opacity:0;transform:translateX(70px) scale(.98);filter:blur(2px)}}
+.notes{display:none}
+.abs{position:absolute}
+
+/* element entrances: --i = 순서, --step = 간격, --base = 시작 지연 */
+.slide .a{opacity:0}
+.slide.active .a{animation:inUp .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--base,180ms) + var(--i,0) * var(--step,85ms))}
+.slide.active .a.l{animation-name:inL}.slide.active .a.r{animation-name:inR}
+.slide.active .a.pop{animation-name:inPop;animation-timing-function:cubic-bezier(.3,1.5,.5,1)}
+.slide.active .a.fade{animation-name:inFade}.slide.active .a.dn{animation-name:inDn}
+.slide.active .a.grow{animation-name:inGrow;transform-origin:bottom center}
+.slide.active .a.wide{animation-name:inWide;transform-origin:left center}
+@keyframes inUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes inDn{from{opacity:0;transform:translateY(-24px)}to{opacity:1;transform:none}}
+@keyframes inL{from{opacity:0;transform:translateX(-46px)}to{opacity:1;transform:none}}
+@keyframes inR{from{opacity:0;transform:translateX(46px)}to{opacity:1;transform:none}}
+@keyframes inPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes inFade{from{opacity:0}to{opacity:1}}
+@keyframes inGrow{from{opacity:1;transform:scaleY(0)}to{opacity:1;transform:none}}
+@keyframes inWide{from{opacity:1;transform:scaleX(0)}to{opacity:1;transform:none}}
+.draw{stroke-dasharray:1;stroke-dashoffset:1}
+.slide.active .draw{animation:draw var(--dur,.9s) cubic-bezier(.5,0,.3,1) both;animation-delay:calc(var(--base,180ms) + var(--i,0) * var(--step,85ms))}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.illus{display:block;max-width:100%}
+.float{animation:bob 4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px)}}
+.star{position:absolute;width:34px;height:34px}
+.slide.active .star{animation:twinkle 3s ease-in-out infinite}
+@keyframes twinkle{50%{transform:rotate(30deg) scale(1.15)}}
+
+/* ---------- shared components ---------- */
+.kicker{border-left:6px solid var(--pink-strong);padding-left:22px}
+.kicker h3{margin:0;font:900 36px/1.15 var(--font);letter-spacing:-1px}
+.kicker p{margin:8px 0 0;font:500 27px/1.2 var(--font);letter-spacing:-.5px}
+.box{border:3px solid var(--ink);border-radius:5px;background:var(--paper);overflow:hidden;display:flex;flex-direction:column}
+.box h4{margin:0;background:var(--pink);border-bottom:3px solid var(--ink);padding:0 20px;min-height:72px;display:flex;align-items:center;justify-content:center;
+  font:900 32px/1.1 var(--font);letter-spacing:-1px;text-align:center}
+.box .bd{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:18px 22px;
+  font:600 25px/1.45 var(--font);letter-spacing:-.6px}
+.box .bd small{display:block;margin-top:8px;font:500 17px/1.3 var(--font);color:var(--muted)}
+.src{font:500 17px/1.3 var(--font);color:#555;letter-spacing:-.3px}
+.banner{background:var(--ink);color:#fff;border-radius:40px;min-height:64px;display:flex;align-items:center;justify-content:center;
+  padding:12px 40px;text-align:center;font:800 25px/1.3 var(--font);letter-spacing:-.6px}
+.banner em{font-style:normal;color:var(--pink)}
+.mark{background:linear-gradient(transparent 62%, var(--pink) 62%, var(--pink) 92%, transparent 92%) no-repeat 0 0 / 0% 100%}
+.slide.active .mark{animation:sweep 1s cubic-bezier(.6,0,.2,1) both;animation-delay:var(--md,1.6s)}
+@keyframes sweep{to{background-size:100% 100%}}
+.chev{width:44px;height:52px;align-self:center;justify-self:center}
+
+/* ---------- 1 title ---------- */
+#s-title .date{position:absolute;left:72px;top:-4px;background:var(--pink);border:3px solid var(--ink);padding:24px 28px 20px;font:900 22px/1 var(--font);border-radius:0 0 4px 4px}
+#s-title .eyebrow{position:absolute;left:96px;top:176px;font:800 31px/1 var(--font);color:var(--pink-strong);letter-spacing:-.5px}
+#s-title h1{position:absolute;left:90px;top:236px;margin:0;font:900 100px/1.14 var(--font);letter-spacing:-5px;white-space:nowrap}
+#s-title h1 > span{display:block}
+#s-title h1 .pk{color:var(--coral)}
+.who{position:absolute;left:96px;top:616px;border-left:6px solid var(--pink-strong);padding-left:20px;font:600 26px/1.55 var(--font);letter-spacing:-.4px}
+#s-title .hero{position:absolute;right:70px;top:250px;width:400px}
+
+/* ---------- 2 toc ---------- */
+#s-toc .big{position:absolute;left:94px;top:84px}
+#s-toc .big h2{margin:0;font:900 110px/1 var(--font);letter-spacing:-4px}
+#s-toc .big p{margin:14px 0 0 4px;font:500 26px/1 var(--font);color:var(--muted)}
+#s-toc .grid{position:absolute;left:470px;top:270px;display:grid;grid-template-columns:1fr 1fr;gap:26px 34px;width:980px}
+.ti{position:relative;height:66px;border:3px solid var(--ink);border-radius:5px;display:flex;align-items:center;padding-left:96px;
+  font:800 30px/1 var(--font);letter-spacing:-.8px;cursor:pointer;background:var(--paper);transition:transform .2s,box-shadow .2s;white-space:nowrap}
+.ti:hover,.ti:focus-visible{transform:translate(-3px,-3px);box-shadow:6px 6px 0 var(--ink);outline:none}
+.ti .n{position:absolute;left:14px;top:-10px;width:52px;height:68px;background:var(--pink);border:3px solid var(--ink);border-radius:3px;display:grid;place-items:center;font:900 24px/1 var(--font)}
+.ti.lead{background:var(--pink-soft);border-color:var(--pink-soft);justify-content:center;padding:0;cursor:default}
+.ti.lead:hover{transform:none;box-shadow:none}
+
+/* ---------- 3 idea ---------- */
+#s-idea .agent{position:absolute;left:150px;top:36px;width:420px}
+#s-idea .qs{position:absolute;left:700px;top:58px;width:740px;display:flex;flex-direction:column;gap:34px}
+#s-idea .q{border-left:6px solid var(--pink-strong);padding-left:24px}
+#s-idea .q b{display:block;font:900 35px/1.15 var(--font);letter-spacing:-1px}
+#s-idea .q span{display:block;margin-top:10px;font:500 26px/1.3 var(--font);letter-spacing:-.4px}
+#s-idea .thesis{position:absolute;left:90px;top:500px;margin:0;font:900 47px/1.3 var(--font);letter-spacing:-2px;white-space:nowrap}
+
+/* ---------- 4 stats ---------- */
+#s-stat .k1{position:absolute;left:150px;top:44px}
+#s-stat .k2{position:absolute;left:830px;top:44px}
+#s-stat .donuts{position:absolute;left:150px;top:200px;display:flex;align-items:flex-start;gap:40px}
+.donut{width:220px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.donut .yr{border:3px solid var(--ink);border-radius:6px;background:var(--pink-soft);padding:7px 16px;font:800 30px/1 var(--font);margin-bottom:16px;white-space:nowrap}
+.donut.b .yr{background:var(--pink-strong)}
+.donut svg{display:block;overflow:visible}
+.donut .pct{font:800 32px/1 var(--font)}
+.donut .ppl{margin-top:18px;font:900 36px/1 var(--font);letter-spacing:-1px;white-space:nowrap}
+.donut .rank{margin-top:14px;border:3px solid var(--ink);border-radius:30px;padding:7px 20px;font:800 30px/1 var(--font);white-space:nowrap}
+.donut.b .rank{background:var(--pink-strong)}
+#s-stat .arrowR{width:60px;margin-top:140px;flex:none}
+#s-stat .bars{position:absolute;left:880px;top:150px;width:560px;height:460px;display:flex;align-items:flex-end;justify-content:center;gap:34px}
+#s-stat .col{display:flex;flex-direction:column;align-items:center;gap:14px}
+#s-stat .bar{width:170px;background:var(--pink);border:3px solid var(--ink);border-radius:6px;box-shadow:8px 8px 0 var(--ink)}
+#s-stat .bar.b{background:var(--coral)}
+.tagv{border:3px solid var(--ink);border-radius:8px;background:#fff;padding:8px 16px;font:900 40px/1 var(--font);white-space:nowrap}
+.tagy{border:3px solid var(--ink);border-radius:6px;background:var(--pink-soft);padding:7px 18px;font:800 30px/1 var(--font);white-space:nowrap}
+#s-stat .mult{align-self:center;flex:none;white-space:nowrap;margin-bottom:70px;background:var(--coral);border:3px solid var(--ink);border-radius:12px;box-shadow:6px 6px 0 var(--ink);padding:14px 20px;text-align:center;font:900 26px/1.2 var(--font)}
+#s-stat .mult b{display:block;font-size:44px}
+#s-stat .src{position:absolute;left:64px;bottom:22px}
+
+/* ---------- 5 what ---------- */
+#s-what .house{position:absolute;left:30px;top:70px;width:560px}
+#s-what .bubble{position:absolute;left:630px;top:40px;width:830px;min-height:150px;background:var(--sky);border-radius:90px;padding:28px 40px;
+  font:500 22px/1.6 var(--font);text-align:center;letter-spacing:-.6px;display:flex;align-items:center;justify-content:center}
+#s-what .qm{position:absolute;z-index:1;font:900 120px/1 Georgia,"Times New Roman",serif}
+#s-what .cards{position:absolute;left:640px;top:292px;display:grid;grid-template-columns:1.72fr 1fr;gap:24px;width:810px;align-items:stretch}
+#s-what .box h4{justify-content:flex-start;font-size:28px;min-height:64px}
+#s-what .bd{align-items:flex-start;padding:16px 14px 18px 12px}
+#s-what ul{margin:0;padding:0 0 0 20px;display:flex;flex-direction:column;gap:12px;font:500 18px/1.4 var(--font);letter-spacing:-.5px;text-align:left}
+#s-what li::marker{color:var(--ink)}
+#s-what li.hl{color:var(--pink-strong)}
+#s-what li.hl::marker{color:var(--pink-strong)}
+
+/* ---------- 6 structure (people) ---------- */
+#s-struct .col{position:absolute;top:100px;width:440px;border:3px solid var(--ink);border-radius:30px;padding:30px 20px 6px}
+#s-struct .col .pill{position:absolute;left:50%;top:-34px;transform:translateX(-50%);border:3px solid var(--ink);border-radius:40px;padding:14px 42px;font:900 29px/1 var(--font);background:var(--pink-soft);white-space:nowrap}
+#s-struct .col.c .pill{background:var(--sky)}
+#s-struct .row{position:relative;height:92px;display:grid;place-items:center;font:800 29px/1 var(--font);letter-spacing:-.8px;border-bottom:2px solid var(--ink);white-space:nowrap}
+#s-struct .row:last-child{border-bottom:0}
+#s-struct .ring{position:absolute;left:50%;top:50%;width:330px;height:110px;transform:translate(-50%,-50%);overflow:visible;pointer-events:none}
+#s-struct .walk{position:absolute;left:556px;top:200px;width:400px}
+#s-struct .star{width:30px;height:30px}
+
+/* ---------- 7 flow ---------- */
+#flow{position:absolute;left:56px;top:20px;width:1400px;height:640px}
+#flow .lane{position:absolute;left:0;width:1400px;height:96px;background:var(--gray)}
+#flow .lane.alt{background:#fff}
+#flow .ll{position:absolute;left:0;width:150px;height:96px;background:var(--pink-strong);color:#fff;border-radius:10px;display:grid;place-items:center;font:800 26px/1 var(--font)}
+#flow .sp{position:absolute;top:0;width:164px;height:40px;border:2.5px solid var(--ink);border-radius:9px;display:grid;place-items:center;font:800 21px/1 var(--font);background:var(--gray)}
+#flow .sp.hot{background:var(--pink-strong)}
+#flow .bx{position:absolute;width:164px;height:64px;border:2.5px solid var(--ink);border-radius:9px;background:var(--blush);display:grid;place-items:center;text-align:center;font:700 18px/1.25 var(--font);letter-spacing:-.4px;white-space:nowrap}
+#flow .zone{position:absolute;border:3px dashed var(--orange);border-radius:16px;background:rgba(239,142,152,.18)}
+#flow .zlab{position:absolute;width:164px;height:36px;border:2.5px solid var(--ink);border-radius:8px;background:var(--pink-strong);display:grid;place-items:center;font:800 19px/1 var(--font)}
+#flow > svg{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#flow .alab{position:absolute;font:600 16px/1.25 var(--font);color:var(--muted);white-space:nowrap;background:rgba(255,255,255,.85);padding:1px 4px;border-radius:4px}
+#flow .alab.m{color:var(--brick);font-weight:800;text-align:center}
+#flow .legend{position:absolute;left:0;top:594px;width:1400px;padding-left:30px;display:flex;gap:56px;align-items:center;font:600 17px/1 var(--font);color:#333}
+#flow .legend span{display:flex;align-items:center;gap:10px;white-space:nowrap}
+#flow .legend .note{margin-left:auto;color:#333}
+
+/* ---------- 8/9 persona ---------- */
+.persona{position:absolute;left:0;right:0;top:80px;display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.persona img{height:350px;width:auto}
+.persona b{display:block;font:900 36px/1.25 var(--font);letter-spacing:-1px;margin-top:14px;text-align:center}
+.pc{position:absolute;width:560px}
+.pc .bd{min-height:150px}
+.pc.p1{left:60px;top:106px}.pc.p2{right:60px;top:106px}.pc.p3{left:60px;top:408px}.pc.p4{right:60px;top:408px}
+.dots{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+
+/* ---------- 10 charts ---------- */
+.chart{position:absolute;top:40px;width:640px}
+.chart .kicker{margin-bottom:34px}
+.chart .lg{display:flex;gap:46px;font:500 17px/1 var(--font);margin:0 0 6px 30px}
+.chart .lg span{display:flex;gap:10px;align-items:center}
+.chart svg{display:block;overflow:visible}
+.chart text{font-family:var(--font)}
+#s-chart .src{position:absolute;left:64px;bottom:22px}
+
+/* ---------- 11 paper ---------- */
+#s-paper img.doc{position:absolute;top:10px;height:640px;width:auto;border:1px solid var(--line)}
+#s-paper .bigarrow{position:absolute;left:656px;top:260px;width:250px}
+
+/* ---------- 12/13 risk & solution ---------- */
+.rtable{position:absolute;left:64px;right:64px;top:22px}
+.rhead{display:grid;font:900 36px/1 var(--font);letter-spacing:-1px;margin-bottom:16px;column-gap:10px}
+.rgroup{display:grid;column-gap:10px;row-gap:12px;margin-bottom:24px}
+.rgroup .who{grid-row:span 2;background:var(--pink-strong);color:#fff;border-radius:12px;display:grid;place-items:center;font:800 28px/1 var(--font);
+  position:static;border:0;padding:0}
+.cell{min-height:102px;border-radius:14px;display:flex;flex-direction:column;justify-content:center;padding:12px 26px;font:800 23px/1.35 var(--font);letter-spacing:-.6px}
+.cell small{display:block;font:600 18px/1.3 var(--font);color:#444;margin-top:4px}
+.c1{background:var(--blush)}.c2{background:var(--pink-soft)}.c3{background:var(--pink-strong);font-size:27px;color:#fff}
+.c3 small{font-size:19px;color:rgba(255,255,255,.92)}
+.c2 small{font-size:17px}
+.c4{background:#fff;border:3px solid var(--ink);font-size:21px;padding:10px 20px}
+.rtable .banner{margin-top:-6px}
+
+/* ---------- 14 compare ---------- */
+#s-cmp .lead{position:absolute;left:64px;top:18px;margin:0;font:900 38px/1.3 var(--font);letter-spacing:-1.2px;white-space:nowrap}
+#s-cmp .lead em{font-style:normal;color:var(--brick)}
+#cmp{position:absolute;left:64px;top:128px;width:1392px;border-collapse:collapse;table-layout:fixed}
+#cmp th{padding:0 6px 8px;vertical-align:bottom}
+#cmp th div{background:var(--gray);border:1.5px solid var(--line);height:92px;display:flex;flex-direction:column;justify-content:center;gap:8px;font:800 21px/1.1 var(--font);letter-spacing:-.5px;text-align:center}
+#cmp th div small{font:500 16px/1 var(--font);color:var(--muted)}
+#cmp th.me div{background:var(--pink-strong);border:3px solid var(--ink)}
+#cmp th.me div small{color:var(--ink)}
+#cmp th.crit{text-align:left;font:600 18px/1 var(--font);color:var(--muted);width:330px}
+#cmp td{border-bottom:1.5px solid var(--line);height:49px;text-align:center}
+#cmp td.crit{text-align:left;font:800 22px/1 var(--font);letter-spacing:-.5px;padding-left:6px;white-space:nowrap}
+#cmp td.me{background:rgba(239,142,152,.12)}
+#cmp svg{vertical-align:middle}
+#s-cmp .diffs{position:absolute;left:64px;top:490px;width:1392px;display:grid;grid-template-columns:repeat(3,1fr);gap:30px}
+#s-cmp .diff{border:3px solid var(--ink);border-radius:18px;padding:14px 20px 16px;background:var(--blush);font:600 18px/1.4 var(--font);letter-spacing:-.4px;min-height:118px}
+#s-cmp .diff.m{background:var(--pink-strong)}
+#s-cmp .diff b{display:block;font:900 26px/1.2 var(--font);margin-bottom:6px;letter-spacing:-.6px}
+#s-cmp .diff b em{font-style:normal;color:var(--brick);font-size:19px;margin-right:6px}
+#s-cmp .leg{position:absolute;left:100px;bottom:14px;display:flex;gap:40px;font:600 16px/1 var(--font);align-items:center}
+#s-cmp .leg span{display:flex;gap:8px;align-items:center}
+#s-cmp .fn{position:absolute;right:64px;bottom:20px;font:500 15px/1 var(--font);color:#444}
+
+/* ---------- 15 / 22 bubble + roles ---------- */
+.talk{position:absolute;left:150px;top:40px;width:1220px;height:250px}
+.talk .bub{position:absolute;z-index:1;left:70px;top:30px;width:1080px;min-height:200px;background:var(--sky);border-radius:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:30px 120px}
+.talk .bub b{font:900 44px/1 var(--font);letter-spacing:-1.2px}
+.talk .bub p{margin:0;font:500 24px/1.55 var(--font);letter-spacing:-.4px}
+.talk .bub small{font:500 18px/1 var(--font);color:var(--muted)}
+.talk .ql,.talk .qr{position:absolute;font:900 110px/1 Georgia,"Times New Roman",serif}
+.talk .ql{left:250px;top:-6px}.talk .qr{right:250px;top:196px}
+.talk .fl{position:absolute;z-index:3;left:0;top:44px;width:210px}
+.talk .fr{position:absolute;z-index:3;right:0;top:44px;width:154px}
+.talk .ql,.talk .qr{z-index:2}
+.roles{position:absolute;left:150px;top:370px;width:1220px;display:grid;grid-template-columns:1fr 70px 1fr 70px 1fr;align-items:stretch;gap:26px}
+.roles .box h4{font-size:32px}
+.roles .bd{min-height:170px;font:600 22px/1.5 var(--font);letter-spacing:-.6px;padding:14px 12px}
+.roles .bd small{font:500 18px/1 var(--font);color:var(--muted);margin-top:10px}
+.plus{font:300 110px/1 var(--font);color:#d6d6d6;text-align:center;align-self:center}
+
+/* ---------- 16 pipeline ---------- */
+#s-pipe .ppl{position:absolute;left:44px;top:80px;width:480px;height:560px}
+#s-pipe .pp{position:absolute;text-align:center;width:180px}
+#s-pipe .pp img{height:190px;width:auto;margin:0 auto}
+#s-pipe .pp span{display:inline-block;margin-top:6px;border:2px solid var(--pink);padding:5px 12px;font:600 26px/1 var(--font)}
+#s-pipe .parr{position:absolute;width:86px}
+#pipe{position:absolute;left:540px;top:42px;width:910px;height:620px;border:5px dashed var(--pink);border-radius:56px}
+#pipe .ttl{position:absolute;left:50%;top:-38px;transform:translateX(-50%);background:#fff;border:3px solid var(--pink);padding:8px 22px;font:500 52px/1 var(--font);letter-spacing:-1px;white-space:nowrap}
+#pipe .in{position:absolute;left:40px;top:112px;width:850px;height:480px}
+#pipe .nd{position:absolute;width:170px;height:80px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;font:800 22px/1 var(--font);letter-spacing:-.6px;white-space:nowrap}
+#pipe .nd small{font:500 16px/1 var(--font)}
+#pipe .h{background:var(--ink);color:#fff}
+#pipe .h small{color:#ddd}
+#pipe .ai{background:var(--pink-soft);border:3px solid var(--ink)}
+#pipe .ai small{color:#555}
+#pipe .dm{position:absolute;width:190px;height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:800 22px/1 var(--font);white-space:nowrap}
+#pipe .dm small{font:500 16px/1 var(--font);color:#444}
+#pipe .dm svg{position:absolute;inset:0;z-index:-1}
+#pipe .store{position:absolute;left:0;top:420px;width:826px;height:50px;border-radius:25px;background:var(--ink);color:#fff;display:grid;place-items:center;font:600 21px/1 var(--font);white-space:nowrap}
+#pipe .store em{font-style:normal;color:var(--pink-strong);font-weight:800}
+#pipe svg.wires{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#pipe .lb{position:absolute;font:800 17px/1 var(--font);color:var(--brick);white-space:nowrap;background:rgba(255,255,255,.9);padding:2px 4px;border-radius:4px}
+#pipe .lg{position:absolute;right:44px;top:60px;display:flex;gap:24px;font:600 17px/1 var(--font);white-space:nowrap}
+#pipe .lg span{display:flex;gap:8px;align-items:center}
+.pulse{position:absolute;left:0;top:0;width:16px;height:16px;border-radius:50%;background:var(--coral);border:3px solid var(--ink);margin:-11px 0 0 -11px;
+  offset-path:path("M0,40 L760,40 L760,360 L0,360");offset-rotate:0deg;opacity:0}
+.slide.active .pulse{animation:travel 6s linear 2.6s infinite}
+@keyframes travel{0%{offset-distance:0%;opacity:0}4%{opacity:1}92%{opacity:1}100%{offset-distance:100%;opacity:0}}
+
+/* ---------- 17 mobile ---------- */
+#s-mob .ph{position:absolute;top:16px;height:600px;width:auto}
+.side{position:absolute;right:64px;top:24px;width:470px}
+.side h3{margin:0;font:900 38px/1 var(--font);letter-spacing:-1px}
+.side .lead{margin:14px 0 20px;font:900 23px/1.2 var(--font);color:var(--brick);letter-spacing:-.6px}
+.side .st{border:3px solid var(--ink);border-radius:12px;background:var(--blush);padding:16px 20px;margin-bottom:16px}
+.side .st b{display:flex;align-items:center;gap:14px;font:900 28px/1 var(--font);letter-spacing:-.8px;margin-bottom:12px}
+.side .st b i{font-style:normal;width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:22px;flex:none}
+.side .st p{margin:0;font:700 20px/1.4 var(--font);letter-spacing:-.5px}
+.side .chips{display:flex;gap:12px}
+.side .chips span{flex:1;border:3px solid var(--ink);border-radius:10px;background:var(--pink-soft);text-align:center;padding:12px 4px;font:900 20px/1 var(--font);letter-spacing:-.5px;white-space:nowrap}
+.side .chips span.y{background:var(--cream)}.side .chips span.d{background:#fff;border-style:dashed}
+
+/* ---------- 18 pc ---------- */
+#s-pc .shot{position:absolute;left:64px;top:30px;width:900px;border:3px solid var(--ink);border-radius:18px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.12);background:#fff}
+#s-pc .shot img{display:block;width:100%}
+#s-pc .side{width:440px}
+#s-pc .side .lead{margin:12px 0 16px}#s-pc .side .st{padding:13px 18px;margin-bottom:12px}#s-pc .side .st b{margin-bottom:9px}
+
+/* ---------- 19 system ----------
+   위: 화면·서버·데이터베이스는 얇은 한 줄로 축소(맥락만 제공)
+   아래: 워커를 주인공으로 — 단계마다 '어떤 기술로 / 어떻게 / 무엇을 남기는지' 카드로 표기 */
+.peri{position:absolute;left:64px;right:64px;top:14px;display:grid;grid-template-columns:250px 34px 1fr 34px 1fr 34px 250px;align-items:center}
+.pb{height:58px;border:2.5px solid var(--ink);border-radius:12px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#fff;font:600 15px/1.3 var(--font);letter-spacing:-.4px;color:#333}
+.pb b{font:900 19px/1 var(--font);letter-spacing:-.5px;color:var(--ink);white-space:nowrap}
+.pb.cl{background:var(--pink-soft);flex-direction:column;align-items:flex-start;justify-content:center;gap:5px}.pb.cl span{font-size:14px;color:#555}
+.pb.sv{background:var(--gray)}
+.peri svg{justify-self:center}
+.wkconn{position:absolute;top:74px;display:flex;align-items:center;gap:8px;font:700 14px/1 var(--font);color:var(--brick)}
+.worker{position:absolute;left:64px;right:64px;top:100px;border:3.5px solid var(--ink);border-radius:22px;background:#FFF6EE;box-shadow:8px 8px 0 var(--orange);padding:10px 16px 12px}
+.wkhd{display:flex;align-items:center;gap:14px;height:38px}
+.wkhd b{font:900 30px/1 var(--font);letter-spacing:-1px}
+.wkhd .tag{background:var(--orange);color:#fff;border-radius:8px;padding:6px 10px;font:800 15px/1 var(--font);white-space:nowrap}
+.wkhd span.d{margin-left:auto;font:600 15px/1.3 var(--font);color:#4a3a30;letter-spacing:-.3px;text-align:right}
+.stgs{display:grid;grid-template-columns:repeat(6,1fr);gap:24px;margin-top:10px}
+.stg{position:relative;border:3px solid var(--ink);border-radius:14px;background:#fff;display:flex;flex-direction:column;min-height:338px}
+.stg + .stg::before{content:'';position:absolute;left:-23px;top:150px;width:13px;height:3px;background:var(--ink)}
+.stg + .stg::after{content:'';position:absolute;left:-12px;top:144px;border:7.5px solid transparent;border-left:9px solid var(--ink);border-right:0}
+.stg h5{margin:0;display:flex;align-items:center;gap:9px;height:46px;padding:0 11px;white-space:nowrap;background:var(--pink);border-bottom:3px solid var(--ink);border-radius:11px 11px 0 0;font:900 21px/1 var(--font);letter-spacing:-.7px}
+.stg h5 i{font-style:normal;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font:900 17px/1 var(--font);flex:none}
+.stg.v h5{background:var(--cream)}
+.stg .tech{margin:9px 10px 0;padding:6px 8px;border-radius:8px;background:var(--ink);color:#fff;font:800 14px/1.28 var(--font);letter-spacing:-.4px;min-height:44px;display:flex;align-items:center}
+.stg ul{margin:10px 9px 0 8px;padding:0 0 0 16px;display:flex;flex-direction:column;gap:7px;font:600 15px/1.36 var(--font);letter-spacing:-.55px}
+.stg li::marker{color:var(--brick)}
+.stg .out{margin-top:auto;border-top:2px dashed #CFC6C0;padding:8px 10px 9px;font:800 14.5px/1.3 var(--font);color:var(--brick);letter-spacing:-.45px}
+.wgates{display:grid;grid-template-columns:repeat(6,1fr);gap:24px;margin-top:10px}
+.wgates div{height:46px;border:3px solid var(--ink);border-radius:12px;display:grid;place-items:center;font:800 17px/1 var(--font);background:var(--orange);color:#fff;letter-spacing:-.4px;white-space:nowrap}
+.wgates .g1{grid-column:1/4}.wgates .g2{grid-column:4/5;background:#fff;color:var(--ink)}.wgates .g3{grid-column:5/7}
+.sstate{margin-top:10px;height:40px;border:2.5px solid var(--ink);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font:700 17px/1 var(--font);letter-spacing:-.4px}
+.sstate em{font-style:normal;color:var(--brick);font-weight:900;margin-right:10px}
+.sysnote{position:absolute;left:64px;bottom:14px;font:600 16px/1 var(--font);color:#444}
+
+/* ---------- 19b 공단 자동 입력 (스윔레인 그래프로 재설계) ----------
+   레인 4개(사회복지사 · 케어노트AI 서버 · 크롬 확장 · 공단 프로그램) × 단계 7칸.
+   크롬 확장·공단 레인은 '사회복지사 PC 브라우저 안' 점선 경계로 묶어 로그인 정보가 서버로 가지 않음을 보여준다. */
+#s-fill .fl-lane{position:absolute;left:64px;width:1392px;background:var(--gray)}
+#s-fill .fl-lane.alt{background:#fff}
+#s-fill .fl-ll{position:absolute;left:64px;width:136px;border-radius:10px;background:var(--pink-strong);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center}
+#s-fill .fl-ll b{font:800 19px/1.15 var(--font);letter-spacing:-.6px}
+#s-fill .fl-ll span{font:600 13px/1.2 var(--font);color:#fff;opacity:.92}
+#s-fill .fl-ph{position:absolute;height:34px;border:2.5px solid var(--ink);border-radius:9px;background:var(--gray);display:grid;place-items:center;font:800 17px/1 var(--font);letter-spacing:-.4px;white-space:nowrap}
+#s-fill .fl-ph.hot{background:var(--pink-strong)}
+#s-fill .fl-n{position:absolute;border:2.5px solid var(--ink);border-radius:10px;background:var(--blush);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;white-space:nowrap}
+#s-fill .fl-n b{font:900 17px/1 var(--font);letter-spacing:-.6px}
+#s-fill .fl-n span{font:600 13px/1 var(--font);color:#555;letter-spacing:-.4px}
+#s-fill .fl-n.hu{background:var(--ink);color:#fff}#s-fill .fl-n.hu span{color:#ddd}
+#s-fill .fl-n.scr{background:#fff;border-style:solid;border-color:#7A8CA8}
+#s-fill .fl-n.scr b{color:#2C3E5C}
+#s-fill .fl-n.ok{background:var(--ink);color:#fff}
+#s-fill .fl-w{position:absolute;border:2.5px dashed var(--orange);border-radius:10px;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;white-space:nowrap}
+#s-fill .fl-w b{font:900 16px/1 var(--font);color:var(--brick);letter-spacing:-.4px}
+#s-fill .fl-w span{font:600 13px/1 var(--font);color:#4a3a30;letter-spacing:-.4px}
+#s-fill .fl-d{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;white-space:nowrap}
+#s-fill .fl-d svg{position:absolute;inset:0;z-index:-1}
+#s-fill .fl-d b{font:900 16px/1 var(--font);letter-spacing:-.6px}
+#s-fill .fl-d span{font:700 12.5px/1 var(--font);letter-spacing:-.3px;color:#4a3a30}
+#s-fill .fl-bd{position:absolute;border:3px dashed #7A8CA8;border-radius:14px;pointer-events:none}
+#s-fill .fl-bt{position:absolute;background:#2C3E5C;color:#fff;border-radius:8px;padding:6px 10px;font:800 13.5px/1 var(--font);letter-spacing:-.3px;white-space:nowrap}
+#s-fill svg.fl-wire{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#s-fill .fl-lb{position:absolute;font:800 13px/1 var(--font);color:var(--brick);white-space:nowrap;padding:1px 3px}
+#s-fill .fl-lb.k{color:var(--ink)}
+#s-fill .fl-lb.s{color:#2C3E5C}
+#s-fill .fl-chips{position:absolute;left:64px;width:1392px;display:flex;gap:12px}
+#s-fill .fl-chips span{flex:1;height:40px;border:2.5px solid var(--ink);border-radius:10px;background:var(--pink-soft);display:grid;place-items:center;font:800 16px/1 var(--font);letter-spacing:-.4px;white-space:nowrap}
+#s-fill .fl-tech{position:absolute;left:64px;font:600 15px/1.35 var(--font);color:#333;letter-spacing:-.35px;white-space:nowrap}
+#s-fill .fl-tech b{color:var(--brick);font-weight:900;margin-right:8px}
+#s-fill .fl-lg{position:absolute;right:64px;display:flex;gap:18px;font:600 13.5px/1 var(--font);color:#333;white-space:nowrap}
+#s-fill .fl-lg span{display:flex;align-items:center;gap:7px}
+
+/* ---------- 20 verify ---------- */
+#s-ver h3{position:absolute;top:18px;margin:0;font:900 34px/1 var(--font);letter-spacing:-.8px}
+.fact{position:absolute;left:64px;top:76px;width:610px;height:440px;background:var(--ink);border-radius:18px;padding:22px 30px;display:flex;flex-direction:column;justify-content:space-around}
+.fact div{display:grid;grid-template-columns:170px 1fr;align-items:center;font:600 21px/1.25 var(--font);color:#fff;letter-spacing:-.4px}
+.fact code{font:600 26px/1 var(--mono);color:var(--pink-strong)}
+.fnote{position:absolute;left:64px;top:532px;width:610px;border:3px dashed var(--orange);border-radius:14px;background:var(--cream);padding:12px 18px;font:800 19px/1.45 var(--font)}
+.checks{position:absolute;left:712px;top:76px;width:744px;display:flex;flex-direction:column;gap:10px}
+.ck{display:grid;grid-template-columns:58px 150px 1fr 190px;align-items:center;gap:12px;border:3px solid var(--ink);border-radius:14px;background:var(--gray);min-height:66px;padding:6px 10px}
+.ck .id{background:var(--ink);color:#fff;border-radius:10px;height:50px;display:grid;place-items:center;font:900 22px/1 var(--mono)}
+.ck b{font:900 23px/1 var(--font);letter-spacing:-.5px;white-space:nowrap}
+.ck span{font:600 18px/1.3 var(--font);letter-spacing:-.4px}
+.ck .res{border:3px solid var(--ink);border-radius:10px;min-height:48px;display:grid;place-items:center;font:900 17px/1.2 var(--font);background:var(--pink-soft);text-align:center;padding:2px 6px}
+.ck .res.ask{background:var(--orange);color:#fff}.ck .res.need{background:var(--cream)}.ck .res.del{background:var(--ink);color:#fff;font-size:15px}
+.vnote{position:absolute;left:712px;top:536px;width:744px;border:3px dashed var(--orange);border-radius:14px;background:var(--pink-soft);padding:14px 18px;font:700 19px/1.4 var(--font)}
+.vnote em{font-style:normal;color:var(--brick);font-weight:900}
+.vfoot{position:absolute;left:64px;bottom:14px;font:600 17px/1 var(--font);color:#444}
+
+/* ---------- 21 eval ---------- */
+#s-eval h3{margin:0 0 12px;font:900 34px/1 var(--font);letter-spacing:-.8px}
+.ev{position:absolute;left:64px;top:24px;width:700px}
+.ab{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:16px;border:3px solid var(--ink);border-radius:14px;background:var(--gray);height:50px;padding:0 16px 0 8px;margin-bottom:10px;font:700 22px/1 var(--font);letter-spacing:-.4px;white-space:nowrap}
+.ab i{font-style:normal;width:44px;height:40px;border:3px solid var(--ink);border-radius:10px;background:#fff;display:grid;place-items:center;font:900 22px/1 var(--font)}
+.ab em{font-style:normal;color:var(--brick);font:900 21px/1 var(--font)}
+.ab.me{background:var(--pink-soft)}.ab.me i{background:var(--pink-strong)}
+.ev .small{font:600 17px/1.5 var(--font);color:#444;margin:4px 0 14px}
+.met{display:grid;grid-template-columns:250px 1fr;align-items:center;border:3px solid var(--ink);border-radius:14px;height:46px;padding:0 16px;margin-bottom:8px;font:600 20px/1 var(--font);letter-spacing:-.4px;white-space:nowrap}
+.met b{font:900 21px/1 var(--font)}
+.met:nth-child(odd){background:var(--gray)}
+.team{position:absolute;left:800px;top:24px;width:656px}
+.mem{border:3px solid var(--ink);border-radius:18px;padding:16px 26px 24px;margin-bottom:22px;min-height:200px}
+.mem .nm{display:inline-block;border:3px solid var(--ink);border-radius:12px;background:var(--pink-strong);padding:10px 50px;font:900 22px/1 var(--font);margin-bottom:16px}
+.mem p{margin:0;font:700 21px/1.6 var(--font);letter-spacing:-.5px}
+.mem.b{background:var(--blush);min-height:0}.mem.b .nm{background:var(--pink-soft)}
+.agree{border:3px dashed var(--orange);border-radius:14px;background:var(--cream);padding:16px 20px;font:800 20px/1.3 var(--font)}
+
+/* ---------- 오케스트레이션과 상태 분기 (덱 디자인으로 재설계) ----------
+   좌표계: 슬라이드 본문 1520 × 686. 6칸 격자(x = 64·307·550·793·1036·1280, 폭 186)로 두 줄을 맞춘다.
+   1행은 왼쪽→오른쪽(AI 처리), 2행은 오른쪽→왼쪽(승인 이후 공단 입력). 대기 상태는 각 행 아래 주황 점선 상자. */
+#s-orch .obar{position:absolute;left:64px;width:1392px;border-radius:14px;background:var(--ink);color:#fff;display:flex;align-items:center;gap:18px;padding:0 22px}
+#s-orch .obar b{font:900 24px/1 var(--font);letter-spacing:-.8px;white-space:nowrap}
+#s-orch .obar .chip{background:var(--pink-strong);color:var(--ink);border-radius:8px;padding:6px 10px;font:800 14px/1 var(--font);white-space:nowrap}
+#s-orch .obar .loop{font:700 18px/1 var(--font);letter-spacing:-.5px;white-space:nowrap}
+#s-orch .obar .loop em{font-style:normal;color:var(--pink)}
+#s-orch .obar .note{margin-left:auto;font:600 14px/1.3 var(--font);color:#cfcfd4;text-align:right;white-space:nowrap}
+#s-orch .on{position:absolute;border:2.5px solid var(--ink);border-radius:12px;background:var(--blush);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;white-space:nowrap}
+#s-orch .on b{font:900 19px/1 var(--font);letter-spacing:-.6px}
+#s-orch .on span{font:600 14px/1 var(--font);color:#555;letter-spacing:-.4px}
+#s-orch .on.hu{background:var(--ink);color:#fff}#s-orch .on.hu span{color:#ddd}
+#s-orch .on.done{background:var(--ink);color:#fff;border-color:var(--ink)}
+#s-orch .on.done b{font-size:22px}
+#s-orch .od{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;white-space:nowrap}
+#s-orch .od svg{position:absolute;inset:0;z-index:-1}
+#s-orch .od b{font:900 17px/1 var(--font);letter-spacing:-.7px}
+#s-orch .od span{font:700 13.5px/1 var(--font);letter-spacing:-.3px}
+#s-orch .od.hu b,#s-orch .od.hu span{color:#fff}
+#s-orch .ow{position:absolute;border:2.5px dashed var(--orange);border-radius:10px;background:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;white-space:nowrap}
+#s-orch .ow b{font:900 16px/1 var(--font);color:var(--brick);letter-spacing:-.4px}
+#s-orch .ow span{font:600 13.5px/1 var(--font);color:#4a3a30;letter-spacing:-.4px}
+#s-orch svg.owire{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#s-orch .ol{position:absolute;font:800 13.5px/1 var(--font);color:var(--brick);white-space:nowrap;background:#fff;padding:1px 3px;border-radius:3px}
+#s-orch .ol.k{color:var(--ink)}
+#s-orch .ol.t{color:var(--teal)}
+#s-orch .odiv{position:absolute;left:64px;width:1392px;height:0;border-top:2px solid var(--line)}
+#s-orch h4{position:absolute;margin:0;font:900 22px/1 var(--font);letter-spacing:-.6px}
+#s-orch table{position:absolute;left:64px;width:836px;border-collapse:collapse;table-layout:fixed}
+#s-orch th{height:26px;background:var(--pink);border:2px solid var(--ink);font:800 15px/1 var(--font)}
+#s-orch td{height:24px;border:2px solid var(--ink);padding:0 12px;font:600 15px/1 var(--font);letter-spacing:-.3px;white-space:nowrap}
+#s-orch td.w{color:var(--brick);font-weight:800}
+#s-orch td.g{font-weight:900}
+#s-orch .orule{position:absolute;left:944px;width:512px;margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:7px;font:600 15.5px/1.35 var(--font);letter-spacing:-.4px}
+#s-orch .orule li::marker{color:var(--brick)}
+#s-orch .orule em{font-style:normal;color:var(--brick);font-weight:900}
+#s-orch .olg{position:absolute;left:944px;display:flex;gap:20px;font:600 13.5px/1 var(--font);color:#333;white-space:nowrap}
+#s-orch .olg span{display:flex;align-items:center;gap:7px}
+
+/* ---------- end ---------- */
+#s-end .qa{position:absolute;left:72px;top:-4px;background:var(--pink);border:3px solid var(--ink);padding:24px 30px 20px;font:900 22px/1 var(--font);border-radius:0 0 4px 4px}
+#s-end h2{position:absolute;left:92px;top:196px;margin:0;font:900 148px/1 var(--font);letter-spacing:-6px;white-space:nowrap}
+#s-end p{position:absolute;left:98px;top:386px;margin:0;font:800 36px/1.5 var(--font);letter-spacing:-1px;white-space:nowrap}
+#s-end p em{font-style:normal;color:var(--coral)}
+#s-end .who b{color:var(--coral);font-weight:900}
+#s-end .hero{position:absolute;right:70px;top:250px;width:400px}
+
+/* ---------- chrome outside the card ---------- */
+#nav{position:absolute;left:40px;right:40px;top:852px;height:40px;display:flex;align-items:center;gap:18px;color:var(--ink);transition:opacity .4s}
+#stage.idle #nav{opacity:0}
+#nav .brand{font:900 18px/1 var(--font);letter-spacing:-.3px;width:200px;white-space:nowrap}
+#secs{display:flex;gap:8px;flex:1;justify-content:center}
+#secs button{all:unset;cursor:pointer;width:30px;height:30px;border:2.5px solid var(--ink);border-radius:5px;display:grid;place-items:center;font:900 15px/1 var(--font);background:transparent;transition:background .25s,transform .25s}
+#secs button.done{background:var(--pink)}
+#secs button.on{background:var(--ink);color:#fff;transform:translateY(-3px)}
+#secs button:focus-visible,.nb:focus-visible{outline:3px solid #fff;outline-offset:2px}
+#nav .ctr{font:600 18px/1 var(--mono);width:90px;text-align:right;white-space:nowrap}
+#nav .clock{font:600 18px/1 var(--mono);width:70px;text-align:right;white-space:nowrap;color:#3a1e22}
+#nav .clock.warn{color:#fff;font-weight:700}
+.nb{all:unset;cursor:pointer;height:34px;min-width:34px;padding:0 10px;border:2.5px solid var(--ink);border-radius:8px;display:grid;place-items:center;font:800 15px/1 var(--font);background:#fff;white-space:nowrap}
+.nb:hover{background:var(--pink-soft)}
+#notesPanel{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;
+  padding:18px max(24px, env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(24px, env(safe-area-inset-left,0px));
+  font:500 17px/1.65 var(--font);transform:translateY(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);z-index:20;max-height:40vh;overflow:auto;user-select:text}
+#notesPanel.open{transform:none}
+#notesPanel b{color:var(--pink);font-weight:800;margin-right:10px}
+#hint{position:fixed;right:max(16px, env(safe-area-inset-right,0px));top:calc(12px + env(safe-area-inset-top,0px));background:var(--ink);color:#fff;border-radius:10px;padding:10px 14px;font:600 13px/1.5 var(--font);opacity:0;transition:opacity .5s;pointer-events:none;z-index:30}
+#hint.show{opacity:.92}
+/* 슬라이드 목록(G 키) */
+#overview{position:fixed;inset:0;background:rgba(20,20,22,.92);color:#fff;z-index:40;display:none;padding:40px;overflow:auto}
+#overview.open{display:block}
+#overview h2{margin:0 0 20px;font:900 28px/1 var(--font)}
+#overview ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+#overview li{border:2px solid rgba(255,255,255,.25);border-radius:10px;padding:12px 14px;cursor:pointer;font:600 17px/1.3 var(--font);display:flex;gap:12px;align-items:baseline}
+#overview li:hover,#overview li.cur{background:var(--pink-strong);color:var(--ink);border-color:var(--pink-strong)}
+#overview li i{font:800 14px/1 var(--mono);opacity:.7;font-style:normal;min-width:28px}
+
+@media (prefers-reduced-motion: reduce){
+  .slide.active .a,.slide.active .draw,.slide.leaving,.slide.active .mark,#tab.flip,#hdrTitle .t.in,#hdrTitle .t.out,.float,.slide.active .star{animation:none!important}
+  .slide .a{opacity:1}.draw{stroke-dashoffset:0}.mark{background-size:100% 100%}
+  .slide.active .pulse{display:none}
+}
+@media print{
+  body{overflow:visible;background:#fff}
+  #viewport{position:static;display:block}
+  #stage{position:static;transform:none!important;width:1600px;height:900px;page-break-after:always}
+  #nav,#hint,#notesPanel{display:none!important}
+}
+</style>
+</head>
+<body>
+<div id="viewport">
+<div id="stage">
+ <div id="card" class="bare">
+  <div id="hdr">
+    <div id="tab">1</div>
+    <div id="hdrTitle"></div>
+    <div id="contest">한국경제신문 지능정보 SW 아이디어 경진대회</div>
+  </div>
+
+  <!-- 1 TITLE -->
+  <section class="slide bare" id="s-title" data-sec="0" data-name="표지">
+    <div class="date a dn" style="--i:0">2026.10</div>
+    <div class="eyebrow a l" style="--i:1">한국경제신문 지능정보 SW 아이디어 경진대회</div>
+    <h1><span class="a l" style="--i:2">음성메모를 기록으로</span><span class="a l" style="--i:4"><span class="pk">케어노트</span> AI</span></h1>
+    <div class="who a" style="--i:6">고려대학교 지능정보 SW 아카데미 8기<br>6조 : 이하랑, 김석범</div>
+    <img class="hero illus a r" style="--i:3" src="images/hero.webp" alt="어르신의 보행을 돕는 요양보호사 일러스트">
+    <svg class="star a pop" style="left:1400px;top:420px;--i:7" viewBox="0 0 40 40"><use href="#star-y"/></svg>
+    <svg class="star a pop" style="left:1040px;top:600px;--i:8;animation-duration:3.6s" viewBox="0 0 40 40"><use href="#star-p"/></svg>
+    <svg class="star a pop" style="left:1430px;top:620px;--i:9;animation-duration:4.2s" viewBox="0 0 40 40"><use href="#star-p"/></svg>
+    <aside class="notes">안녕하세요, 6조 이하랑, 김석범입니다. 저희가 제안하는 아이디어는 요양보호사의 음성메모를 그대로 공식 기록으로 바꿔 주는 ‘케어노트 AI’입니다.</aside>
+  </section>
+
+  <!-- 2 TOC -->
+  <section class="slide bare" id="s-toc" data-sec="0" data-name="목차">
+    <div class="big"><h2 class="a l" style="--i:0">목차</h2><p class="a l" style="--i:1">Contents</p></div>
+    <svg class="star a pop" style="left:304px;top:70px;--i:2" viewBox="0 0 40 40"><use href="#star-y"/></svg>
+    <div class="grid" style="--step:70ms">
+      <div class="ti lead a" style="--i:2">케어노트 AI</div>
+      <div class="ti a" style="--i:7" data-go="5" tabindex="0"><span class="n">5</span>문제에 따른 위험요소</div>
+      <div class="ti a" style="--i:3" data-go="1" tabindex="0"><span class="n">1</span>아이디어 배경</div>
+      <div class="ti a" style="--i:8" data-go="6" tabindex="0"><span class="n">6</span>해결책</div>
+      <div class="ti a" style="--i:4" data-go="2" tabindex="0"><span class="n">2</span>재가급여란?</div>
+      <div class="ti a" style="--i:9" data-go="7" tabindex="0"><span class="n">7</span>프로젝트 파이프라인</div>
+      <div class="ti a" style="--i:5" data-go="3" tabindex="0"><span class="n">3</span>재가급여의 구조</div>
+      <div class="ti a" style="--i:10" data-go="8" tabindex="0"><span class="n">8</span>구현 방법</div>
+      <div class="ti a" style="--i:6" data-go="4" tabindex="0"><span class="n">4</span>구조적인 문제점</div>
+      <div class="ti a" style="--i:11" data-go="9" tabindex="0"><span class="n">9</span>기대효과</div>
+    </div>
+    <aside class="notes">발표 순서입니다. 배경과 재가급여 제도를 먼저 설명하고, 현장의 구조적 문제와 위험요소를 짚은 뒤, 해결책과 구현 방법, 기대효과 순으로 말씀드리겠습니다. (항목을 클릭하면 해당 장으로 바로 이동합니다.)</aside>
+  </section>
+
+  <!-- 3 IDEA -->
+  <section class="slide" id="s-idea" data-sec="1" data-title="아이디어 배경">
+    <img class="agent illus a pop float" style="--i:0" src="images/agent.webp" alt="헤드셋을 쓴 AI 상담원 일러스트">
+    <div class="qs" style="--step:260ms">
+      <div class="q a r" style="--i:1"><b>"AI는 대체 뭘까?"</b><span>편리하고 빠르게 발전중인 기술이라 생각합니다.</span></div>
+      <div class="q a r" style="--i:2"><b>"어떻게 하면 잘 쓸 수 있을까?"</b><span>왜? 어디에? 써야하는지를 먼저 고민했습니다.</span></div>
+      <div class="q a r" style="--i:3"><b>"어머니의 일터"</b><span>저희 어머니는 사회복지사 선생님으로, 재가급여 산업에 종사하십니다.</span></div>
+    </div>
+    <p class="thesis a" style="--i:5;--step:260ms">디테일한 문제 정의를 통해 정확한 해결책으로<br><span class="mark" style="--md:2.3s">사람이 AI가 대체할 수 없는 일</span>에 집중할 수 있게 돕는 도구</p>
+    <aside class="notes">AI를 어디에 써야 할지 먼저 고민했습니다. 답은 가까운 곳에 있었습니다. 사회복지사로 재가급여 현장에서 일하시는 어머니의 일터입니다. 저희 목표는 AI가 사람을 대체하는 것이 아니라, 사람이 사람만 할 수 있는 돌봄에 집중하도록 돕는 것입니다.</aside>
+  </section>
+
+  <!-- 4 STATS -->
+  <section class="slide" id="s-stat" data-sec="2" data-title="재가급여란?">
+    <div class="kicker k1 a l" style="--i:0"><h3>65세 이상 노인 인구</h3><p>향후 노인 인구 세계 1위 전망</p></div>
+    <div class="kicker k2 a l" style="--i:1"><h3>장기요양 수급자</h3><p>재가급여 수요 증가 전망</p></div>
+    <div class="donuts">
+      <div class="donut a pop" style="--i:2">
+        <div class="yr">2025</div>
+        <svg width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" fill="#fff" stroke="#141416" stroke-width="3"/>
+          <circle class="seg" cx="100" cy="100" r="78" fill="none" stroke="#FFB3B9" stroke-width="36" pathLength="100" data-v="20.3" transform="rotate(-90 100 100)"/>
+          <circle cx="100" cy="100" r="60" fill="#fff" stroke="#141416" stroke-width="3"/>
+          <text x="100" y="112" text-anchor="middle" class="pct" fill="#141416"><tspan data-count="20.3" data-dec="1">20.3</tspan>%</text></svg>
+        <div class="ppl"><span data-count="1051" data-sep="1">1,051</span>만 명</div>
+        <div class="rank">세계 22위</div>
+      </div>
+      <svg class="arrowR a l" style="--i:4" viewBox="0 0 60 40"><path d="M2 12h30V3l26 17-26 17v-9H2z" fill="#FF8B96" stroke="#141416" stroke-width="3" stroke-linejoin="round"/></svg>
+      <div class="donut b a pop" style="--i:5">
+        <div class="yr">2045 전망</div>
+        <svg width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" fill="#fff" stroke="#141416" stroke-width="3"/>
+          <circle class="seg" cx="100" cy="100" r="78" fill="none" stroke="#FF8B96" stroke-width="36" pathLength="100" data-v="37" transform="rotate(-90 100 100)"/>
+          <circle cx="100" cy="100" r="60" fill="#fff" stroke="#141416" stroke-width="3"/>
+          <text x="100" y="112" text-anchor="middle" class="pct" fill="#141416"><tspan data-count="37" data-dec="1">37.0</tspan>%</text></svg>
+        <div class="ppl">약 <span data-count="1780" data-sep="1">1,780</span>만 명</div>
+        <div class="rank">세계 1위 전망</div>
+      </div>
+    </div>
+    <div class="bars">
+      <div class="col">
+        <div class="tagv a pop" style="--i:7"><span data-count="116.5" data-dec="1">116.5</span>만</div>
+        <div class="bar a grow" style="height:112px;--i:6"></div>
+        <div class="tagy a" style="--i:6">2024</div>
+      </div>
+      <div class="mult a pop" style="--i:12;--base:600ms">약<b>2.7배</b></div>
+      <div class="col">
+        <div class="tagv a pop" style="--i:10;--base:500ms"><span data-count="312.6" data-dec="1">312.6</span>만</div>
+        <div class="bar b a grow" style="height:300px;--i:9;--base:400ms"></div>
+        <div class="tagy a" style="--i:9">2040 전망</div>
+      </div>
+    </div>
+    <div class="src a fade" style="--i:13">출처: 국가데이터처(구 통계청) 고령자통계·장래인구추계, 미국 인구조사국(세계 순위), 공단 통계연보, 고려대 윤석준 추계(2040 예상)</div>
+    <aside class="notes">재가급여가 왜 중요한지 숫자로 보겠습니다. 65세 이상 인구는 2025년 20.3%에서 2045년 37%로, 세계 1위가 될 전망입니다. 장기요양 수급자도 2024년 116만 명에서 2040년 312만 명, 약 2.7배로 늘어납니다.</aside>
+  </section>
+
+  <!-- 5 WHAT -->
+  <section class="slide" id="s-what" data-sec="2" data-title="재가급여란?">
+    <img class="house illus a pop" style="--i:0" src="images/house.webp" alt="집 안에서 어르신을 돌보는 요양보호사 일러스트">
+    <div class="bubble a r" style="--i:1"><div>나이가 들거나 몸이 불편해 혼자 생활하기 어려운 어르신이 살던 집에서 지내면서 필요한 도움을 받도록 지원하는 제도입니다.<br>여기서 ‘급여’는 월급이 아니라, 보험에서 지원하는 서비스라는 뜻입니다.</div></div>
+    <div class="qm a pop" style="left:632px;top:-12px;--i:2">“</div>
+    <div class="qm a pop" style="left:1392px;top:168px;--i:2">”</div>
+    <div class="cards">
+      <div class="box a" style="--i:3"><h4>종류</h4><div class="bd"><ul style="--step:120ms">
+        <li class="hl a l" style="--i:5">방문요양 – 집으로 방문해 식사·세면 등을 도움</li>
+        <li class="a l" style="--i:6">방문목욕 – 목욕 장비를 이용해 가정에서 목욕 지원</li>
+        <li class="a l" style="--i:7">방문간호 – 의료진의 지시기반 간호·건강관리 제공</li>
+        <li class="a l" style="--i:8">주·야간보호 – 일정 시간 센터에서 돌봄·활동 제공</li></ul></div></div>
+      <div class="box a" style="--i:4"><h4>수급자란?</h4><div class="bd"><ul>
+        <li class="a l" style="--i:9">나라에서 인정한 돌봄이 필요한 만 65세 이상 노인</li>
+        <li class="a l" style="--i:10">치매 등 법에서 정한 노인성 질병이 있는 분</li></ul></div></div>
+    </div>
+    <aside class="notes">재가급여는 어르신이 살던 집에서 필요한 도움을 받도록 지원하는 제도입니다. 여기서 급여는 월급이 아니라 보험이 지원하는 서비스를 뜻합니다. 그중 저희가 집중하는 것은 가장 대표적인 방문요양입니다.</aside>
+  </section>
+
+  <!-- 6 STRUCT -->
+  <section class="slide" id="s-struct" data-sec="3" data-title="재가급여의 구조">
+    <div class="col a l" style="left:64px;--i:0">
+      <div class="pill">수급자의 집</div>
+      <div class="row a fade" style="--i:1"><span><span style="color:var(--coral)">요양보호사</span> 방문</span></div>
+      <div class="row a fade" style="--i:2">RFID 태그로 근퇴 관리</div>
+      <div class="row a fade" style="--i:3">어르신 돌봄 진행</div>
+      <div class="row a fade" style="--i:4">돌봄 내용 기록
+        <svg class="ring" viewBox="0 0 330 110"><path class="draw" pathLength="1" style="--i:10;--dur:.8s" d="M300 30C250 8 90 6 30 30 -10 50 20 90 120 96 220 102 330 80 310 50" fill="none" stroke="#E0262F" stroke-width="4" stroke-linecap="round"/>
+        <path class="draw" pathLength="1" style="--i:12;--dur:.2s" d="M255 4l4 18M282 14l-8 14M318 32l-26 6" fill="none" stroke="#E0262F" stroke-width="5" stroke-linecap="round"/></svg></div>
+      <div class="row a fade" style="--i:5">센터에 기록 전송</div>
+    </div>
+    <img class="walk illus a pop" style="--i:6" src="images/walk.webp" alt="지팡이를 짚은 어르신과 요양보호사 일러스트">
+    <svg class="star a pop" style="left:548px;top:300px;--i:8" viewBox="0 0 40 40"><use href="#star-p"/></svg>
+    <svg class="star a pop" style="left:900px;top:220px;--i:9;animation-duration:3.6s" viewBox="0 0 40 40"><use href="#star-y"/></svg>
+    <div class="col c a r" style="right:64px;--i:0">
+      <div class="pill">센터</div>
+      <div class="row a fade" style="--i:6"><span><span style="color:var(--blue)">사회복지사</span> 출근</span></div>
+      <div class="row a fade" style="--i:7">요양보호사 기록 확인</div>
+      <div class="row a fade" style="--i:8">급여제공기록지 작성
+        <svg class="ring" viewBox="0 0 330 110" style="width:380px"><path class="draw" pathLength="1" style="--i:14;--dur:.8s" d="M300 30C250 8 90 6 30 30 -10 50 20 90 120 96 220 102 330 80 310 50" fill="none" stroke="#E0262F" stroke-width="4" stroke-linecap="round"/>
+        <path class="draw" pathLength="1" style="--i:16;--dur:.2s" d="M255 4l4 18M282 14l-8 14M318 32l-26 6" fill="none" stroke="#E0262F" stroke-width="5" stroke-linecap="round"/></svg></div>
+      <div class="row a fade" style="--i:9"><span><span style="color:var(--teal)">센터장</span> 승인</span></div>
+      <div class="row a fade" style="--i:10"><span><span style="color:var(--brick)">국민건강보험공단</span>에 비용 청구</span></div>
+    </div>
+    <aside class="notes">방문요양의 하루입니다. 요양보호사는 수급자 집에 방문해 돌봄을 하고 내용을 기록해 센터로 보냅니다. 센터의 사회복지사는 그 기록을 확인해 급여제공기록지를 작성하고, 센터장 승인 후 공단에 청구합니다. 빨간 원으로 표시한 두 곳, ‘기록’이 이 구조의 핵심 고리입니다.</aside>
+  </section>
+
+  <!-- 7 FLOW -->
+  <section class="slide" id="s-flow" data-sec="3" data-title="재가급여의 구조">
+    <div id="flow"></div>
+    <aside class="notes">전체 흐름을 보면 인정, 계약, 계획·배정, 돌봄, 기록, 청구·지급의 6단계입니다. 서류와 돈이 모두 ‘기록’을 거쳐 흘러갑니다. 점선으로 표시한 ⑤ 기록 구간, 요양보호사의 메모와 사회복지사의 취합·검토가 바로 케어노트 AI가 들어가는 자리입니다.</aside>
+  </section>
+
+  <!-- 8 PERSONA carer -->
+  <section class="slide" id="s-p1" data-sec="4" data-title="구조적인 문제점">
+    <svg class="dots" width="1512" height="682"><g fill="none" stroke="#141416" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round">
+      <path class="a fade" style="--i:3" d="M624 230 L 696 300"/><path class="a fade" style="--i:3" d="M896 230 L 824 300"/>
+      <path class="a fade" style="--i:3" d="M624 470 L 696 404"/><path class="a fade" style="--i:3" d="M896 470 L 824 404"/></g></svg>
+    <div class="persona a pop" style="--i:0"><img class="illus" src="images/carer.webp" alt="요양보호사 일러스트"><b>요양보호사<br>김*화(61세)</b></div>
+    <div class="box pc p1 a l" style="--i:4"><h4>요양보호사도 고령</h4><div class="bd"><div>요양보호사 평균 연령<br><span data-count="59.6" data-dec="1">59.6</span>세(2020) → <span data-count="61.7" data-dec="1">61.7</span>세(2023)<small>출처: 복지부·보사연 자료(2020, 2023)</small></div></div></div>
+    <div class="box pc p2 a r" style="--i:5"><h4>디지털 기기 부담</h4><div class="bd"><div>“화면이 잘 안 보이고 점점 복잡해져서<br>손으로 쓰는 게 편해요.”<small>현장 인터뷰 1</small></div></div></div>
+    <div class="box pc p3 a l" style="--i:6"><h4>기억 의존 기록</h4><div class="bd"><div>“수급자 집에서 할 시간이 없어서<br>보통 집에서 해요.”<small>현장 인터뷰 2</small></div></div></div>
+    <div class="box pc p4 a r" style="--i:7"><h4>피로 누적</h4><div class="bd"><div>“집에 와서도 서류를 써야 하고 수정하라고<br>연락오면 편히 못 쉬어요.”<small>현장 인터뷰 3</small></div></div></div>
+    <aside class="notes">현장 인터뷰로 확인한 문제입니다. 요양보호사 평균 연령은 61.7세까지 올라갔고, 디지털 기기보다 손글씨를 편하게 여깁니다. 현장에서 쓸 시간이 없어 퇴근 후 기억에 의존해 기록하고, 수정 연락까지 받으면서 피로가 쌓입니다.</aside>
+  </section>
+
+  <!-- 9 PERSONA social -->
+  <section class="slide" id="s-p2" data-sec="4" data-title="구조적인 문제점">
+    <svg class="dots" width="1512" height="682"><g fill="none" stroke="#141416" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round">
+      <path class="a fade" style="--i:3" d="M624 230 L 696 300"/><path class="a fade" style="--i:3" d="M896 230 L 824 300"/>
+      <path class="a fade" style="--i:3" d="M624 470 L 696 404"/><path class="a fade" style="--i:3" d="M896 470 L 824 404"/></g></svg>
+    <div class="persona a pop" style="--i:0;top:110px"><img class="illus" src="images/social.webp" alt="사회복지사 일러스트" style="height:300px"><b style="margin-top:34px">사회복지사<br>김*미(44세)</b></div>
+    <div class="box pc p1 a l" style="--i:4"><h4>인력 부족</h4><div class="bd"><div>사회복지사 1명당 요양보호사<br>약 <span data-count="20.3" data-dec="1">20.3</span>명 관리<small>출처: 2022년 장기요양실태조사 최종보고서</small></div></div></div>
+    <div class="box pc p2 a r" style="--i:5"><h4>반복 업무 부담</h4><div class="bd"><div>“같은 기록을 여러 곳에 작성해야하고 종이<br>문서를 온라인에 타이핑해요.”<small>현장 인터뷰 1</small></div></div></div>
+    <div class="box pc p3 a l" style="--i:6"><h4>기록지 작성의 어려움</h4><div class="bd"><div>“종이 문서를 온라인으로 타이핑할 때<br>글씨를 알아보기 힘들어요.”<small>현장 인터뷰 2</small></div></div></div>
+    <div class="box pc p4 a r" style="--i:7"><h4>책임의 리스크</h4><div class="bd"><div>“서류가 누락되거나 문제가 생기면<br>환수나 센터 등급 하락의 위험이 있어요.”<small>현장 인터뷰 3</small></div></div></div>
+    <aside class="notes">사회복지사 쪽도 마찬가지입니다. 한 명이 요양보호사 약 20명을 관리하며, 같은 내용을 여러 곳에 반복 입력합니다. 알아보기 힘든 손글씨를 타이핑해야 하고, 누락이 생기면 환수나 센터 등급 하락이라는 책임까지 집니다.</aside>
+  </section>
+
+  <!-- 10 CHARTS -->
+  <section class="slide" id="s-chart" data-sec="4" data-title="구조적인 문제점">
+    <div class="chart" style="left:120px" id="chA"><div class="kicker a l" style="--i:0"><h3>요양보호사</h3><p>전체 장기요양기관 기준</p></div></div>
+    <div class="chart" style="left:820px" id="chB"><div class="kicker a l" style="--i:1"><h3>사회복지사</h3><p>전체 장기요양기관 기준</p></div></div>
+    <div class="src a fade" style="--i:14">출처 : 공단 통계연보(2026.6.30 공식발표), 인구보건복지협회(2025)</div>
+    <aside class="notes">앞으로가 더 문제입니다. 2050년 요양보호사는 266만 명이 필요하지만 공급은 185만 명에 그칠 전망이고, 사회복지사도 14.7만 명 필요에 10.6만 명 공급으로 격차가 벌어집니다. 사람을 늘리는 것만으로는 해결할 수 없다는 뜻입니다.</aside>
+  </section>
+
+  <!-- 11 PAPER -->
+  <section class="slide" id="s-paper" data-sec="4" data-title="구조적인 문제점">
+    <img class="doc a l" style="left:200px;--i:0" src="images/paper.webp" alt="손글씨로 작성된 장기요양급여 제공기록지. 누락된 기록과 알아보기 힘든 글씨가 빨간 상자로 표시됨">
+    <svg class="bigarrow a l" style="--i:3" viewBox="0 0 250 160"><path d="M10 50h120V8l108 72-108 72v-42H10z" fill="#141416" transform="translate(8 8)"/><path d="M10 50h120V8l108 72-108 72v-42H10z" fill="#E0262F" stroke="#141416" stroke-width="5" stroke-linejoin="round"/></svg>
+    <img class="doc a r" style="left:920px;--i:5" src="images/screen.webp" alt="공단 프로그램의 특정내역 수정 화면. 빈 칸이 빨간 상자로 표시됨">
+    <aside class="notes">실제 기록지입니다. 왼쪽 손글씨 기록지에는 체크가 빠진 칸과 알아보기 힘든 특이사항이 있습니다. 사회복지사는 이걸 오른쪽 공단 프로그램에 다시 타이핑합니다. 이 과정에서 누락과 왜곡이 또 한 번 생깁니다.</aside>
+  </section>
+
+  <!-- 12 RISK -->
+  <section class="slide" id="s-risk" data-sec="5" data-title="문제에 따른 위험요소">
+    <div class="rtable" style="--cols:160px 1fr 56px 1fr 56px 1.15fr">
+      <div class="rhead" style="grid-template-columns:var(--cols)"><span></span><span class="a dn" style="--i:0">상황</span><span></span><span class="a dn" style="--i:4">문제</span><span></span><span class="a dn" style="--i:8">위험 요소</span></div>
+      <div class="rgroup" style="grid-template-columns:var(--cols)">
+        <div class="who a l" style="--i:0">요양보호사</div>
+        <div class="cell c1 a l" style="--i:1">디지털 기기 부담</div><svg class="chev a l" style="--i:3" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c2 a l" style="--i:5">수기로 작성한 기록을 선호<br>기억에 의존해 기록지를 작성</div><svg class="chev a l" style="--i:7" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c3 a l" style="--i:9">누락 · 왜곡의 위험</div>
+        <div class="cell c1 a l" style="--i:1">현장에서 기록지를 작성할<br>시간 부족</div><svg class="chev a l" style="--i:3" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c2 a l" style="--i:5">퇴근후 자택에서 기록지 수기 작성</div><svg class="chev a l" style="--i:7" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c3 a l" style="--i:9">기록의 연속성 저하</div>
+      </div>
+      <div class="rgroup" style="grid-template-columns:var(--cols)">
+        <div class="who a l" style="--i:2">사회복지사</div>
+        <div class="cell c1 a l" style="--i:2">인력 부족</div><svg class="chev a l" style="--i:4" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c2 a l" style="--i:6">수기로 작성된 기록지를<br>온라인에 입력</div><svg class="chev a l" style="--i:8" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c3 a l" style="--i:10">2차 누락 · 왜곡의 위험</div>
+        <div class="cell c1 a l" style="--i:2">반복된 행정 업무</div><svg class="chev a l" style="--i:4" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c2 a l" style="--i:6">상담 등 업무에 투자할 시간이 부족</div><svg class="chev a l" style="--i:8" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c3 a l" style="--i:10">돌봄 품질의 저하</div>
+      </div>
+      <div class="banner a wide" style="--i:12;--step:110ms">기록 오류는 <em>환수 · 센터 등급 하락</em>으로 이어져, 행정을 줄일 수도 소홀히 할 수도 없습니다</div>
+    </div>
+    <aside class="notes">정리하면, 상황이 문제를 낳고 문제가 위험으로 이어집니다. 요양보호사 단계의 누락·왜곡과 연속성 저하, 사회복지사 단계의 2차 누락과 돌봄 품질 저하입니다. 기록 오류는 환수와 등급 하락으로 이어지기 때문에, 행정을 줄일 수도 소홀히 할 수도 없습니다.</aside>
+  </section>
+
+  <!-- 13 SOLUTION -->
+  <section class="slide" id="s-sol" data-sec="6" data-title="해결책">
+    <div class="rtable" style="--cols:160px 1fr 56px 1.25fr 56px 1fr">
+      <div class="rhead" style="grid-template-columns:var(--cols)"><span></span><span class="a dn" style="--i:0">위험요소</span><span></span><span class="a dn" style="--i:4">해결 방법</span><span></span><span class="a dn" style="--i:8">달라지는 점</span></div>
+      <div class="rgroup" style="grid-template-columns:var(--cols)">
+        <div class="who a l" style="--i:0">요양보호사</div>
+        <div class="cell c2 a l" style="--i:1">누락 · 왜곡의 위험<small>디지털 기기 부담 · 기억에 의존한 기록</small></div><svg class="chev a l" style="--i:3" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c3 a pop" style="--i:5">큰 버튼 하나, 말하기 한 번<small>말한 것만 사실로, 원문 근거와 함께</small></div><svg class="chev a l" style="--i:7" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c4 a l" style="--i:9">불확실한 곳은 되묻고 표시해<br>누락 · 왜곡 감소</div>
+        <div class="cell c2 a l" style="--i:1">기록의 연속성 저하<small>시간 부족 · 퇴근 후 자택에서 수기 작성</small></div><svg class="chev a l" style="--i:3" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c3 a pop" style="--i:5">방문 직후 현장에서 기록<small>퇴근 후 작성 없이, 방문마다 바로 저장</small></div><svg class="chev a l" style="--i:7" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c4 a l" style="--i:9">기록이 끊기지 않고<br>피로 감소</div>
+      </div>
+      <div class="rgroup" style="grid-template-columns:var(--cols)">
+        <div class="who a l" style="--i:2">사회복지사</div>
+        <div class="cell c2 a l" style="--i:2">2차 누락 · 왜곡의 위험<small>인력 부족 · 수기를 온라인에 재입력</small></div><svg class="chev a l" style="--i:4" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c3 a pop" style="--i:6">양식에 맞춘 초안 자동 작성<small>AI가 양식 칸을 채워 재입력이 없음</small></div><svg class="chev a l" style="--i:8" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c4 a l" style="--i:10">재입력이 없어<br>2차 오류 감소</div>
+        <div class="cell c2 a l" style="--i:2">돌봄 품질의 저하<small>반복된 행정 · 상담 시간 부족</small></div><svg class="chev a l" style="--i:4" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c3 a pop" style="--i:6">입력은 AI, 사람은 확인만<small>‘확인 필요’ 항목만 검토</small></div><svg class="chev a l" style="--i:8" viewBox="0 0 44 52"><use href="#chev"/></svg>
+        <div class="cell c4 a l" style="--i:10">상담에 쓸 시간 확대<br>돌봄 품질 향상</div>
+      </div>
+      <div class="banner a wide" style="--i:12;--step:110ms">환수 · 센터 등급 하락 위험은 <em>HITL</em>로: 사람이 승인한 기록만 확정하고, 근거와 수정·승인 이력을 남깁니다</div>
+    </div>
+    <aside class="notes">앞의 위험요소 각각에 해결 방법을 붙였습니다. 요양보호사는 큰 버튼 하나로 방문 직후 말하기만 하면 되고, 사회복지사는 AI가 양식에 맞춰 채운 초안에서 ‘확인 필요’ 항목만 검토합니다. 마지막 책임은 HITL, 즉 사람이 승인한 기록만 확정하는 구조로 지킵니다.</aside>
+  </section>
+
+  <!-- 14 COMPARE -->
+  <section class="slide" id="s-cmp" data-sec="6" data-title="해결책">
+    <p class="lead a l" style="--i:0">저장하는 도구, 받아쓰는 도구는 있어도<br><em>‘확인 가능한 방문요양 기록’</em>을 만드는 도구는 확인되지 않았습니다</p>
+    <table id="cmp"></table>
+    <div class="diffs" style="--base:1900ms;--step:140ms">
+      <div class="diff a" style="--i:0"><b><em>차별점 1</em>확인 가능한 초안</b>모든 문장에 원문 근거를 연결하고,<br>말하지 않은 내용은 ‘AI 제안’으로 따로 둡니다.</div>
+      <div class="diff m a" style="--i:1"><b><em>차별점 2</em>불확실하면 되묻는다</b>잘 안 들린 구간만 ‘확인 필요’로 표시하고<br>요양보호사에게 다시 묻습니다.</div>
+      <div class="diff a" style="--i:2"><b><em>차별점 3</em>방문요양 현장에 맞춤</b>직접 입력하는 기존 앱과 달리 말로 남기고,<br>고령 사용자도 쓰기 쉬운 큰 화면을 씁니다.</div>
+    </div>
+    <div class="leg a fade" style="--i:20" id="cmpLeg"></div>
+    <div class="fn a fade" style="--i:20">공개 자료로 확인한 범위(2026.10). 케어노트AI는 설계 기준입니다.</div>
+    <aside class="notes">기존 도구와 비교했습니다. 음성 전사 도구는 받아쓰기는 하지만 기록지 양식에 맞추지 못하고, 업무 앱은 양식은 있지만 직접 입력해야 합니다. 케어노트 AI는 다섯 기준을 모두 충족하도록 설계했습니다. 핵심은 확인 가능한 초안, 불확실하면 되묻기, 현장 맞춤 세 가지입니다.</aside>
+  </section>
+
+  <!-- 15 CARENOTE -->
+  <section class="slide" id="s-def" data-sec="6" data-title="해결책">
+    <div class="talk">
+      <div class="bub a pop" style="--i:0"><b>케어노트 AI</b><p>음성 메모를 기록 양식에 맞는 초안으로 변환하고, 담당자의 검토·승인 후<br>공단 프로그램에 자동 입력하는 에이전틱 AI 서비스입니다.</p></div>
+      <div class="ql a dn" style="--i:1">“</div><div class="qr a" style="--i:1">”</div>
+      <img class="fl illus a l" style="--i:2" src="images/tlk_l.webp" alt="손을 흔드는 사람 일러스트">
+      <img class="fr illus a r" style="--i:2" src="images/tlk_r.webp" alt="웃는 사람 일러스트">
+    </div>
+    <div class="roles" style="--base:700ms;--step:160ms">
+      <div class="box a" style="--i:0"><h4>요양보호사</h4><div class="bd"><div>현장에서 음성으로 말해요</div></div></div>
+      <div class="plus a pop" style="--i:1">+</div>
+      <div class="box a" style="--i:2"><h4>사회복지사</h4><div class="bd"><div>AI가 작성한 초안을 확인해요</div></div></div>
+      <div class="plus a pop" style="--i:3">+</div>
+      <div class="box a" style="--i:4"><h4>센터장</h4><div class="bd"><div>최종으로 검수하고<br>공단에 청구해요</div></div></div>
+    </div>
+    <aside class="notes">한 문장으로 정리하면, 케어노트 AI는 음성 메모를 기록 양식에 맞는 초안으로 바꾸고, 담당자 검토·승인 후 공단 프로그램에 자동 입력하는 에이전틱 AI 서비스입니다. 요양보호사는 말하고, 사회복지사는 확인하고, 센터장은 검수 후 청구합니다.</aside>
+  </section>
+
+  <!-- 16 PIPELINE -->
+  <section class="slide" id="s-pipe" data-sec="7" data-title="프로젝트 파이프라인">
+    <div class="ppl">
+      <div class="pp a pop" style="left:0;top:0;--i:0"><img class="illus" src="images/p_old.webp" alt="수급자"><span>수급자</span></div>
+      <svg class="parr a l" style="left:180px;top:100px;--i:1" viewBox="0 0 90 30"><use href="#parr"/></svg>
+      <div class="pp a pop" style="left:280px;top:0;--i:2"><img class="illus" src="images/p_carer.webp" alt="요양보호사"><span>요양보호사</span></div>
+      <svg class="parr a l" style="left:440px;top:100px;--i:3" viewBox="0 0 90 30"><use href="#parr"/></svg>
+      <div class="pp a pop" style="left:0;top:300px;--i:16"><img class="illus" src="images/p_bld.webp" alt="국민건강보험공단 건물"><span>공단</span></div>
+      <svg class="parr a r" style="left:180px;top:400px;--i:15" viewBox="0 0 90 30"><use href="#parr" transform="rotate(180 45 15)"/></svg>
+      <div class="pp a pop" style="left:280px;top:300px;--i:14"><img class="illus" src="images/p_sw.webp" alt="사회복지사"><span>사회복지사</span></div>
+      <svg class="parr a r" style="left:440px;top:400px;--i:13" viewBox="0 0 90 30"><use href="#parr" transform="rotate(180 45 15)"/></svg>
+    </div>
+    <div id="pipe" class="a fade" style="--i:3">
+      <div class="ttl">케어노트AI</div>
+      <div class="lg a fade" style="--i:4"><span><svg width="30" height="18"><rect x="1" y="1" width="28" height="16" rx="5" fill="#141416"/></svg>사람이 하는 일</span><span><svg width="30" height="18"><rect x="1.5" y="1.5" width="27" height="15" rx="5" fill="#FDE1E4" stroke="#141416" stroke-width="2"/></svg>AI가 하는 일</span><span style="color:var(--brick);font-weight:800"><svg width="34" height="12"><path d="M0 6h24" stroke="#DD7A52" stroke-width="3"/><path d="M22 1l10 5-10 5z" fill="#DD7A52"/></svg>되묻는 길</span></div>
+      <div class="in" id="pipeIn"></div>
+    </div>
+    <aside class="notes">파이프라인입니다. 검은 상자는 사람이, 분홍 상자는 AI가 하는 일입니다. 녹음을 올리면 AI가 소리를 정리하고 글로 옮긴 뒤, 잘 들렸는지 판정합니다. 애매하면 요양보호사에게 그 구간만 되묻습니다. 통과하면 사실을 추출해 근거를 연결하고, 말한 대로인지 검증한 뒤 기록지 초안을 만듭니다. 마지막 확인·승인은 사회복지사가 하고, 모든 단계는 기록 저장소에 남습니다.</aside>
+  </section>
+
+  <!-- 17 MOBILE -->
+  <section class="slide" id="s-mob" data-sec="8" data-title="구현 방법" data-sub="– 모바일 화면">
+    <img class="ph a" style="left:40px;--i:0" src="images/ph1.webp" alt="모바일 1단계: 오늘 누구를 만나셨나요? 어르신 이름 선택 화면">
+    <img class="ph a" style="left:340px;--i:2;--step:180ms" src="images/ph2.webp" alt="모바일 2단계: 큰 마이크 버튼으로 녹음하는 화면">
+    <img class="ph a" style="left:640px;--i:4;--step:180ms" src="images/ph3.webp" alt="모바일 3단계: AI가 들은 내용과 잘 안 들린 부분 표시 화면">
+    <div class="side">
+      <h3 class="a r" style="--i:1">화면 설명</h3>
+      <div class="lead a r" style="--i:1">요양보호사는 말하고 확인만 합니다</div>
+      <div class="st a r" style="--i:2"><b><i>1</i>누구를 만났나요</b><p>방문한 어르신 이름만 눌러요.<br>입력할 글자가 없어요.</p></div>
+      <div class="st a r" style="--i:4"><b><i>2</i>편하게 말씀하세요</b><p>큰 버튼 하나로 녹음해요.<br>끝나면 ‘다 말했어요’만 누르면 돼요.</p></div>
+      <div class="st a r" style="--i:6"><b><i>3</i>이렇게 들었어요</b><p>AI가 들은 내용을 보여줘요.<br>잘 안 들린 부분만 다시 말하면 돼요.</p></div>
+      <div class="chips"><span class="a pop" style="--i:8">큰 버튼</span><span class="a pop" style="--i:9">한 화면 한 가지</span><span class="a pop" style="--i:10">글자 입력 없음</span></div>
+    </div>
+    <aside class="notes">요양보호사용 모바일 화면입니다. 세 단계뿐입니다. 어르신 이름을 누르고, 큰 버튼으로 말하고, AI가 들은 내용을 확인합니다. ‘어지럽다고’처럼 잘 안 들린 부분만 다시 말하면 됩니다. 큰 버튼, 한 화면 한 가지, 글자 입력 없음이 원칙입니다.</aside>
+  </section>
+
+  <!-- 18 PC -->
+  <section class="slide" id="s-pc" data-sec="8" data-title="구현 방법" data-sub="– PC 화면">
+    <div class="shot a l" style="--i:0"><img src="images/pc.webp" alt="사회복지사 PC 화면: 들은 내용, 방문요양 기록지 초안, 확인·승인 3단 구성"></div>
+    <div class="side">
+      <h3 class="a r" style="--i:1">화면 설명</h3>
+      <div class="lead a r" style="--i:1">AI는 초안만, 승인은 사람이 합니다</div>
+      <div class="st a r" style="--i:2"><b><i>1</i>들은 내용</b><p>원본 음성과 글은 바꿀 수 없어요.<br>잘 안 들린 구간은 표시돼요.</p></div>
+      <div class="st a r" style="--i:4"><b><i>2</i>기록지 초안</b><p>문장마다 근거(0:06)가 붙어요.<br>말하지 않은 AI 제안은 따로 표시돼요.</p></div>
+      <div class="st a r" style="--i:6"><b><i>3</i>확인 · 승인</b><p>‘확인 필요’를 모두 처리해야 승인 가능해요.<br>빠진 항목은 바로 물어봐요.<br>승인하면 공단 화면에 자동 입력돼요.</p></div>
+      <div class="chips"><span class="a pop" style="--i:8">근거 있음</span><span class="y a pop" style="--i:9">확인 필요</span><span class="d a pop" style="--i:10">AI 제안</span></div>
+    </div>
+    <aside class="notes">사회복지사용 PC 화면입니다. 왼쪽은 원본 음성과 전사로, 수정할 수 없습니다. 가운데 기록지 초안은 문장마다 근거 시간이 붙고, AI 제안은 따로 표시됩니다. 오른쪽에서 ‘확인 필요’를 모두 처리해야만 승인 버튼이 열립니다.</aside>
+  </section>
+
+  <!-- 19 SYSTEM -->
+  <section class="slide" id="s-sys" data-sec="8" data-title="구현 방법" data-sub="– 시스템 구조">
+    <div class="peri">
+      <div class="pb cl a dn" style="--i:0"><b>요양보호사 모바일</b><span>Next.js · 녹음 · 들은 내용 확인</span></div>
+      <span class="a fade" style="--i:1"><svg width="30" height="16" viewBox="0 0 30 16"><path d="M5 8h20M9 3L4 8l5 5M21 3l5 5-5 5" fill="none" stroke="#141416" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <div class="pb sv a dn" style="--i:1"><b>서버</b><span>녹음 접수 · 상태 조회(2초 폴링)<br>승인은 ‘확인 필요 0건’일 때만</span></div>
+      <span class="a fade" style="--i:2"><svg width="30" height="16" viewBox="0 0 30 16"><path d="M5 8h20M9 3L4 8l5 5M21 3l5 5-5 5" fill="none" stroke="#141416" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <div class="pb sv a dn" style="--i:2"><b>데이터베이스</b><span>원문 · 사실 · 초안 · 수정 이력<br>+ 작업 대기열</span></div>
+      <span class="a fade" style="--i:3"><svg width="30" height="16" viewBox="0 0 30 16"><path d="M5 8h20M9 3L4 8l5 5M21 3l5 5-5 5" fill="none" stroke="#141416" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <div class="pb cl a dn" style="--i:3"><b>사회복지사 PC</b><span>Next.js · 승인 · 공단 입력 확장</span></div>
+    </div>
+    <div class="wkconn a fade" style="--i:4;left:966px"><svg width="16" height="26" viewBox="0 0 16 26"><path d="M8 3v20M3 8l5-5 5 5M3 18l5 5 5-5" fill="none" stroke="#B9461F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>작업 꺼내기 · 결과 저장</div>
+    <div class="worker a" style="--i:4">
+      <div class="wkhd"><b>워커</b><span class="tag">핵심 · 오케스트레이터(상태 머신)</span><span class="d">Python 워커가 데이터베이스 대기열에서 녹음을 1건씩 꺼내<br>1 → 6 순서로 처리하고, 단계마다 결과와 상태를 기록합니다</span></div>
+      <div class="stgs" style="--step:130ms">
+        <div class="stg a pop" style="--i:6"><h5><i>1</i>전처리</h5><div class="tech">FFmpeg + Silero VAD</div>
+          <ul><li>기기마다 다른 녹음 형식을 16kHz 모노 WAV로 통일</li><li>음량 정규화로 작은 목소리 보정</li><li>VAD로 무음을 빼고 말한 구간만 분리</li></ul>
+          <div class="out">→ 발화 구간 + 원본 시각</div></div>
+        <div class="stg a pop" style="--i:7"><h5><i>2</i>음성인식</h5><div class="tech">faster-whisper</div>
+          <ul><li>Whisper large-v3로 구간별 받아쓰기</li><li>구간 시각·신뢰도를 함께 저장</li><li>어댑터로 감싸 Qwen3-ASR 등과 비교·교체</li></ul>
+          <div class="out">→ 원문 전사 (수정 불가)</div></div>
+        <div class="stg a pop" style="--i:8"><h5><i>3</i>PII 마스킹</h5><div class="tech">정규식 + 수급자 명단 매칭</div>
+          <ul><li>이름·연락처·주소·인정번호 탐지</li><li>[이름]·[연락처] 표시로 가림 (복원하지 않음)</li><li>수급자 칸은 앱에서 고른 값으로 채움</li></ul>
+          <div class="out">→ 마스킹된 전사만 LLM에 전달</div></div>
+        <div class="stg a pop" style="--i:9"><h5><i>4</i>사실 추출</h5><div class="tech">구조화 출력 LLM</div>
+          <ul><li>로컬 Qwen3-8B 등 후보 모델 비교</li><li>사실 1건 = 칸·문장·부정·<br>인용·근거·확실성</li><li>Pydantic으로 형식 검사, 틀리면 재요청</li></ul>
+          <div class="out">→ 구조화된 사실 목록</div></div>
+        <div class="stg v a pop" style="--i:10"><h5><i>5</i>검증</h5><div class="tech">코드 규칙 + LLM 판정</div>
+          <ul><li>C1~C3 인용·형식·숫자·부정어를 코드로 검사</li><li>C4 빠진 필수 칸 → 되묻기 질문</li><li>C5 애매한 구간 → ‘확인 필요’, C6만 LLM</li></ul>
+          <div class="out">→ 근거 있음 / 확인 필요<br>/ 삭제 판정</div></div>
+        <div class="stg a pop" style="--i:11"><h5><i>6</i>초안 작성</h5><div class="tech">필드 매핑 + Jinja2</div>
+          <ul><li>검증된 사실만 기록지 칸에 배치</li><li>문장마다 근거 시각(0:06) 연결</li><li>말하지 않은 내용은 ‘AI 제안’으로 분리</li></ul>
+          <div class="out">→ 기록지 초안 (승인 대기)</div></div>
+      </div>
+      <div class="wgates"><div class="g1 a wide" style="--i:12">관문① 동기: 애매한 구간을 화면에서 확인</div><div class="g2 a pop" style="--i:13">재시도 최대 2회</div><div class="g3 a wide" style="--i:14">관문② 비동기: 빠진 항목 질문 → 답이 오면 부분 재처리</div></div>
+      <div class="sstate a" style="--i:15"><em>상태</em>업로드 → 전사 → 전사 확인 → 추출 → 검증 → 검토 대기 → 승인 → 공단 입력 (실패 시 FAILED)</div>
+    </div>
+    <div class="sysnote a fade" style="--i:17">음성인식 엔진과 LLM은 미확정이며 교체 가능하게 설계합니다. 숫자(재시도 등)는 시작값입니다.</div>
+    <aside class="notes">시스템 구조입니다. 화면과 서버, 데이터베이스는 위에 한 줄로 정리했고, 핵심은 아래 워커입니다. 워커는 데이터베이스 대기열에서 녹음을 한 건씩 꺼내 여섯 단계를 순서대로 돌립니다. 먼저 전처리에서 기기마다 다른 녹음 파일을 16kHz 모노 음성으로 통일하고, 음량을 맞춘 뒤 VAD로 무음을 걸러 말한 구간만 남깁니다. 그 구간을 faster-whisper로 받아쓰고, 이름·연락처 같은 개인정보는 표시로 가려서 마스킹된 전사만 LLM에 넘깁니다. LLM은 정해진 구조로 사실만 뽑고, 검증 단계에서 코드 규칙으로 인용·형식·숫자·부정어를 먼저 확인합니다. 빠진 칸은 되묻고, 애매한 구간은 확인 필요로 표시하며, LLM 판정은 마지막 보조로만 씁니다. 통과한 사실만 기록지 칸에 배치해 초안을 만들고, 승인은 서버가 확인 필요 0건일 때만 허용합니다.</aside>
+  </section>
+
+  <!-- 19b FILL -->
+  <section class="slide" id="s-fill" data-sec="8" data-title="구현 방법" data-sub="– 공단 자동 입력">
+    <div class="fl-ph  a dn" style="left:218px;top:8px;width:166px;--i:0.0">① 승인</div><div class="fl-ph  a dn" style="left:396px;top:8px;width:166px;--i:0.5">② 작업 전달</div><div class="fl-ph  a dn" style="left:574px;top:8px;width:166px;--i:1.0">③ 신원 대조</div><div class="fl-ph  a dn" style="left:752px;top:8px;width:166px;--i:1.5">④ 자동 입력</div><div class="fl-ph  a dn" style="left:930px;top:8px;width:166px;--i:2.0">⑤ 되읽기 대조</div><div class="fl-ph hot a dn" style="left:1108px;top:8px;width:166px;--i:2.5">⑥ 사람이 저장</div><div class="fl-ph  a dn" style="left:1286px;top:8px;width:166px;--i:3.0">⑦ 이력 기록</div>
+    <div class="fl-lane  a fade" style="top:52px;height:110px;--i:0"></div><div class="fl-lane alt a fade" style="top:168px;height:110px;--i:0"></div><div class="fl-lane  a fade" style="top:284px;height:110px;--i:0"></div><div class="fl-lane alt a fade" style="top:400px;height:110px;--i:0"></div>
+    <div class="fl-ll a l" style="top:52px;height:110px;--i:0.0"><b>사회복지사</b><span>사람이 하는 일</span></div><div class="fl-ll a l" style="top:168px;height:110px;--i:0.5"><b>케어노트AI</b><span>서버 · 승인본 관리</span></div><div class="fl-ll a l" style="top:284px;height:110px;--i:1.0"><b>크롬 확장</b><span>사회복지사 PC</span></div><div class="fl-ll a l" style="top:400px;height:110px;--i:1.5"><b>공단 프로그램</b><span>본인 로그인 화면</span></div>
+    <div class="fl-bd a fade" style="left:206px;top:280px;width:1256px;height:234px;--i:1"></div>
+    <svg class="fl-wire" width="1520" height="686" viewBox="0 0 1520 686">
+      <defs>
+        <marker id="fa-k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="#141416"/></marker>
+        <marker id="fa-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4A6390"/></marker>
+        <marker id="fa-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="#DD7A52"/></marker>
+      </defs>
+      <g fill="none" stroke="#141416" stroke-width="2.5" marker-end="url(#fa-k)"><path class="draw" pathLength="1" style="--i:3;--dur:0.45s" d="M301 139V223H404"/><path class="draw" pathLength="1" style="--i:5;--dur:0.3s" d="M479 255V306"/><path class="draw" pathLength="1" style="--i:6;--dur:0.3s" d="M553 339H570"/><path class="draw" pathLength="1" style="--i:8;--dur:0.3s" d="M743 339H760"/><path class="draw" pathLength="1" style="--i:10;--dur:0.3s" d="M909 339H926"/><path class="draw" pathLength="1" style="--i:12;--dur:0.5s" d="M1099 339H1167V140"/><path class="draw" pathLength="1" style="--i:15;--dur:0.55s" d="M1265 455H1369V256"/></g>
+      <g fill="none" stroke="#4A6390" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#fa-s)"><path class="draw" pathLength="1" style="--i:7;--dur:0.3s" d="M657 423V387"/><path class="draw" pathLength="1" style="--i:9;--dur:0.3s" d="M835 371V422"/><path class="draw" pathLength="1" style="--i:11;--dur:0.45s" d="M909 455H1013V387"/><path class="draw" pathLength="1" style="--i:14;--dur:0.55s" d="M1215 139V422"/></g>
+      <g fill="none" stroke="#DD7A52" stroke-width="3" marker-end="url(#fa-o)"><path class="draw" pathLength="1" style="--i:13;--dur:0.45s" d="M657 292V140"/><path class="draw" pathLength="1" style="--i:13;--dur:0.45s" d="M1013 292V140"/><path class="draw" pathLength="1" style="--i:14;--dur:0.5s" d="M936 107H865V306"/></g>
+    </svg>
+    <div class="fl-bt a pop" style="left:236px;top:500px;--i:1">사회복지사 PC 브라우저 안 · 로그인 정보는 저장하지 않음</div>
+
+    <div class="fl-n hu a pop" style="left:229px;top:77px;width:144px;height:60px;--i:2"><b>초안 승인</b><span>확인 필요 0건일 때만</span></div>
+    <div class="fl-n  a pop" style="left:407px;top:193px;width:144px;height:60px;--i:4"><b>입력 작업 생성</b><span>승인본 고정 · 작업 등록</span></div>
+    <div class="fl-n  a pop" style="left:407px;top:309px;width:144px;height:60px;--i:5"><b>작업 가져오기</b><span>대기 중인 작업 수신</span></div>
+    <div class="fl-d a pop" style="left:573px;top:294px;width:168px;height:90px;--i:6"><svg viewBox="0 0 168 90" width="168" height="90"><path d="M84.0 2L166 45.0 84.0 88 2 45.0z" fill="#FFF2CF" stroke="#141416" stroke-width="3" stroke-linejoin="round"/></svg><b>수급자 일치?</b><span>이름·생일·일자</span></div>
+    <div class="fl-n scr a pop" style="left:585px;top:425px;width:144px;height:60px;--i:6"><b>수급자 정보 화면</b><span>공단 특정내역 화면</span></div>
+    <div class="fl-n  a pop" style="left:763px;top:309px;width:144px;height:60px;--i:8"><b>칸별 자동 입력</b><span>양식 매퍼 · 승인값만</span></div>
+    <div class="fl-n scr a pop" style="left:763px;top:425px;width:144px;height:60px;--i:9"><b>양식 칸 채워짐</b><span>시간·체크·기능·특이사항</span></div>
+    <div class="fl-d a pop" style="left:929px;top:294px;width:168px;height:90px;--i:10"><svg viewBox="0 0 168 90" width="168" height="90"><path d="M84.0 2L166 45.0 84.0 88 2 45.0z" fill="#FFF2CF" stroke="#141416" stroke-width="3" stroke-linejoin="round"/></svg><b>되읽기 일치?</b><span>칸별 재대조</span></div>
+    <div class="fl-n hu a pop" style="left:1119px;top:77px;width:144px;height:60px;--i:12"><b>화면 확인 후 저장</b><span>마지막 저장은 사람이</span></div>
+    <div class="fl-n scr a pop" style="left:1119px;top:425px;width:144px;height:60px;--i:14"><b>저장 · 접수</b><span>공단 프로그램</span></div>
+    <div class="fl-n ok a pop" style="left:1297px;top:193px;width:144px;height:60px;--i:16"><b>완료 · 이력 기록</b><span>입력값·시각·담당자</span></div>
+    <div class="fl-w a pop" style="left:580px;top:77px;width:154px;height:60px;--i:13"><b>입력 중단 · 알림</b><span>수급자가 다르면 즉시 멈춤</span></div>
+    <div class="fl-w a pop" style="left:936px;top:77px;width:154px;height:60px;--i:13"><b>틀린 칸 확인</b><span>다른 칸만 빨갛게 표시</span></div>
+
+    <span class="fl-lb k a fade" style="left:307px;top:149px;--i:3">승인</span>
+    <span class="fl-lb k a fade" style="left:485px;top:265px;--i:5">작업 전달</span>
+    <span class="fl-lb k a fade" style="left:1103px;top:315px;--i:12">일치</span>
+    <span class="fl-lb s a fade" style="left:663px;top:379px;--i:7">화면 읽기</span>
+    <span class="fl-lb s a fade" style="left:755px;top:379px;--i:9">칸 쓰기</span>
+    <span class="fl-lb s a fade" style="left:1019px;top:391px;--i:11">다시 읽기</span>
+    <span class="fl-lb s a fade" style="left:1221px;top:215px;--i:14">저장 클릭</span>
+    <span class="fl-lb k a fade" style="left:1375px;top:331px;--i:15">접수 결과</span>
+    <span class="fl-lb  a fade" style="left:663px;top:215px;--i:13">다르면</span>
+    <span class="fl-lb  a fade" style="left:1019px;top:215px;--i:13">다르면</span>
+    <span class="fl-lb  a fade" style="left:871px;top:215px;--i:14">확인 후 재입력</span>
+
+    <div class="fl-chips" style="top:532px"><span class="a pop" style="--i:18">승인본만 입력</span><span class="a pop" style="--i:18.5">수급자 다르면 중단</span><span class="a pop" style="--i:19">되읽기 대조</span><span class="a pop" style="--i:19.5">저장은 사람이</span><span class="a pop" style="--i:20">입력 이력 기록</span></div>
+    <div class="fl-tech a fade" style="top:592px;--i:21"><b>구현</b>Chrome 확장(Manifest V3) · content script · 양식별 매퍼<br><b>작업 상태</b>대기 → 입력 중 → 확인 대기 → 완료 / 실패 (재시도 최대 2회)</div>
+    <div class="fl-lg a fade" style="top:602px;--i:21">
+      <span><svg width="34" height="10"><path d="M1 5H25" stroke="#141416" stroke-width="2.5"/><path d="M24 0L33 5 24 10z" fill="#141416"/></svg>처리 흐름</span>
+      <span><svg width="34" height="10"><path d="M1 5H25" stroke="#4A6390" stroke-width="2.5" stroke-dasharray="6 4"/><path d="M24 0L33 5 24 10z" fill="#4A6390"/></svg>공단 화면 읽기·쓰기</span>
+      <span><svg width="34" height="10"><path d="M1 5H25" stroke="#DD7A52" stroke-width="3"/><path d="M24 0L33 5 24 10z" fill="#DD7A52"/></svg>사람 확인 · 중단</span>
+    </div>
+    <aside class="notes">승인 이후의 자동 입력 흐름입니다. 레인은 누가 하는 일인지를 나타냅니다. 사회복지사가 초안을 승인하면 서버가 승인본을 고정해 입력 작업을 만들고, 사회복지사 PC의 크롬 확장이 그 작업을 가져옵니다. 확장은 공단 화면에서 수급자 이름·생년월일·서비스 일자를 먼저 읽어 대조하고, 하나라도 다르면 즉시 멈추고 알립니다. 맞으면 승인된 값만 칸에 쓰고, 다시 읽어 한 칸씩 비교합니다. 다른 칸이 있으면 그 칸만 표시해 사회복지사가 확인한 뒤 다시 입력합니다. 모두 맞으면 사회복지사가 화면을 보고 직접 저장을 누르고, 접수 결과와 입력 이력을 서버에 남깁니다. 점선 안의 일은 모두 사회복지사 PC 브라우저 안에서만 일어나며, 공단 로그인 정보는 저장하지 않습니다. AI가 스스로 제출하지 않는다는 원칙은 그대로입니다.</aside>
+  </section>
+
+  <!-- 19c ORCHESTRATION -->
+  <section class="slide" id="s-orch" data-sec="8" data-title="구현 방법" data-sub="– 오케스트레이션과 상태 분기">
+    <div class="obar a dn" style="top:10px;height:50px;--i:0"><b>오케스트레이터</b><span class="chip">규칙 기반 상태 머신</span><span class="loop">현재 상태 조회 <em>→</em> 분기 조건 평가 <em>→</em> 다음 작업 실행 <em>→</em> 상태 저장</span><span class="note">복잡한 중단·재개가 필요해지면<br>LangGraph 도입 검토</span></div>
+
+    <svg class="owire" width="1520" height="686" viewBox="0 0 1520 686">
+      <defs>
+        <marker id="oa-k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="#141416"/></marker>
+        <marker id="oa-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="#DD7A52"/></marker>
+        <marker id="oa-t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1F7A6B"/></marker>
+      </defs>
+      <g fill="none" stroke="#1F7A6B" stroke-width="2.5" stroke-dasharray="5 5" marker-end="url(#oa-t)" class="a fade" style="--i:2"><path d="M157 63V91"/><path d="M400 63V91"/><path d="M643 63V91"/><path d="M886 63V91"/><path d="M1129 63V91"/><path d="M1368 63V80"/></g>
+      <g fill="none" stroke="#141416" stroke-width="2.5" marker-end="url(#oa-k)"><path class="draw" pathLength="1" style="--i:4;--dur:0.35s" d="M252 125H304"/><path class="draw" pathLength="1" style="--i:5;--dur:0.35s" d="M495 125H547"/><path class="draw" pathLength="1" style="--i:6;--dur:0.35s" d="M738 125H790"/><path class="draw" pathLength="1" style="--i:7;--dur:0.35s" d="M981 125H1033"/><path class="draw" pathLength="1" style="--i:8;--dur:0.35s" d="M1224 125H1277"/><path class="draw" pathLength="1" style="--i:10;--dur:0.4s" d="M1368 169V261"/><path class="draw" pathLength="1" style="--i:15;--dur:0.35s" d="M305 295H253"/><path class="draw" pathLength="1" style="--i:14;--dur:0.35s" d="M548 295H496"/><path class="draw" pathLength="1" style="--i:13;--dur:0.35s" d="M791 295H739"/><path class="draw" pathLength="1" style="--i:12;--dur:0.35s" d="M1034 295H982"/><path class="draw" pathLength="1" style="--i:11;--dur:0.35s" d="M1278 295H1225"/></g>
+      <g fill="none" stroke="#DD7A52" stroke-width="3" marker-end="url(#oa-o)"><path class="draw" pathLength="1" style="--i:17;--dur:0.3s" d="M400 158V187"/><path class="draw" pathLength="1" style="--i:18;--dur:0.45s" d="M562 212H605V159"/><path class="draw" pathLength="1" style="--i:17;--dur:0.3s" d="M886 158V187"/><path class="draw" pathLength="1" style="--i:18;--dur:0.45s" d="M790 212H700V159"/><path class="draw" pathLength="1" style="--i:19;--dur:0.55s" d="M1324 146V212H1160V159"/><path class="draw" pathLength="1" style="--i:20;--dur:0.3s" d="M886 339V357"/><path class="draw" pathLength="1" style="--i:21;--dur:0.45s" d="M1002 382H1129V329"/><path class="draw" pathLength="1" style="--i:20;--dur:0.3s" d="M400 328V357"/><path class="draw" pathLength="1" style="--i:21;--dur:0.45s" d="M522 382H643V340"/></g>
+    </svg>
+
+    <div class="on hu a pop" style="left:64px;top:94px;width:186px;height:62px;--i:3"><b>녹음 업로드</b><span>요양보호사 · 모바일</span></div>
+    <div class="on  a pop" style="left:307px;top:94px;width:186px;height:62px;--i:4"><b>전처리 · 전사</b><span>VAD · faster-whisper</span></div>
+    <div class="on  a pop" style="left:550px;top:94px;width:186px;height:62px;--i:5"><b>마스킹 · 사실 추출</b><span>PII 마스킹 · 구조화 출력</span></div>
+    <div class="on  a pop" style="left:793px;top:94px;width:186px;height:62px;--i:6"><b>검증</b><span>코드 규칙 + LLM 판정</span></div>
+    <div class="on  a pop" style="left:1036px;top:94px;width:186px;height:62px;--i:7"><b>초안 작성</b><span>필드 매핑 · 템플릿</span></div>
+    <div class="od hu a pop" style="left:1280px;top:83px;width:176px;height:84px;--i:8"><svg viewBox="0 0 176 84" width="176" height="84"><path d="M88.0 2L174 42.0 88.0 82 2 42.0z" fill="#DD7A52" stroke="#141416" stroke-width="3" stroke-linejoin="round"/></svg><b>HITL 승인</b><span>사회복지사</span></div>
+
+    <div class="on  a pop" style="left:1280px;top:264px;width:176px;height:62px;--i:11"><b>입력 작업 생성</b><span>승인본 고정</span></div>
+    <div class="on  a pop" style="left:1036px;top:264px;width:186px;height:62px;--i:12"><b>신원 대조·자동 입력</b><span>크롬 확장 · 다르면 중단</span></div>
+    <div class="od  a pop" style="left:793px;top:253px;width:186px;height:84px;--i:13"><svg viewBox="0 0 186 84" width="186" height="84"><path d="M93.0 2L184 42.0 93.0 82 2 42.0z" fill="#FFF2CF" stroke="#141416" stroke-width="3" stroke-linejoin="round"/></svg><b>되읽기 일치?</b><span>칸별 대조</span></div>
+    <div class="od hu a pop" style="left:550px;top:253px;width:186px;height:84px;--i:14"><svg viewBox="0 0 186 84" width="186" height="84"><path d="M93.0 2L184 42.0 93.0 82 2 42.0z" fill="#DD7A52" stroke="#141416" stroke-width="3" stroke-linejoin="round"/></svg><b>HITL 저장</b><span>사회복지사</span></div>
+    <div class="on  a pop" style="left:307px;top:264px;width:186px;height:62px;--i:15"><b>접수 확인</b><span>공단 접수 결과</span></div>
+    <div class="on done a pop" style="left:64px;top:264px;width:186px;height:62px;--i:16"><b>✓ 완료</b></div>
+
+    <div class="ow a pop" style="left:300px;top:190px;width:262px;height:44px;--i:17"><b>전사 확인 대기</b><span>애매한 구간을 화면에서 확인 (관문①)</span></div>
+    <div class="ow a pop" style="left:790px;top:190px;width:262px;height:44px;--i:17"><b>정보 확인 대기</b><span>빠진 필수 칸을 되묻기 (관문②)</span></div>
+    <div class="ow a pop" style="left:770px;top:360px;width:232px;height:44px;--i:20"><b>오류 확인 대기</b><span>틀린 칸 표시 · 담당자 확인</span></div>
+    <div class="ow a pop" style="left:278px;top:360px;width:244px;height:44px;--i:20"><b>접수 결과 확인 대기</b><span>실패 · 결과 불명 시 재확인</span></div>
+
+    <span class="ol  a fade" style="left:406px;top:167px;--i:17">애매하면</span>
+    <span class="ol  a fade" style="left:567px;top:167px;--i:18">재개</span>
+    <span class="ol  a fade" style="left:892px;top:167px;--i:17">누락</span>
+    <span class="ol  a fade" style="left:706px;top:167px;--i:18">답 오면 재처리</span>
+    <span class="ol  a fade" style="left:1168px;top:218px;--i:19">수정 요청</span>
+    <span class="ol k a fade" style="left:1376px;top:207px;--i:10">승인</span>
+    <span class="ol k a fade" style="left:752px;top:269px;--i:13">일치</span>
+    <span class="ol k a fade" style="left:509px;top:269px;--i:14">저장</span>
+    <span class="ol k a fade" style="left:266px;top:269px;--i:15">성공</span>
+    <span class="ol  a fade" style="left:892px;top:343px;--i:20">불일치</span>
+    <span class="ol  a fade" style="left:1135px;top:337px;--i:21">재입력</span>
+    <span class="ol  a fade" style="left:406px;top:337px;--i:20">실패·불명</span>
+    <span class="ol  a fade" style="left:649px;top:345px;--i:21">재저장</span>
+
+    <div class="odiv a wide" style="top:424px;--i:22"></div>
+    <h4 class="a l" style="left:64px;top:436px;--i:22">상태 분기 규칙</h4>
+    <table class="a" style="top:468px;--i:23">
+      <colgroup><col style="width:22%"><col style="width:42%"><col style="width:36%"></colgroup>
+      <tr><th>현재 상태</th><th>전이 조건</th><th>다음 상태</th></tr>
+      <tr><td>전사 중</td><td>신뢰도 낮은 구간 있음</td><td class="w">전사 확인 대기</td></tr>
+      <tr><td>검증 중</td><td>필수 칸 누락</td><td class="w">정보 확인 대기</td></tr>
+      <tr><td class="w">검토 대기</td><td>사회복지사 승인 (확인 필요 0건)</td><td>입력 작업 생성</td></tr>
+      <tr><td>입력 중</td><td>되읽기 불일치</td><td class="w">오류 확인 대기</td></tr>
+      <tr><td class="w">저장 대기</td><td>담당자 저장 + 접수 성공</td><td class="g">완료</td></tr>
+    </table>
+    <h4 class="a l" style="left:944px;top:436px;--i:22">상태 저장 · 실행 원칙</h4>
+    <ul class="orule" style="top:470px">
+      <li class="a r" style="--i:23">모든 전이를 DB에 기록 (승인 버전 · 입력 결과 · 수정 이력)</li>
+      <li class="a r" style="--i:24"><em>사람 응답 전에는 실행하지 않고 대기</em></li>
+      <li class="a r" style="--i:25">재시도 최대 2회, 초과·시간 초과 시 FAILED → 담당자 알림</li>
+      <li class="a r" style="--i:26">승인 후 내용이 바뀌면 새 버전으로 재승인</li>
+    </ul>
+    <div class="olg a fade" style="top:604px;--i:27">
+      <span><svg width="34" height="10"><path d="M1 5H25" stroke="#141416" stroke-width="2.5"/><path d="M24 0L33 5 24 10z" fill="#141416"/></svg>처리 흐름</span>
+      <span><svg width="34" height="10"><path d="M1 5H25" stroke="#1F7A6B" stroke-width="2.5" stroke-dasharray="5 4"/><path d="M24 0L33 5 24 10z" fill="#1F7A6B"/></svg>실행 제어</span>
+      <span><svg width="34" height="10"><path d="M1 5H25" stroke="#DD7A52" stroke-width="3"/><path d="M24 0L33 5 24 10z" fill="#DD7A52"/></svg>사람 확인 · 대기</span>
+    </div>
+    <aside class="notes">전체 흐름을 상태 기준으로 다시 보면 이렇습니다. 위의 오케스트레이터는 현재 상태를 조회하고, 분기 조건을 평가해 다음 작업을 실행한 뒤 상태를 저장하는 일을 반복합니다. 윗줄은 녹음부터 승인까지입니다. 전사가 애매하면 전사 확인 대기, 필수 칸이 빠지면 정보 확인 대기로 멈췄다가 사람이 답하면 재개합니다. 사회복지사가 수정을 요청하면 초안으로 돌아가고, 승인하면 아랫줄로 넘어갑니다. 아랫줄은 승인 이후입니다. 승인본을 고정해 입력 작업을 만들고, 크롬 확장이 신원을 대조한 뒤 칸을 채웁니다. 되읽기가 다르면 오류 확인 대기, 맞으면 담당자가 최종 저장하고 접수를 확인해 완료합니다. 핵심 원칙은 사람의 응답이 오기 전에는 실행하지 않고 기다린다는 것입니다.</aside>
+  </section>
+
+  <!-- 20 VERIFY -->
+  <section class="slide" id="s-ver" data-sec="8" data-title="구현 방법" data-sub="– 검증 설계">
+    <h3 class="a l" style="left:64px;--i:0">사실 1건의 모양 (Fact)</h3>
+    <h3 class="a l" style="left:712px;--i:0">검증</h3>
+    <div class="fact a l" style="--i:1;--step:90ms">
+      <div class="a fade" style="--i:2"><code>slot</code><span>양식 칸 (식사 · 배설 · 신체 상태 …)</span></div>
+      <div class="a fade" style="--i:3"><code>value</code><span>기록지에 들어갈 문장</span></div>
+      <div class="a fade" style="--i:4"><code>polarity</code><span>있음 / 없음 (부정은 따로)</span></div>
+      <div class="a fade" style="--i:5"><code>quote</code><span>전사에서 그대로 따온 구절</span></div>
+      <div class="a fade" style="--i:6"><code>seg_ids</code><span>근거 구간 번호 (근거 0:06)</span></div>
+      <div class="a fade" style="--i:7"><code>certainty</code><span>명확 / 불명확</span></div>
+    </div>
+    <div class="fnote a" style="--i:9">전사에 없는 사실은 만들지 않음.<br>전사문은 명령이 아니라 데이터로만 취급.</div>
+    <div class="checks" style="--base:500ms;--step:150ms">
+      <div class="ck a r" style="--i:1"><span class="id">C1</span><b>인용 존재</b><span>quote가 근거 구간 전사에 그대로 들어 있는가</span><span class="res">추출 재시도</span></div>
+      <div class="ck a r" style="--i:2"><span class="id">C2</span><b>형식</b><span>스키마·열거형을 통과하는가</span><span class="res">추출 재시도</span></div>
+      <div class="ck a r" style="--i:3"><span class="id">C3</span><b>숫자·부정어</b><span>숫자가 quote에 있고,<br>부정어가 polarity와 맞는가</span><span class="res">추출 재시도</span></div>
+      <div class="ck a r" style="--i:4"><span class="id">C4</span><b>필수 칸</b><span>양식 필수 칸 중 빠진 칸이 있는가</span><span class="res ask">되묻기 질문</span></div>
+      <div class="ck a r" style="--i:5"><span class="id">C5</span><b>신뢰도 겹침</b><span>근거 구간이 애매하게 들렸는가</span><span class="res need">확인 필요 표시</span></div>
+      <div class="ck a r" style="--i:6"><span class="id">C6</span><b>함의 판정</b><span>quote가 value를 뒷받침하는가<br>(LLM, C1~C3 통과분만)</span><span class="res del">아니오 삭제 ·<br>불확실 확인 필요</span></div>
+    </div>
+    <div class="vnote a" style="--i:8;--base:500ms;--step:150ms"><em>결과 3가지</em> 검증됨(근거 있음) · 불명확(확인 필요) · 삭제 ‘코드 검사가 먼저, LLM은 보조’</div>
+    <div class="vfoot a fade" style="--i:16">C1은 인용이 있는지만 봅니다. 의미 뒤집힘은 C3·C6이 보완하며 완벽하지 않아 최종 승인은 사람이 합니다.</div>
+    <aside class="notes">환각을 막는 검증 설계입니다. AI가 뽑은 사실 하나는 양식 칸, 문장, 긍정·부정, 원문 인용, 근거 구간, 확실성으로 구성됩니다. C1부터 C3까지는 코드로 검사해 실패하면 다시 추출하고, C4는 빠진 칸을 되묻고, C5는 애매한 구간을 표시합니다. C6에서만 LLM이 함의를 판정합니다. 코드 검사가 먼저이고 LLM은 보조입니다.</aside>
+  </section>
+
+  <!-- 21 EVAL -->
+  <section class="slide" id="s-eval" data-sec="8" data-title="구현 방법" data-sub="– 평가와 분담">
+    <div class="ev">
+      <h3 class="a l" style="--i:0">평가 방법</h3>
+      <div class="ab a l" style="--i:1"><i>A</i>LLM에 한 번에 시키기<em>기준선</em></div>
+      <div class="ab a l" style="--i:2"><i>B</i>A + 사실 추출 + 근거 연결<span></span></div>
+      <div class="ab a l" style="--i:3"><i>C</i>B + 검증 (C1~C6)<span></span></div>
+      <div class="ab me a l" style="--i:4"><i>D</i>C + 재시도 · 되묻기<em>케어노트AI</em></div>
+      <div class="small a fade" style="--i:5">(a) 정답 전사로 에이전트만 평가 — 음성인식 오류와 분리<br>(b) 실제 녹음 10~20건으로 전체 흐름 확인</div>
+      <h3 class="a l" style="--i:6">평가 요소</h3>
+      <div>
+        <div class="met a l" style="--i:7"><b>근거 없는 사실 비율</b>말하지 않은 내용이 섞였는지</div>
+        <div class="met a l" style="--i:8"><b>빠진 항목 검출률</b>일부러 뺀 필수 칸을 찾아 묻는지</div>
+        <div class="met a l" style="--i:9"><b>부정·숫자 오류율</b>‘못 드셨다’, ‘두 숟갈’을 맞게 옮기는지</div>
+        <div class="met a l" style="--i:10"><b>수정 시간</b>수기 대비 줄어드는지</div>
+      </div>
+    </div>
+    <div class="team">
+      <h3 class="a r" style="--i:2">팀 역할 분담</h3>
+      <div class="mem a r" style="--i:3"><div class="nm">이하랑 · AI · 백엔드</div><p>상태 머신 · 작업 큐 · DB<br>음성인식·LLM 어댑터와 엔진 비교<br>사실 추출 · 검증(C1~C6) · 되묻기 · 초안<br>A~D 비교 실험</p></div>
+      <div class="mem b a r" style="--i:5"><div class="nm">김석범 · 화면·현장</div><p>녹음·전사 확인 화면 · 초안 확인·승인 화면<br>정답 시나리오 라벨링 · 질문 문구 · 사용성 테스트</p></div>
+      <div class="agree a r" style="--i:7">스키마·API 합의 → 가짜 응답으로 병렬 개발. 검증</div>
+    </div>
+    <aside class="notes">평가는 단계별 비교 실험으로 합니다. LLM에 한 번에 시키는 A를 기준선으로, 사실 추출, 검증, 재시도·되묻기를 하나씩 더해 D가 케어노트 AI입니다. 음성인식 오류와 분리하기 위해 정답 전사로 먼저 평가하고, 실제 녹음으로 전체 흐름을 확인합니다. 역할은 이하랑이 AI·백엔드, 김석범이 화면과 현장 검증을 맡습니다.</aside>
+  </section>
+
+  <!-- 22 EFFECT -->
+  <section class="slide" id="s-eff" data-sec="9" data-title="기대효과">
+    <div class="talk">
+      <div class="bub a pop" style="--i:0"><b>수급자</b><p>불안하지 않고 안정적인 돌봄으로 컨디션이 좋아졌어요.</p><small>가상의 수급자</small></div>
+      <div class="ql a dn" style="--i:1">“</div><div class="qr a" style="--i:1">”</div>
+      <img class="fl illus a l" style="--i:2" src="images/tlk_l.webp" alt="손을 흔드는 사람 일러스트">
+      <img class="fr illus a r" style="--i:2" src="images/tlk_r.webp" alt="웃는 사람 일러스트">
+    </div>
+    <div class="roles" style="--base:700ms;--step:160ms">
+      <div class="box a" style="--i:0"><h4>요양보호사</h4><div class="bd"><div>현장에서 바로 기록하니 실수가<br>줄고 퇴근후에 쉴 수 있어요.<small>가상의 요양보호사</small></div></div></div>
+      <div class="plus a pop" style="--i:1">+</div>
+      <div class="box a" style="--i:2"><h4>사회복지사</h4><div class="bd"><div>옮겨적지 않으니 누락이 줄고<br>업무 시간이 줄었어요<small>가상의 사회복지사</small></div></div></div>
+      <div class="plus a pop" style="--i:3">+</div>
+      <div class="box a" style="--i:4"><h4>센터장</h4><div class="bd"><div>센터 평가가 낮아지거나 감사<br>의 리스크가 줄었어요<small>가상의 센터장</small></div></div></div>
+    </div>
+    <aside class="notes">기대효과입니다. 요양보호사는 현장에서 바로 기록하고 퇴근 후에 쉴 수 있고, 사회복지사는 옮겨 적는 일이 없어 누락과 업무 시간이 줄며, 센터장은 평가와 감사 리스크가 줄어듭니다. 결국 그 시간이 어르신께 돌아가 더 안정적인 돌봄이 됩니다.</aside>
+  </section>
+
+  <!-- 24 END -->
+  <section class="slide bare" id="s-end" data-sec="0" data-name="마무리">
+    <div class="qa a dn" style="--i:0">Q&amp;A</div>
+    <h2 class="a l" style="--i:1">감사합니다</h2>
+    <p class="a l" style="--i:3">말하면 기록이 되고,<br>그 시간은 <em>어르신께</em> 돌아갑니다.</p>
+    <div class="who a" style="--i:5"><b>케어노트 AI</b> · 고려대학교 지능정보 SW 아카데미 8기<br>6조 : 이하랑, 김석범</div>
+    <img class="hero illus a r float" style="--i:2" src="images/hero.webp" alt="어르신의 보행을 돕는 요양보호사 일러스트">
+    <svg class="star a pop" style="left:1400px;top:420px;--i:6" viewBox="0 0 40 40"><use href="#star-y"/></svg>
+    <svg class="star a pop" style="left:1040px;top:600px;--i:7;animation-duration:3.6s" viewBox="0 0 40 40"><use href="#star-p"/></svg>
+    <aside class="notes">들어주셔서 감사합니다. 말하면 기록이 되고, 그 시간은 어르신께 돌아갑니다. 질문 받겠습니다.</aside>
+  </section>
+
+  <div id="bar"></div>
+ </div>
+
+ <div id="nav">
+   <div class="brand">케어노트 AI · 6조</div>
+   <div id="secs"></div>
+   <button class="nb" id="prev" aria-label="이전 슬라이드">←</button>
+   <button class="nb" id="next" aria-label="다음 슬라이드">→</button>
+   <button class="nb" id="listBtn" aria-label="슬라이드 목록">목록</button>
+   <button class="nb" id="noteBtn" aria-label="발표 노트 열기">노트</button>
+   <button class="nb" id="fsBtn" aria-label="전체 화면">전체</button>
+   <div class="clock" id="clock" title="발표 경과 시간 (T 키로 초기화)">00:00</div>
+   <div class="ctr" id="ctr">01 / 22</div>
+ </div>
+</div>
+</div>
+<div id="notesPanel" aria-live="polite"></div>
+<div id="hint">← → 이동 · F 전체 화면 · N 노트 · G 목록</div>
+<div id="overview" role="dialog" aria-label="슬라이드 목록"><h2>슬라이드 목록 <small style="font-weight:500;font-size:16px;opacity:.7">(Esc 닫기)</small></h2><ol id="ovList"></ol></div>
+
+<!-- 공용 SVG 심볼 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="star-y"><path d="M20 4c3 0 5 4 5 8 4-2 9-2 10 1s-3 6-7 7c4 2 6 6 4 9s-7 1-10-2c-1 4-4 8-7 7s-3-5-1-9c-4 0-8-3-7-6s6-3 9-2c-1-4 1-8 5-8z" fill="#F7C873" stroke="#141416" stroke-width="2.5"/><circle cx="20" cy="20" r="3" fill="#141416"/></g>
+    <g id="star-p"><path d="M20 4c3 0 5 4 5 8 4-2 9-2 10 1s-3 6-7 7c4 2 6 6 4 9s-7 1-10-2c-1 4-4 8-7 7s-3-5-1-9c-4 0-8-3-7-6s6-3 9-2c-1-4 1-8 5-8z" fill="#FFB3B9" stroke="#141416" stroke-width="2.5"/><circle cx="20" cy="20" r="3" fill="#141416"/></g>
+    <path id="chev" d="M4 4h16l20 22-20 22H4l20-22z" fill="#DD7A52" stroke="#141416" stroke-width="3" stroke-linejoin="round"/>
+    <path id="parr" d="M4 15h76M64 4l18 11-18 11" fill="none" stroke="#FFB3B9" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  </defs>
+</svg>
+
+<script>
+(function(){
+'use strict';
+const NS='http://www.w3.org/2000/svg';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const el=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e};
+const div=(cls,style,html,parent)=>{const d=document.createElement('div');if(cls)d.className=cls;if(style)d.setAttribute('style',style);if(html!=null)d.innerHTML=html;if(parent)parent.appendChild(d);return d};
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- 7: swimlane flow (재가급여의 구조 2) ---------- */
+(function buildFlow(){
+  const F=$('#flow');
+  const colX=i=>180+i*202, laneY=j=>60+j*104;
+  const lanes=['수급자','요양보호사','사회복지사','센터장','공단'];
+  const steps=['① 인정','② 계약','③ 계획·배정','④ 돌봄','⑤ 기록','⑥ 청구·지급'];
+  const T=i=>0.35+i*0.5; // 열(단계)마다 등장 시각(초)
+  lanes.forEach((n,j)=>{div('lane a fade'+(j%2?' alt':''),`top:${laneY(j)}px;--i:0`,'',F);div('ll a l',`top:${laneY(j)}px;--i:${j}`,n,F)});
+  steps.forEach((s,i)=>div('sp a dn'+(i===4?' hot':''),`left:${colX(i)+8}px;--i:${i}`,s,F));
+  const B={};
+  const box=(k,c,l,t)=>{B[k]={c,l,x:colX(c)+8,y:laneY(l)+16};div('bx a pop',`left:${B[k].x}px;top:${B[k].y}px;--base:${T(c)*1000}ms;--i:${l*0.6}`,t,F)};
+  div('zone a fade',`left:${colX(4)-4}px;top:${laneY(1)+4}px;width:188px;height:${104+96-8}px;--base:${T(4)*1000-150}ms;--i:0`,'',F);
+  div('zlab a pop',`left:${colX(4)+8}px;top:${laneY(1)-42}px;--base:${T(4)*1000-150}ms;--i:0`,'케어노트 AI',F);
+  box('apply',0,0,'장기요양<br>인정 신청'); box('grade',0,4,'조사·등급판정<br>인정서 발급');
+  box('pick',1,0,'센터 선택·<br>이용 계약'); box('sign',1,3,'이용 계약<br>체결');
+  box('assign',2,1,'방문 일정<br>배정 확인'); box('plan',2,2,'서비스 계획<br>수립');
+  box('recv',3,0,'돌봄 받기'); box('give',3,1,'방문 돌봄<br>제공');
+  box('memo',4,1,'돌봄 후<br>기록 메모'); box('sum',4,2,'기록<br>취합·정리·검토'); box('ok',4,3,'기록<br>확인 · 승인');
+  box('see',5,0,'기록지 확인'); box('bill',5,3,'급여비용 청구'); box('pay',5,4,'심사·지급<br>사후 점검');
+  const W=164,H=64;
+  const P=(k,side)=>{const b=B[k];return side==='t'?[b.x+W/2,b.y]:side==='b'?[b.x+W/2,b.y+H]:side==='l'?[b.x,b.y+H/2]:[b.x+W,b.y+H/2]};
+  const svg=el('svg',{width:1400,height:600},F);
+  const defs=el('defs',{},svg);
+  [['ah','#141416'],['am','#DD7A52']].forEach(([id,c])=>{const m=el('marker',{id,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:12,markerHeight:12,markerUnits:'userSpaceOnUse',orient:'auto-start-reverse'},defs);el('path',{d:'M0 0L10 5L0 10z',fill:c},m)});
+  const arrow=(pts,col,opt={})=>{
+    const d='M'+pts.map(p=>p.join(' ')).join(' L');
+    const money=opt.money;
+    const p=el('path',{d,fill:'none',stroke:money?'#DD7A52':'#141416','stroke-width':money?4:2.5,pathLength:1,class:'draw','marker-end':money?'url(#am)':'url(#ah)'},svg);
+    if(opt.both||money)p.setAttribute('marker-start',money?'url(#am)':'url(#ah)');
+    p.setAttribute('style',`--base:${T(col)*1000+250}ms;--i:${opt.k||0};--dur:.6s`);
+    if(opt.label){const [lx,ly]=opt.at;div('alab a fade'+(money?' m':''),`left:${lx}px;top:${ly}px;--base:${T(col)*1000+500}ms;--i:0`,opt.label,F)}
+  };
+  const elbow=(a,b,col,opt)=>{const xm=a[0]+19;arrow([a,[xm,a[1]],[xm,b[1]],b],col,opt)};
+  arrow([P('apply','b'),P('grade','t')],0,{label:'신청',at:[colX(0)+100,laneY(2)+40]});
+  elbow(P('grade','r'),P('pick','l'),0,{k:1,label:'인정서',at:[colX(0)+196,laneY(2)+40]});
+  arrow([P('pick','b'),P('sign','t')],1,{both:true,label:'계약',at:[colX(1)+100,laneY(1)+40]});
+  elbow(P('sign','r'),P('plan','l'),1,{k:1});
+  arrow([P('plan','t'),P('assign','b')],2,{label:'배정',at:[colX(2)+100,laneY(2)-14]});
+  arrow([P('assign','r'),P('give','l')],2,{k:1});
+  arrow([P('give','t'),P('recv','b')],3,{label:'돌봄',at:[colX(3)+100,laneY(1)-14]});
+  arrow([P('give','r'),P('memo','l')],3,{k:1});
+  arrow([P('memo','b'),P('sum','t')],4);
+  arrow([P('sum','b'),P('ok','t')],4,{k:1});
+  elbow(P('sum','r'),P('see','l'),4,{k:1,label:'기록지',at:[colX(4)+198,laneY(1)+40]});
+  arrow([P('ok','r'),P('bill','l')],4,{k:2});
+  arrow([[P('see','b')[0],P('see','b')[1]+10],[P('bill','t')[0],P('bill','t')[1]-10]],5,{money:true,label:'본인부담금<br>청구 · 납부',at:[colX(5)+104,laneY(1)+44]});
+  arrow([[P('bill','b')[0],P('bill','b')[1]+4],[P('pay','t')[0],P('pay','t')[1]-4]],5,{money:true,k:1,label:'청구·지급',at:[colX(5)+102,laneY(3)+92]});
+  div('legend a fade',`--base:${T(5)*1000+600}ms;--i:0`,
+   `<span><svg width="56" height="12"><path d="M2 6h44" stroke="#141416" stroke-width="3"/><path d="M44 1l10 5-10 5z" fill="#141416"/></svg>서류·기록·안내의 흐름</span>
+    <span style="color:var(--brick);font-weight:800"><svg width="56" height="12"><path d="M10 6h36" stroke="#DD7A52" stroke-width="4"/><path d="M44 1l10 5-10 5zM12 1L2 6l10 5z" fill="#DD7A52"/></svg>돈(급여비용)의 흐름</span>
+    <span><svg width="52" height="22"><rect x="2" y="2" width="48" height="18" rx="5" fill="rgba(239,142,152,.25)" stroke="#DD7A52" stroke-width="2.5" stroke-dasharray="5 4"/></svg>케어노트AI가 들어가는 구간</span>
+    <span class="note">일반적인 예시이며 기관 규모에 따라 다를 수 있습니다.</span>`,F);
+})();
+
+/* ---------- 10: line charts (인력 전망) ---------- */
+function lineChart(host,o){
+  const w=620,h=400,L=56,R=566,Tp=36,Bt=340;
+  const x=yr=>L+(yr-2015)/35*(R-L), y=v=>Bt-v/o.max*(Bt-Tp);
+  div('lg a fade','--i:2',`<span><svg width="30" height="4"><path d="M0 2h30" stroke="#141416" stroke-width="3"/></svg>실적</span><span><svg width="30" height="4"><path d="M0 2h30" stroke="#141416" stroke-width="3.5" stroke-dasharray="6 4"/></svg>예상 공급</span><span><svg width="30" height="4"><path d="M0 2h30" stroke="#FF8B96" stroke-width="3.5" stroke-dasharray="6 4"/></svg>필요 인력</span>`,host);
+  const s=el('svg',{width:w,height:h,viewBox:`0 0 ${w} ${h}`},host);
+  const g=el('g',{class:'a fade',style:'--i:3'},s);
+  o.ticks.forEach(t=>{el('line',{x1:L,x2:R+10,y1:y(t),y2:y(t),stroke:'#E4E4E8','stroke-width':1.5},g);const tx=el('text',{x:L-12,y:y(t)+5,'text-anchor':'end','font-size':16,fill:'#6E6E74'},g);tx.textContent=t});
+  el('line',{x1:L,x2:R+10,y1:Bt,y2:Bt,stroke:'#141416','stroke-width':3},g);
+  const xd=x(2027.5);el('line',{x1:xd,x2:xd,y1:Tp-14,y2:Bt+30,stroke:'#999','stroke-width':1.5,'stroke-dasharray':'5 5'},g);
+  [2015,2025,2030,2040,2050].forEach(yr=>{const t=el('text',{x:x(yr),y:Bt+30,'text-anchor':'middle','font-size':19,'font-weight':700,fill:'#141416'},g);t.textContent=yr;el('line',{x1:x(yr),x2:x(yr),y1:Bt,y2:Bt+7,stroke:'#141416','stroke-width':2},g)});
+  const lab=(tx,xx,yy,a,col,fw,fs)=>{const t=el('text',{x:xx,y:yy,'text-anchor':a||'middle','font-size':fs||20,'font-weight':fw||800,fill:col||'#141416'},g);t.textContent=tx;return t};
+  lab('실적',x(2020),Tp-8);lab('전망',x(2039),Tp-8);lab('만 명',R+10,Tp-8,'end','#6E6E74',500,16);
+  const pts=o.act.map((v,i)=>[x(2015+i),y(v)]);
+  const path=(arr,attrs,i,dur)=>el('path',Object.assign({d:'M'+arr.map(p=>p.join(' ')).join(' L'),fill:'none',pathLength:1,class:'draw',style:`--i:${i};--dur:${dur||1}s`},attrs),s);
+  path(pts,{stroke:'#141416','stroke-width':3},4,1.2);
+  const dg=el('g',{class:'a fade',style:'--i:6'},s);
+  pts.forEach(p=>el('circle',{cx:p[0],cy:p[1],r:4.5,fill:'#FFB3B9',stroke:'#141416','stroke-width':2},dg));
+  const yrs=[2030,2040,2050];
+  const supPts=yrs.map((yr,i)=>[x(yr),y(o.sup[i])]), needPts=yrs.map((yr,i)=>[x(yr),y(o.need[i])]);
+  // 전망선: 처음부터 점선으로 그리기 (dasharray 는 pathLength 단위로 환산)
+  const dashed=(arr,c,i)=>{const p=el('path',{d:'M'+arr.map(p=>p.join(' ')).join(' L'),fill:'none',stroke:c,'stroke-width':4,'stroke-dasharray':'9 6','stroke-linecap':'round',class:'a fade',style:`--i:${i}`},s);return p};
+  dashed(supPts,'#141416',8);dashed(needPts,'#FF8B96',9);
+  const mk=el('g',{class:'a pop',style:'--i:11'},s);
+  yrs.forEach((yr,i)=>{el('rect',{x:x(yr)-6,y:y(o.sup[i])-6,width:12,height:12,fill:'#FFB3B9',stroke:'#141416','stroke-width':2.5},mk);el('circle',{cx:x(yr),cy:y(o.need[i]),r:7,fill:'#FF8B96',stroke:'#141416','stroke-width':2.5},mk)});
+  const vg=el('g',{class:'a pop',style:'--i:12'},s);
+  const vt=(v,xx,yy,a)=>{const t=el('text',{x:xx,y:yy,'text-anchor':a||'start','font-size':22,'font-weight':800,fill:'#141416'},vg);const sp=el('tspan',{'data-count':v,'data-dec':o.dec},t);sp.textContent=v.toFixed(o.dec);};
+  vt(o.act[o.act.length-1],x(2025)-4,y(o.act[o.act.length-1])-18,'middle');
+  vt(o.need[2],x(2050)+14,y(o.need[2])+7);vt(o.sup[2],x(2050)+14,y(o.sup[2])+7);
+}
+lineChart($('#chA'),{max:300,ticks:[0,100,200,300],dec:1,act:[30,32,34,38,42,45,50,55,60,63,65.4],sup:[93,138,184.7],need:[93,175,266.3]});
+lineChart($('#chB'),{max:16,ticks:[0,4,8,12,16],dec:2,act:[1.4,1.5,1.8,2.2,2.6,3.0,3.4,3.7,4.0,4.2,4.49],sup:[5.7,8.1,10.62],need:[5.2,9.6,14.66]});
+
+/* ---------- 14: comparison table ---------- */
+(function(){
+  const cols=[['수기 · 엑셀','종이·한글·엑셀'],['장기요양 업무 앱','예: 케어포·공단 앱'],['범용 음성 전사','예: 클로바노트'],['범용 생성형 AI','챗봇형 서비스'],['해외 요양 음성 기록','예: voize·CareWiz'],['케어노트AI','설계 기준']];
+  const rows=[['현장 음성으로 입력','ooFhFF'],['방문요양 기록지 양식에 맞춤','ohoooF'],['불확실한 부분을 표시','oooo?F'],['문장마다 원문 근거를 연결','ooho?F'],['사람이 확인·승인한 뒤 확정','hhoo?F']];
+  const sym=(t,size=36)=>{const s=`<svg width="${size}" height="${size}" viewBox="0 0 40 40">`;
+    if(t==='F')return s+'<circle cx="20" cy="20" r="17" fill="#141416"/></svg>';
+    if(t==='o')return s+'<circle cx="20" cy="20" r="16" fill="#fff" stroke="#141416" stroke-width="3"/></svg>';
+    if(t==='h')return s+'<circle cx="20" cy="20" r="16" fill="#fff" stroke="#141416" stroke-width="3"/><path d="M20 4a16 16 0 0 0 0 32z" fill="#141416"/></svg>';
+    return s+'<circle cx="20" cy="20" r="16" fill="#fff" stroke="#141416" stroke-width="2.5" stroke-dasharray="4 4"/><text x="20" y="27" text-anchor="middle" font-size="20" font-weight="800" fill="#141416">?</text></svg>'};
+  const t=$('#cmp');
+  let h='<tr><th class="crit a fade" style="--i:1">비교 기준</th>'+cols.map((c,i)=>`<th class="${i===5?'me ':''}"><div class="a dn" style="--i:${i===5?9:1+i*0.5}">${c[0]}<small>${c[1]}</small></div></th>`).join('')+'</tr>';
+  rows.forEach((r,ri)=>{h+=`<tr><td class="crit a l" style="--i:${4+ri*0.6}">${r[0]}</td>`+[...r[1]].map((c,ci)=>`<td class="${ci===5?'me':''}"><span class="a pop" style="display:inline-block;--i:${ci===5?11+ri*0.5:4.4+ri*0.6+ci*0.15}">${sym(c)}</span></td>`).join('')+'</tr>'});
+  t.innerHTML=h;
+  $('#cmpLeg').innerHTML=[['F','있음'],['h','일부'],['o','확인되지 않음'],['?','판단 불가']].map(([k,n])=>`<span>${sym(k,30)}${n}</span>`).join('');
+})();
+
+/* ---------- 16: pipeline (케어노트AI 내부 흐름) ---------- */
+(function(){
+  const P=$('#pipeIn');
+  const nd=(cls,x,y,t,s,i)=>div('nd '+cls+' a pop',`left:${x}px;top:${y}px;--i:${i}`,`${t}<small>${s}</small>`,P);
+  const dm=(cx,cy,t,s,i)=>{const d=div('dm a pop',`left:${cx-95}px;top:${cy-55}px;--i:${i}`,`${t}<small>${s}</small>`,P);d.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 190 110" width="190" height="110"><path d="M95 3L187 55 95 107 3 55z" fill="#fff" stroke="#141416" stroke-width="3" stroke-linejoin="round"/></svg>')};
+  const s=el('svg',{class:'wires',width:850,height:480},P);
+  const defs=el('defs',{},s);
+  [['pa','#141416'],['po','#DD7A52']].forEach(([id,c])=>{const m=el('marker',{id,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:12,markerHeight:12,markerUnits:'userSpaceOnUse',orient:'auto'},defs);el('path',{d:'M0 0L10 5L0 10z',fill:c},m)});
+  const w=(d,i,o)=>el('path',{d,fill:'none',stroke:o?'#DD7A52':'#141416','stroke-width':o?3.5:2.5,'marker-end':o?'url(#po)':'url(#pa)',pathLength:1,class:'draw',style:`--i:${i};--dur:.45s`},s);
+  const lb=(t,x,y,i,extra='')=>div('lb a fade',`left:${x}px;top:${y}px;--i:${i};${extra}`,t,P);
+  // 1행 (상자 세로 중심 y=40)
+  nd('h',0,0,'음성 입력','현장에서 녹음·업로드',5);
+  w('M172 40H216',6); nd('ai',220,0,'소리 정리','전처리 · VAD',6.5);
+  w('M392 40H436',7); nd('ai',440,0,'글로 옮기기','음성인식 · 신뢰도',7.5);
+  w('M612 40H662',8); dm(760,40,'잘 들렸나?','위험 판정',8.5);
+  // 되묻기 루프 (주황)
+  w('M760 96V182H668',9.5,1); lb('애매하면',772,116,9.5);
+  div('nd h a pop',`left:400px;top:150px;width:265px;height:64px;--i:10`,'요양보호사에게 되묻기<small>애매한 구간만 다시 확인</small>',P);
+  w('M532 148V86',10.5,1); lb('답을 받으면 다시 처리',352,104,10.5,'text-align:right;width:170px');
+  // 통과 → 아래로
+  w('M760 96V316',11); lb('통과',772,220,11);
+  nd('ai',670,320,'사실 정리','사실 추출 · 근거 연결',11.5);
+  w('M668 360H628',12); dm(530,360,'말한 대로?','근거 검증',12.5);
+  w('M532 304V218',13,1); lb('빠졌으면',544,250,13);
+  w('M434 360H394',13.5); lb('통과',396,326,13.5);
+  nd('ai',220,320,'기록지 초안','양식 칸에 맞춰 작성',14);
+  w('M218 360H174',14.5); nd('h',0,320,'확인·승인','사회복지사',15);
+  el('path',{d:'M85 402V418',stroke:'#141416','stroke-width':2.5,'stroke-dasharray':'5 5',fill:'none',class:'a fade',style:'--i:16'},s);
+  div('store a wide',`--i:16`,'<span><em>기록 저장소</em> 음성 · 원문 · 초안 · 승인본 · 변경 이력</span>',P);
+  div('pulse','',null,P);
+})();
+$$('#s-pipe .a').forEach(e=>{if(!e.closest('.ppl')&&e.id!=='pipe')e.style.setProperty('--step','150ms')});
+
+/* ---------- deck engine ---------- */
+const slides=$$('.slide'), N=slides.length, card=$('#card'), stage=$('#stage');
+const secNames=['','아이디어 배경','재가급여란?','재가급여의 구조','구조적인 문제점','문제에 따른 위험요소','해결책','프로젝트 파이프라인','구현 방법','기대효과'];
+const secs=$('#secs');
+for(let s=1;s<=9;s++){const b=document.createElement('button');b.textContent=s;b.title=secNames[s];b.setAttribute('aria-label',`${s}. ${secNames[s]}`);b.onclick=e=>{e.stopPropagation();goSec(s)};secs.appendChild(b)}
+const firstOf=s=>slides.findIndex(x=>+x.dataset.sec===s);
+function goSec(s){const i=firstOf(s);if(i>=0)go(i)}
+$$('[data-go]').forEach(t=>{const f=e=>{e.stopPropagation();goSec(+t.dataset.go)};t.addEventListener('click',f);t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f(e)}})});
+// 슬라이드 목록(overview)
+const ov=$('#overview'), ovList=$('#ovList');
+slides.forEach((s,i)=>{const li=document.createElement('li');const name=s.dataset.name||(s.dataset.title+(s.dataset.sub?' '+s.dataset.sub:''));li.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><span>${name}</span>`;li.onclick=()=>{ov.classList.remove('open');go(i)};ovList.appendChild(li)});
+const toggleOv=(force)=>{ov.classList.toggle('open',force);$$('li',ovList).forEach((li,i)=>li.classList.toggle('cur',i===cur))};
+
+let cur=-1, curTitle='', curSub='', curSec=-1, timers=[];
+const fmt=(v,dec,sep)=>{let s=v.toFixed(dec);if(sep)s=s.replace(/\B(?=(\d{3})+(?!\d))/g,',');return s};
+function countUp(root){
+  $$('[data-count]',root).forEach(e=>{
+    const to=+e.dataset.count,dec=+(e.dataset.dec||0),sep=e.dataset.sep;
+    if(reduced){e.textContent=fmt(to,dec,sep);return}
+    const host=e.closest('.a')||e.closest('svg');
+    let delay=300;if(host){const cs=getComputedStyle(host);const i=parseFloat(cs.getPropertyValue('--i'))||0,b=parseFloat(cs.getPropertyValue('--base'))||180,st=parseFloat(cs.getPropertyValue('--step'))||85;delay=b+i*st}
+    e.textContent=fmt(0,dec,sep);
+    timers.push(setTimeout(()=>{const t0=performance.now(),D=1100;const f=t=>{const p=Math.min(1,(t-t0)/D),k=1-Math.pow(1-p,3);e.textContent=fmt(to*k,dec,sep);if(p<1&&e.isConnected)requestAnimationFrame(f)};requestAnimationFrame(f)},delay));
+  });
+}
+function donuts(root){
+  $$('circle.seg',root).forEach(c=>{const v=+c.dataset.v;
+    if(reduced){c.setAttribute('stroke-dasharray',`${v} ${100-v}`);return}
+    c.style.transition='none';c.setAttribute('stroke-dasharray',`0 100`);
+    timers.push(setTimeout(()=>{c.style.transition='stroke-dasharray 1.2s cubic-bezier(.5,0,.2,1)';c.setAttribute('stroke-dasharray',`${v} ${100-v}`)},520))});
+}
+function setHeader(s,instant){
+  const bare=s.classList.contains('bare');card.classList.toggle('bare',bare);if(bare){curSec=0;return}
+  const sec=+s.dataset.sec,title=s.dataset.title||'',sub=s.dataset.sub||'';
+  const tab=$('#tab'),ht=$('#hdrTitle');
+  if(sec!==curSec){
+    if(instant||reduced){tab.textContent=sec}else{tab.classList.remove('flip');void tab.offsetWidth;tab.classList.add('flip');setTimeout(()=>tab.textContent=sec,270)}
+  }
+  if(title!==curTitle||!ht.firstChild){
+    $$('.t',ht).forEach(o=>{o.classList.remove('in');o.classList.add('out');setTimeout(()=>o.remove(),420)});
+    const t=document.createElement('div');t.className='t'+(instant?'':' in');t.innerHTML=`<b>${title}</b>`+(sub?`<i>${sub}</i>`:'');ht.appendChild(t);
+  }else if(sub!==curSub){const t=$('.t:last-child',ht);let i=$('i',t);if(!i){i=document.createElement('i');t.appendChild(i)}i.textContent=sub;i.classList.remove('swap');void i.offsetWidth;i.classList.add('swap')}
+  curSec=sec;curTitle=title;curSub=sub;
+}
+function go(n,instant){
+  n=Math.max(0,Math.min(N-1,n));if(n===cur)return;
+  timers.forEach(clearTimeout);timers=[];
+  const back=n<cur, prev=slides[cur];
+  slides.forEach(s=>s.classList.remove('leaving','back'));
+  if(prev&&!instant&&!reduced){prev.classList.remove('active');prev.classList.add('leaving');if(back)prev.classList.add('back');setTimeout(()=>prev.classList.remove('leaving','back'),520)}
+  else if(prev)prev.classList.remove('active');
+  const s=slides[n];s.classList.remove('active');void s.offsetWidth;s.classList.add('active');
+  cur=n;setHeader(s,instant);countUp(s);donuts(s);
+  $('#bar').style.width=((n+1)/N*100)+'%';
+  $('#ctr').textContent=String(n+1).padStart(2,'0')+' / '+N;
+  const sec=+s.dataset.sec;
+  [...secs.children].forEach((b,i)=>{const k=i+1;b.classList.toggle('on',k===sec);b.classList.toggle('done',sec===0?n===N-1:k<sec)});
+  const note=$('.notes',s);$('#notesPanel').innerHTML=`<b>${String(n+1).padStart(2,'0')}</b>${note?note.textContent:''}`;
+  try{history.replaceState(null,'','#s'+(n+1))}catch(e){}
+  if(n>0)startClock();
+}
+// 무대 축소·확대: 창 크기에 맞춰 1600×900 을 비율 유지 스케일
+function fit(){const w=innerWidth,h=innerHeight,k=Math.min(w/1600,h/900);stage.style.transform=`translate(-50%,-50%) scale(${k})`}
+addEventListener('resize',fit);fit();
+// 발표 타이머 (첫 장에서 넘어가는 순간 시작, T 로 초기화)
+let t0=null,clockTimer=null;const clock=$('#clock');
+function startClock(){if(t0)return;t0=Date.now();clockTimer=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);clock.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');clock.classList.toggle('warn',s>=13*60)},1000)}
+function resetClock(){clearInterval(clockTimer);t0=null;clock.textContent='00:00';clock.classList.remove('warn');if(cur>0)startClock()}
+// 입력
+const next=()=>go(cur+1),prev=()=>go(cur-1);
+$('#next').onclick=e=>{e.stopPropagation();next()};$('#prev').onclick=e=>{e.stopPropagation();prev()};
+const toggleNotes=()=>$('#notesPanel').classList.toggle('open');
+$('#noteBtn').onclick=e=>{e.stopPropagation();toggleNotes()};
+$('#listBtn').onclick=e=>{e.stopPropagation();toggleOv()};
+const fs=()=>{try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+$('#fsBtn').onclick=e=>{e.stopPropagation();fs()};
+addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key;
+  if(k==='Escape'){if(ov.classList.contains('open')){toggleOv(false);return}if($('#notesPanel').classList.contains('open')){toggleNotes();return}}
+  if(ov.classList.contains('open')&&!['g','G'].includes(k))return;
+  if(['ArrowRight','PageDown',' ','Enter','ArrowDown'].includes(k)&&!(k==='Enter'&&e.target.dataset&&e.target.dataset.go)){e.preventDefault();next()}
+  else if(['ArrowLeft','PageUp','Backspace','ArrowUp'].includes(k)){e.preventDefault();prev()}
+  else if(k==='Home')go(0);else if(k==='End')go(N-1);
+  else if(k==='n'||k==='N')toggleNotes();else if(k==='f'||k==='F')fs();
+  else if(k==='g'||k==='G'||k==='o'||k==='O')toggleOv();
+  else if(k==='t'||k==='T')resetClock();
+  else if(/^[1-9]$/.test(k))goSec(+k);
+});
+stage.addEventListener('click',e=>{
+  if(e.target.closest('button,[data-go],#nav'))return;
+  const r=stage.getBoundingClientRect();((e.clientX-r.left)/r.width<0.22)?prev():next();
+});
+let tx=null;addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+addEventListener('touchend',e=>{if(tx==null)return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)(d<0?next:prev)();tx=null},{passive:true});
+// 전체 화면에서 마우스가 멈추면 하단 조작 막대 숨김
+let idleT=null;const wake=()=>{stage.classList.remove('idle');clearTimeout(idleT);if(document.fullscreenElement)idleT=setTimeout(()=>stage.classList.add('idle'),2500)};
+addEventListener('mousemove',wake);document.addEventListener('fullscreenchange',wake);
+// 해시(#s7)로 특정 장에서 시작 가능
+let start=0;const m=/^#s(\d+)$/.exec(location.hash||'');if(m)start=Math.min(N,Math.max(1,+m[1]))-1;
+go(start,true);
+const hint=$('#hint');setTimeout(()=>hint.classList.add('show'),900);setTimeout(()=>hint.classList.remove('show'),6000);
+})();
+</script>
+</body>
+</html>
