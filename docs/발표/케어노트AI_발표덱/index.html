@@ -233,8 +233,8 @@ body{margin:0;background:var(--coral);color:var(--ink);font-family:var(--font);o
   position:static;border:0;padding:0}
 .cell{min-height:102px;border-radius:14px;display:flex;flex-direction:column;justify-content:center;padding:12px 26px;font:800 23px/1.35 var(--font);letter-spacing:-.6px}
 .cell small{display:block;font:600 18px/1.3 var(--font);color:#444;margin-top:4px}
-.c1{background:var(--blush)}.c2{background:var(--pink-soft)}.c3{background:var(--pink-strong);font-size:27px}
-.c3 small{font-size:19px;color:#3a2a2c}
+.c1{background:var(--blush)}.c2{background:var(--pink-soft)}.c3{background:var(--pink-strong);font-size:27px;color:#fff}
+.c3 small{font-size:19px;color:rgba(255,255,255,.92)}
 .c2 small{font-size:17px}
 .c4{background:#fff;border:3px solid var(--ink);font-size:21px;padding:10px 20px}
 .rtable .banner{margin-top:-6px}
@@ -326,30 +326,38 @@ body{margin:0;background:var(--coral);color:var(--ink);font-family:var(--font);o
 #s-pc .shot img{display:block;width:100%}
 #s-pc .side{width:440px}
 
-/* ---------- 19 system ---------- */
-.sys{position:absolute;left:64px;right:64px}
-.sysbox{border:3px solid var(--ink);border-radius:14px;padding:0 22px;display:flex;align-items:center;font:600 21px/1.2 var(--font);letter-spacing:-.4px;min-height:78px;gap:12px}
-.sysbox b{font:900 27px/1 var(--font);letter-spacing:-.6px;white-space:nowrap}
-.sys.top{display:grid;grid-template-columns:1fr 1fr;gap:44px;top:0}
-.sys.top .sysbox{background:var(--pink-soft)}
-.sys.api{top:118px}.sys.api .sysbox{background:var(--ink);color:#fff}
-.sys.db{top:200px}.sys.db .sysbox{background:var(--blush)}
-.sys.wk{top:300px;border:3px dashed var(--orange);border-radius:16px;padding:14px 12px 12px;height:228px}
-.sys.wk > b{font:900 22px/1 var(--font);color:var(--brick);margin-left:10px}
-.wkrow{display:grid;grid-template-columns:repeat(5,1fr);gap:46px;margin-top:14px;position:relative}
-.wkn{position:relative;border:3px solid var(--ink);border-radius:14px;background:var(--blush);height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center}
-.wkn b{font:900 27px/1 var(--font)}
-.wkn span{font:600 18px/1 var(--font)}
-.wkn.v{background:var(--cream)}
-.wkn:not(:last-of-type)::after{content:'';position:absolute;right:-41px;top:50%;width:30px;height:3px;background:var(--ink)}
-.wkn:not(:last-of-type)::before{content:'';position:absolute;right:-44px;top:calc(50% - 6px);border:7px solid transparent;border-left:10px solid var(--ink);border-right:0}
-.gates{display:grid;grid-template-columns:2fr 1fr 2fr;gap:46px;margin-top:14px}
-.gates div{height:50px;border:3px solid var(--ink);border-radius:12px;display:grid;place-items:center;font:800 19px/1 var(--font);background:var(--orange);color:#fff}
-.gates div.w{background:#fff;color:var(--ink)}
-.sys.state{top:548px}.sys.state .sysbox{justify-content:center;background:var(--gray);font-weight:700;font-size:22px}
-.sys.state em{font-style:normal;color:var(--brick);font-weight:900;margin-right:6px}
-.sysnote{position:absolute;left:64px;bottom:18px;font:600 18px/1 var(--font);color:#444}
-.poll{position:absolute;left:624px;top:92px;font:600 19px/1 var(--font);color:#444}
+/* ---------- 19 system ----------
+   위: 화면·서버·데이터베이스는 얇은 한 줄로 축소(맥락만 제공)
+   아래: 워커를 주인공으로 — 단계마다 '어떤 기술로 / 어떻게 / 무엇을 남기는지' 카드로 표기 */
+.peri{position:absolute;left:64px;right:64px;top:14px;display:grid;grid-template-columns:250px 34px 1fr 34px 1fr 34px 250px;align-items:center}
+.pb{height:58px;border:2.5px solid var(--ink);border-radius:12px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#fff;font:600 15px/1.3 var(--font);letter-spacing:-.4px;color:#333}
+.pb b{font:900 19px/1 var(--font);letter-spacing:-.5px;color:var(--ink);white-space:nowrap}
+.pb.cl{background:var(--pink-soft);flex-direction:column;align-items:flex-start;justify-content:center;gap:5px}.pb.cl span{font-size:14px;color:#555}
+.pb.sv{background:var(--gray)}
+.peri svg{justify-self:center}
+.wkconn{position:absolute;top:74px;display:flex;align-items:center;gap:8px;font:700 14px/1 var(--font);color:var(--brick)}
+.worker{position:absolute;left:64px;right:64px;top:102px;border:3.5px solid var(--ink);border-radius:22px;background:#FFF6EE;box-shadow:8px 8px 0 var(--orange);padding:12px 16px 14px}
+.wkhd{display:flex;align-items:center;gap:14px;height:40px}
+.wkhd b{font:900 30px/1 var(--font);letter-spacing:-1px}
+.wkhd .tag{background:var(--orange);color:#fff;border-radius:8px;padding:6px 10px;font:800 15px/1 var(--font);white-space:nowrap}
+.wkhd span.d{margin-left:auto;font:600 15px/1.3 var(--font);color:#4a3a30;letter-spacing:-.3px;text-align:right}
+.stgs{display:grid;grid-template-columns:repeat(5,1fr);gap:30px;margin-top:12px}
+.stg{position:relative;border:3px solid var(--ink);border-radius:14px;background:#fff;display:flex;flex-direction:column;min-height:318px}
+.stg + .stg::before{content:'';position:absolute;left:-28px;top:130px;width:20px;height:3px;background:var(--ink)}
+.stg + .stg::after{content:'';position:absolute;left:-12px;top:124px;border:7.5px solid transparent;border-left:10px solid var(--ink);border-right:0}
+.stg h5{margin:0;display:flex;align-items:center;gap:10px;height:48px;padding:0 12px;background:var(--pink);border-bottom:3px solid var(--ink);border-radius:11px 11px 0 0;font:900 22px/1 var(--font);letter-spacing:-.6px}
+.stg h5 i{font-style:normal;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font:900 17px/1 var(--font);flex:none}
+.stg.v h5{background:var(--cream)}
+.stg .tech{margin:10px 12px 0;padding:7px 9px;border-radius:8px;background:var(--ink);color:#fff;font:800 14.5px/1.25 var(--font);letter-spacing:-.4px;white-space:nowrap}
+.stg ul{margin:12px 12px 0 10px;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px;font:600 16px/1.38 var(--font);letter-spacing:-.5px}
+.stg li::marker{color:var(--brick)}
+.stg .out{margin-top:auto;border-top:2px dashed #CFC6C0;padding:9px 12px 10px;font:800 15px/1.3 var(--font);color:var(--brick);letter-spacing:-.4px}
+.wgates{display:grid;grid-template-columns:repeat(5,1fr);gap:30px;margin-top:12px}
+.wgates div{height:46px;border:3px solid var(--ink);border-radius:12px;display:grid;place-items:center;font:800 17px/1 var(--font);background:var(--orange);color:#fff;letter-spacing:-.4px;white-space:nowrap}
+.wgates .g1{grid-column:1/3}.wgates .g2{grid-column:3/4;background:#fff;color:var(--ink)}.wgates .g3{grid-column:4/6}
+.sstate{position:absolute;left:64px;right:64px;top:582px;height:48px;border:2.5px solid var(--ink);border-radius:12px;background:var(--gray);display:flex;align-items:center;justify-content:center;font:700 19px/1 var(--font);letter-spacing:-.4px}
+.sstate em{font-style:normal;color:var(--brick);font-weight:900;margin-right:10px}
+.sysnote{position:absolute;left:64px;bottom:14px;font:600 16px/1 var(--font);color:#444}
 
 /* ---------- 20 verify ---------- */
 #s-ver h3{position:absolute;top:18px;margin:0;font:900 34px/1 var(--font);letter-spacing:-.8px}
@@ -758,26 +766,40 @@ body{margin:0;background:var(--coral);color:var(--ink);font-family:var(--font);o
 
   <!-- 19 SYSTEM -->
   <section class="slide" id="s-sys" data-sec="8" data-title="구현 방법" data-sub="– 시스템 구조">
-    <div class="sys top" style="top:26px"><div class="sysbox a dn" style="--i:0"><b>요양보호사 모바일</b>녹음 · 다시 말하기 · 맞아요 (Next.js)</div><div class="sysbox a dn" style="--i:0"><b>사회복지사 PC</b>초안 확인 · 근거 듣기 · 승인 (Next.js)</div></div>
-    <div class="poll a fade" style="--i:2;top:116px">HTTPS · 상태는 2초마다 확인(폴링)</div>
-    <svg class="a fade abs" style="left:590px;top:104px;--i:1" width="20" height="40"><path d="M10 2v32M3 26l7 10 7-10" fill="none" stroke="#141416" stroke-width="3"/></svg>
-    <svg class="a fade abs" style="left:1400px;top:104px;--i:3" width="20" height="40"><path d="M10 38V6M3 14l7-10 7 10" fill="none" stroke="#141416" stroke-width="3"/></svg>
-    <div class="sys api" style="top:144px"><div class="sysbox a wide" style="--i:2"><b>FastAPI</b>방문 · 녹음 · 질문 · 초안 · 승인 &nbsp;&nbsp;승인은 서버가 ‘확인 필요 0건’일 때만 허용</div></div>
-    <div class="sys db" style="top:226px"><div class="sysbox a wide" style="--i:4"><b>PostgreSQL</b>방문 · 전사 · 사실 · 질문 · 초안 · 감사 기록 (작업 큐 겸용)</div></div>
-    <svg class="a fade abs" style="left:746px;top:305px;--i:5" width="20" height="22"><path d="M10 2v18M4 8l6-6 6 6M4 14l6 6 6-6" fill="none" stroke="#141416" stroke-width="3"/></svg>
-    <div class="sys wk a fade" style="--i:5;top:326px"><b>워커 (오케스트레이터 · 상태 머신)</b>
-      <div class="wkrow" style="--step:150ms">
-        <div class="wkn a pop" style="--i:6"><b>1 음성인식</b><span>교체 가능한 어댑터</span></div>
-        <div class="wkn a pop" style="--i:7"><b>2 가리기</b><span>개인정보 치환</span></div>
-        <div class="wkn a pop" style="--i:8"><b>3 사실 추출</b><span>JSON 스키마 강제</span></div>
-        <div class="wkn v a pop" style="--i:9"><b>4 검증</b><span>코드 검사 + LLM 판정</span></div>
-        <div class="wkn a pop" style="--i:10"><b>5 초안 작성</b><span>기록 / AI 제안 분리</span></div>
-      </div>
-      <div class="gates"><div class="a wide" style="--i:12">관문① 동기: 애매한 구간을 화면에서 확인</div><div class="w a pop" style="--i:13">재시도 최대 2회</div><div class="a wide" style="--i:14">관문② 비동기: 빠진 항목 질문 → 답이 오면 부분 재처리</div></div>
+    <div class="peri">
+      <div class="pb cl a dn" style="--i:0"><b>요양보호사 모바일</b><span>Next.js · 녹음 · 들은 내용 확인</span></div>
+      <span class="a fade" style="--i:1"><svg width="30" height="16" viewBox="0 0 30 16"><path d="M5 8h20M9 3L4 8l5 5M21 3l5 5-5 5" fill="none" stroke="#141416" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <div class="pb sv a dn" style="--i:1"><b>서버</b><span>녹음 접수 · 상태 조회(2초 폴링)<br>승인은 ‘확인 필요 0건’일 때만</span></div>
+      <span class="a fade" style="--i:2"><svg width="30" height="16" viewBox="0 0 30 16"><path d="M5 8h20M9 3L4 8l5 5M21 3l5 5-5 5" fill="none" stroke="#141416" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <div class="pb sv a dn" style="--i:2"><b>데이터베이스</b><span>원문 · 사실 · 초안 · 수정 이력<br>+ 작업 대기열</span></div>
+      <span class="a fade" style="--i:3"><svg width="30" height="16" viewBox="0 0 30 16"><path d="M5 8h20M9 3L4 8l5 5M21 3l5 5-5 5" fill="none" stroke="#141416" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <div class="pb cl a dn" style="--i:3"><b>사회복지사 PC</b><span>Next.js · 초안 확인 · 승인</span></div>
     </div>
-    <div class="sys state" style="top:566px"><div class="sysbox a" style="--i:16"><em>상태</em> 업로드 → 전사 → 전사 확인 → 추출 → 검증 → 검토 대기 → 승인 (실패 시 FAILED)</div></div>
-    <div class="sysnote a fade" style="--i:17;bottom:10px">음성인식 엔진과 LLM은 미확정이며 교체 가능하게 설계합니다. 숫자(재시도 등)는 시작값입니다.</div>
-    <aside class="notes">시스템 구조입니다. 모바일과 PC는 Next.js, 서버는 FastAPI, 저장은 PostgreSQL로 작업 큐를 겸합니다. 워커가 상태 머신으로 음성인식, 개인정보 가리기, 사실 추출, 검증, 초안 작성을 순서대로 돌립니다. 사람이 개입하는 관문이 두 곳 있고, 승인은 서버가 ‘확인 필요 0건’일 때만 허용합니다. 음성인식 엔진과 LLM은 교체 가능하게 어댑터로 설계했습니다.</aside>
+    <div class="wkconn a fade" style="--i:4;left:946px"><svg width="16" height="26" viewBox="0 0 16 26"><path d="M8 3v20M3 8l5-5 5 5M3 18l5 5 5-5" fill="none" stroke="#B9461F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>작업 꺼내기 · 결과 저장</div>
+    <div class="worker a" style="--i:4">
+      <div class="wkhd"><b>워커</b><span class="tag">핵심 · 오케스트레이터(상태 머신)</span><span class="d">Python 워커가 데이터베이스 대기열에서 녹음을 1건씩 꺼내<br>1 → 5 순서로 처리하고, 단계마다 결과와 상태를 기록합니다</span></div>
+      <div class="stgs" style="--step:150ms">
+        <div class="stg a pop" style="--i:6"><h5><i>1</i>음성인식</h5><div class="tech">faster-whisper · large-v3</div>
+          <ul><li>내장 VAD로 무음·잡음 구간 제거</li><li>구간별 전사 + 시각 + 신뢰도 저장</li><li>어댑터로 감싸 Qwen3-ASR 등과 교체·비교</li></ul>
+          <div class="out">→ 원문 전사 (수정 불가)</div></div>
+        <div class="stg a pop" style="--i:7"><h5><i>2</i>가리기</h5><div class="tech">정규식 + 수급자 명단 매칭</div>
+          <ul><li>이름·연락처·인정번호 탐지</li><li>[수급자1] 같은 가명으로 치환</li><li>대응표는 DB에만, LLM에는 가명본만 전달</li></ul>
+          <div class="out">→ 가명 처리된 전사</div></div>
+        <div class="stg a pop" style="--i:8"><h5><i>3</i>사실 추출</h5><div class="tech">LLM 구조화 출력 + Pydantic</div>
+          <ul><li>로컬 Qwen3-8B 등 후보에 JSON 스키마 강제</li><li>사실 1건 = 칸·문장·부정·<br>인용·근거·확실성</li><li>형식 오류는 오류 내용을 붙여 재요청</li></ul>
+          <div class="out">→ 사실 목록 (JSON)</div></div>
+        <div class="stg v a pop" style="--i:9"><h5><i>4</i>검증</h5><div class="tech">코드 규칙 C1~C5 + LLM C6</div>
+          <ul><li>C1~C3 인용·형식·숫자·부정어를 코드로 검사</li><li>C4 빠진 필수 칸 → 되묻기 질문</li><li>C5 애매한 구간 → ‘확인 필요’, C6만 LLM</li></ul>
+          <div class="out">→ 근거 있음 · 확인 필요 · 삭제</div></div>
+        <div class="stg a pop" style="--i:10"><h5><i>5</i>초안 작성</h5><div class="tech">필드 매핑 코드 + Jinja2 템플릿</div>
+          <ul><li>검증된 사실만 기록지 칸에 배치</li><li>문장마다 근거 시각(0:06) 연결</li><li>말하지 않은 내용은 ‘AI 제안’으로 분리</li></ul>
+          <div class="out">→ 기록지 초안 (승인 대기)</div></div>
+      </div>
+      <div class="wgates"><div class="g1 a wide" style="--i:12">관문① 동기: 애매한 구간을 화면에서 확인</div><div class="g2 a pop" style="--i:13">재시도 최대 2회</div><div class="g3 a wide" style="--i:14">관문② 비동기: 빠진 항목 질문 → 답이 오면 부분 재처리</div></div>
+    </div>
+    <div class="sstate a" style="--i:16"><em>상태</em>업로드 → 전사 → 전사 확인 → 추출 → 검증 → 검토 대기 → 승인 (실패 시 FAILED)</div>
+    <div class="sysnote a fade" style="--i:17">음성인식 엔진과 LLM은 미확정이며 교체 가능하게 설계합니다. 숫자(재시도 등)는 시작값입니다.</div>
+    <aside class="notes">시스템 구조입니다. 화면과 서버, 데이터베이스는 위에 한 줄로 정리했고, 핵심은 아래 워커입니다. 워커는 데이터베이스 대기열에서 녹음을 한 건씩 꺼내 다섯 단계를 순서대로 돌립니다. 먼저 faster-whisper로 무음을 걸러 내며 구간별로 받아쓰고, 이름·연락처 같은 개인정보는 가명으로 바꾼 뒤에만 LLM에 넘깁니다. LLM은 정해진 JSON 스키마로 사실만 뽑고, 검증 단계에서 코드 규칙으로 인용·형식·숫자·부정어를 먼저 확인합니다. 빠진 칸은 되묻고, 애매한 구간은 확인 필요로 표시하며, LLM 판정은 마지막 보조로만 씁니다. 통과한 사실만 기록지 칸에 배치해 초안을 만들고, 승인은 서버가 확인 필요 0건일 때만 허용합니다.</aside>
   </section>
 
   <!-- 20 VERIFY -->
@@ -1003,7 +1025,6 @@ lineChart($('#chB'),{max:16,ticks:[0,4,8,12,16],dec:2,act:[1.4,1.5,1.8,2.2,2.6,3
   const w=(d,i,o)=>el('path',{d,fill:'none',stroke:o?'#DD7A52':'#141416','stroke-width':o?3.5:2.5,'marker-end':o?'url(#po)':'url(#pa)',pathLength:1,class:'draw',style:`--i:${i};--dur:.45s`},s);
   const lb=(t,x,y,i,extra='')=>div('lb a fade',`left:${x}px;top:${y}px;--i:${i};${extra}`,t,P);
   // 1행 (상자 세로 중심 y=40)
-  w('M-28 40H-4',5);
   nd('h',0,0,'음성 입력','현장에서 녹음·업로드',5);
   w('M172 40H216',6); nd('ai',220,0,'소리 정리','전처리 · VAD',6.5);
   w('M392 40H436',7); nd('ai',440,0,'글로 옮기기','음성인식 · 신뢰도',7.5);
@@ -1021,7 +1042,6 @@ lineChart($('#chB'),{max:16,ticks:[0,4,8,12,16],dec:2,act:[1.4,1.5,1.8,2.2,2.6,3
   nd('ai',220,320,'기록지 초안','양식 칸에 맞춰 작성',14);
   w('M218 360H174',14.5); nd('h',0,320,'확인·승인','사회복지사',15);
   el('path',{d:'M85 402V418',stroke:'#141416','stroke-width':2.5,'stroke-dasharray':'5 5',fill:'none',class:'a fade',style:'--i:16'},s);
-  w('M-4 360H-30',15.5);
   div('store a wide',`--i:16`,'<span><em>기록 저장소</em> 음성 · 원문 · 초안 · 승인본 · 변경 이력</span>',P);
   div('pulse','',null,P);
 })();
