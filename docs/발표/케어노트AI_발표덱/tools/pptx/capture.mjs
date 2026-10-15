@@ -148,10 +148,24 @@ for (let n = 0; n < info.length; n++) {
       const el = document.querySelector(`[data-uid="${uid}"]`);
       el.setAttribute('data-cap', '');
       offs.forEach(o => document.querySelector(`[data-uid="${o}"]`)?.setAttribute('data-cap-off', ''));
-      const b = el.getBoundingClientRect();
-      return { x: b.left, y: b.top, w: b.width, h: b.height };
+      // 요소 자신의 상자만 쓰면 위·옆으로 튀어나온 자식(원형 이름표·제목 탭 등)이 잘린다.
+      // 보이는 자식까지 모두 합친 영역으로 자른다 (별도 레이어로 빠지는 자식은 제외).
+      const off = new Set(offs.map(o => document.querySelector(`[data-uid="${o}"]`)).filter(Boolean));
+      let L = Infinity, T = Infinity, Rr = -Infinity, B = -Infinity, grew = false;
+      const add = (r) => { if (r.width === 0 && r.height === 0) return; L = Math.min(L, r.left); T = Math.min(T, r.top); Rr = Math.max(Rr, r.right); B = Math.max(B, r.bottom); };
+      const own = el.getBoundingClientRect(); add(own);
+      for (const d of el.querySelectorAll('*')) {
+        if ([...off].some(o => o === d || o.contains(d))) continue;
+        if (d.closest('defs, marker')) continue;
+        const cs = getComputedStyle(d);
+        if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+        add(d.getBoundingClientRect());
+      }
+      grew = L < own.left - 1 || T < own.top - 1 || Rr > own.right + 1 || B > own.bottom + 1;
+      return { x: L, y: T, w: Rr - L, h: B - T, grew };
     }, u);
-    if (r.w < 1 && r.h < 1) continue; // 곧은 선은 폭이나 높이가 0 이므로 둘 다 0일 때만 건너뜀
+    if (r.w < 1 && r.h < 1) continue;
+    if (r.grew) console.log(`  slide ${n + 1} unit ${u.uid}: 튀어나온 자식 포함해 영역 확장`); // 곧은 선은 폭이나 높이가 0 이므로 둘 다 0일 때만 건너뜀
     const x0 = Math.max(0, Math.floor(r.x - PAD)), y0 = Math.max(0, Math.floor(r.y - PAD));
     const x1 = Math.min(W, Math.ceil(r.x + r.w + PAD)), y1 = Math.min(H, Math.ceil(r.y + r.h + PAD));
     if (x1 - x0 < 2 || y1 - y0 < 2) continue;
