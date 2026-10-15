@@ -1,0 +1,7 @@
+/* 서브셋 글꼴: 덱에 쓰인 글자만 포함. 원본 글꼴은 SIL Open Font License (fonts/OFL.txt) */
+@font-face{font-family:"Gothic A1";font-style:normal;font-weight:500;font-display:block;src:url("GothicA1-500.woff2") format("woff2")}
+@font-face{font-family:"Gothic A1";font-style:normal;font-weight:600;font-display:block;src:url("GothicA1-600.woff2") format("woff2")}
+@font-face{font-family:"Gothic A1";font-style:normal;font-weight:700;font-display:block;src:url("GothicA1-700.woff2") format("woff2")}
+@font-face{font-family:"Gothic A1";font-style:normal;font-weight:800;font-display:block;src:url("GothicA1-800.woff2") format("woff2")}
+@font-face{font-family:"Gothic A1";font-style:normal;font-weight:900;font-display:block;src:url("GothicA1-900.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:block;src:url("IBMPlexMono-600.woff2") format("woff2")}
