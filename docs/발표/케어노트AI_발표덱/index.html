@@ -85,7 +85,7 @@ body{margin:0;background:var(--coral);color:var(--ink);font-family:var(--font);o
 .draw{stroke-dasharray:1;stroke-dashoffset:1}
 .slide.active .draw{animation:draw var(--dur,.9s) cubic-bezier(.5,0,.3,1) both;animation-delay:calc(var(--base,180ms) + var(--i,0) * var(--step,85ms))}
 @keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
-.illus{mix-blend-mode:multiply;display:block;max-width:100%}
+.illus{display:block;max-width:100%}
 .float{animation:bob 4s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-10px)}}
 .star{position:absolute;width:34px;height:34px}
@@ -264,14 +264,15 @@ body{margin:0;background:var(--coral);color:var(--ink);font-family:var(--font);o
 
 /* ---------- 15 / 22 bubble + roles ---------- */
 .talk{position:absolute;left:150px;top:40px;width:1220px;height:250px}
-.talk .bub{position:absolute;left:70px;top:30px;width:1080px;min-height:200px;background:var(--sky);border-radius:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:30px 120px}
+.talk .bub{position:absolute;z-index:1;left:70px;top:30px;width:1080px;min-height:200px;background:var(--sky);border-radius:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:30px 120px}
 .talk .bub b{font:900 44px/1 var(--font);letter-spacing:-1.2px}
 .talk .bub p{margin:0;font:500 24px/1.55 var(--font);letter-spacing:-.4px}
 .talk .bub small{font:500 18px/1 var(--font);color:var(--muted)}
 .talk .ql,.talk .qr{position:absolute;font:900 110px/1 Georgia,"Times New Roman",serif}
 .talk .ql{left:250px;top:-6px}.talk .qr{right:250px;top:196px}
-.talk .fl{position:absolute;left:0;top:44px;width:210px}
-.talk .fr{position:absolute;right:0;top:44px;width:154px}
+.talk .fl{position:absolute;z-index:3;left:0;top:44px;width:210px}
+.talk .fr{position:absolute;z-index:3;right:0;top:44px;width:154px}
+.talk .ql,.talk .qr{z-index:2}
 .roles{position:absolute;left:150px;top:370px;width:1220px;display:grid;grid-template-columns:1fr 70px 1fr 70px 1fr;align-items:stretch;gap:26px}
 .roles .box h4{font-size:32px}
 .roles .bd{min-height:170px;font:600 22px/1.5 var(--font);letter-spacing:-.6px;padding:14px 12px}
@@ -286,7 +287,7 @@ body{margin:0;background:var(--coral);color:var(--ink);font-family:var(--font);o
 #s-pipe .parr{position:absolute;width:86px}
 #pipe{position:absolute;left:540px;top:42px;width:910px;height:620px;border:5px dashed var(--pink);border-radius:56px}
 #pipe .ttl{position:absolute;left:50%;top:-38px;transform:translateX(-50%);background:#fff;border:3px solid var(--pink);padding:8px 22px;font:500 52px/1 var(--font);letter-spacing:-1px;white-space:nowrap}
-#pipe .in{position:absolute;left:28px;top:112px;width:850px;height:480px}
+#pipe .in{position:absolute;left:40px;top:112px;width:850px;height:480px}
 #pipe .nd{position:absolute;width:170px;height:80px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;font:800 22px/1 var(--font);letter-spacing:-.6px;white-space:nowrap}
 #pipe .nd small{font:500 16px/1 var(--font)}
 #pipe .h{background:var(--ink);color:#fff}
@@ -296,11 +297,11 @@ body{margin:0;background:var(--coral);color:var(--ink);font-family:var(--font);o
 #pipe .dm{position:absolute;width:190px;height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:800 22px/1 var(--font);white-space:nowrap}
 #pipe .dm small{font:500 16px/1 var(--font);color:#444}
 #pipe .dm svg{position:absolute;inset:0;z-index:-1}
-#pipe .store{position:absolute;left:0;top:420px;width:850px;height:50px;border-radius:25px;background:var(--ink);color:#fff;display:grid;place-items:center;font:600 21px/1 var(--font);white-space:nowrap}
+#pipe .store{position:absolute;left:0;top:420px;width:826px;height:50px;border-radius:25px;background:var(--ink);color:#fff;display:grid;place-items:center;font:600 21px/1 var(--font);white-space:nowrap}
 #pipe .store em{font-style:normal;color:var(--pink-strong);font-weight:800}
 #pipe svg.wires{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 #pipe .lb{position:absolute;font:800 17px/1 var(--font);color:var(--brick);white-space:nowrap;background:rgba(255,255,255,.9);padding:2px 4px;border-radius:4px}
-#pipe .lg{position:absolute;right:40px;top:60px;display:flex;gap:24px;font:600 17px/1 var(--font);white-space:nowrap}
+#pipe .lg{position:absolute;right:44px;top:60px;display:flex;gap:24px;font:600 17px/1 var(--font);white-space:nowrap}
 #pipe .lg span{display:flex;gap:8px;align-items:center}
 .pulse{position:absolute;left:0;top:0;width:16px;height:16px;border-radius:50%;background:var(--coral);border:3px solid var(--ink);margin:-11px 0 0 -11px;
   offset-path:path("M0,40 L760,40 L760,360 L0,360");offset-rotate:0deg;opacity:0}
@@ -713,9 +714,9 @@ body{margin:0;background:var(--coral);color:var(--ink);font-family:var(--font);o
       <div class="pp a pop" style="left:280px;top:0;--i:2"><img class="illus" src="images/p_carer.webp" alt="요양보호사"><span>요양보호사</span></div>
       <svg class="parr a l" style="left:440px;top:100px;--i:3" viewBox="0 0 90 30"><use href="#parr"/></svg>
       <div class="pp a pop" style="left:0;top:300px;--i:16"><img class="illus" src="images/p_bld.webp" alt="국민건강보험공단 건물"><span>공단</span></div>
-      <svg class="parr a r" style="left:180px;top:400px;--i:15;transform:scaleX(-1)" viewBox="0 0 90 30"><use href="#parr"/></svg>
+      <svg class="parr a r" style="left:180px;top:400px;--i:15" viewBox="0 0 90 30"><use href="#parr" transform="rotate(180 45 15)"/></svg>
       <div class="pp a pop" style="left:280px;top:300px;--i:14"><img class="illus" src="images/p_sw.webp" alt="사회복지사"><span>사회복지사</span></div>
-      <svg class="parr a r" style="left:440px;top:400px;--i:13;transform:scaleX(-1)" viewBox="0 0 90 30"><use href="#parr"/></svg>
+      <svg class="parr a r" style="left:440px;top:400px;--i:13" viewBox="0 0 90 30"><use href="#parr" transform="rotate(180 45 15)"/></svg>
     </div>
     <div id="pipe" class="a fade" style="--i:3">
       <div class="ttl">케어노트AI</div>
@@ -1002,7 +1003,7 @@ lineChart($('#chB'),{max:16,ticks:[0,4,8,12,16],dec:2,act:[1.4,1.5,1.8,2.2,2.6,3
   const w=(d,i,o)=>el('path',{d,fill:'none',stroke:o?'#DD7A52':'#141416','stroke-width':o?3.5:2.5,'marker-end':o?'url(#po)':'url(#pa)',pathLength:1,class:'draw',style:`--i:${i};--dur:.45s`},s);
   const lb=(t,x,y,i,extra='')=>div('lb a fade',`left:${x}px;top:${y}px;--i:${i};${extra}`,t,P);
   // 1행 (상자 세로 중심 y=40)
-  w('M-40 40H-4',5);
+  w('M-28 40H-4',5);
   nd('h',0,0,'음성 입력','현장에서 녹음·업로드',5);
   w('M172 40H216',6); nd('ai',220,0,'소리 정리','전처리 · VAD',6.5);
   w('M392 40H436',7); nd('ai',440,0,'글로 옮기기','음성인식 · 신뢰도',7.5);
@@ -1020,7 +1021,7 @@ lineChart($('#chB'),{max:16,ticks:[0,4,8,12,16],dec:2,act:[1.4,1.5,1.8,2.2,2.6,3
   nd('ai',220,320,'기록지 초안','양식 칸에 맞춰 작성',14);
   w('M218 360H174',14.5); nd('h',0,320,'확인·승인','사회복지사',15);
   el('path',{d:'M85 402V418',stroke:'#141416','stroke-width':2.5,'stroke-dasharray':'5 5',fill:'none',class:'a fade',style:'--i:16'},s);
-  w('M-4 360H-44',15.5);
+  w('M-4 360H-30',15.5);
   div('store a wide',`--i:16`,'<span><em>기록 저장소</em> 음성 · 원문 · 초안 · 승인본 · 변경 이력</span>',P);
   div('pulse','',null,P);
 })();
