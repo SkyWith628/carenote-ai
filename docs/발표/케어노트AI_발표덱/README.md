@@ -1,6 +1,6 @@
-# 케어노트 AI 발표 덱 (HTML, 23장)
+# 케어노트 AI 발표 덱 (HTML, 25장)
 
-PDF 발표자료(`6조_케어노트AI`, 22장)를 바탕으로 만든 브라우저용 프레젠테이션입니다. PDF 이후 추가·수정한 장(시스템 구조 재구성, 공단 자동 입력 추가)이 있습니다.
+PDF 발표자료(`6조_케어노트AI`, 22장)를 바탕으로 만든 브라우저용 프레젠테이션입니다. PDF 이후 추가·수정한 장(시스템 구조 재구성, 공단 자동 입력·오케스트레이션 흐름도·마무리 장 추가)이 있습니다.
 발표는 **크롬 브라우저**에서 `../케어노트AI_발표덱_standalone.html` 한 파일만 열면 됩니다(인터넷 불필요).
 
 ## 발표 방법
@@ -27,14 +27,14 @@ PDF 발표자료(`6조_케어노트AI`, 22장)를 바탕으로 만든 브라우�
 
 ```
 케어노트AI_발표덱/
-├─ index.html         # 덱 본체 (슬라이드 23장 + 엔진). 폴더 버전은 images/, fonts/ 를 참조
+├─ index.html         # 덱 본체 (슬라이드 25장 + 엔진). 폴더 버전은 images/, fonts/ 를 참조
 ├─ images/            # 일러스트·화면 캡처 (webp). PDF 를 4000px 로 렌더해 잘라낸 고해상도·투명 배경본
 ├─ fonts/             # 덱에 쓰인 글자만 담은 서브셋 글꼴 (Gothic A1 5종 + IBM Plex Mono, 총 ≈ 210 KB, OFL)
 ├─ tools/build.py     # 서브셋 글꼴 생성 + 단일 파일(standalone) 빌드
 ├─ tools/crop_illus.py # (참고) 발표 PDF 렌더(pdftoppm, 4000px)에서 일러스트를 잘라 투명 배경 webp 로 만든 스크립트
 └─ tools/pptx/        # HTML → 애니메이션 PPTX 변환기 (capture.mjs → build.cjs → animate.py)
-../케어노트AI_발표덱_standalone.html   # 이미지·글꼴을 모두 내장한 단일 파일 (≈ 1.4 MB) ← 발표용
-../케어노트AI_발표덱.pptx              # PowerPoint 판 (≈ 12 MB, 애니메이션 포함)
+../케어노트AI_발표덱_standalone.html   # 이미지·글꼴을 모두 내장한 단일 파일 (≈ 1.8 MB) ← 발표용
+../케어노트AI_발표덱.pptx              # PowerPoint 판 (≈ 14 MB, 애니메이션 포함)
 ```
 
 내용을 고치려면 `index.html` 을 수정한 뒤 아래를 실행해 standalone 을 다시 만듭니다.
