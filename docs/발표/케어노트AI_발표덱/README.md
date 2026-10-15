@@ -32,7 +32,7 @@ PDF 발표자료(`6조_케어노트AI`, 22장)와 **내용이 1:1로 같은** �
 ├─ fonts/             # 덱에 쓰인 글자만 담은 서브셋 글꼴 (Gothic A1 5종 + IBM Plex Mono, 총 ≈ 210 KB, OFL)
 ├─ tools/build.py     # 서브셋 글꼴 생성 + 단일 파일(standalone) 빌드
 └─ tools/crop_illus.py # (참고) 발표 PDF 렌더(pdftoppm, 4000px)에서 일러스트를 잘라 투명 배경 webp 로 만든 스크립트
-../케어노트AI_발표덱_standalone.html   # 이미지·글꼴을 모두 내장한 단일 파일 (≈ 0.9 MB) ← 발표용
+../케어노트AI_발표덱_standalone.html   # 이미지·글꼴을 모두 내장한 단일 파일 (≈ 1.4 MB) ← 발표용
 ```
 
 내용을 고치려면 `index.html` 을 수정한 뒤 아래를 실행해 standalone 을 다시 만듭니다.
