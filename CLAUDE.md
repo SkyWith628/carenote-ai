@@ -16,11 +16,12 @@ mode: work
 | 웹 | Next.js + TS (PWA, 모바일 우선) | 현장 사용자는 폰 |
 | 평가 | pytest + 자체 Eval Runner | 모든 혁신을 수치로 증명 |
 
-## 명령어 (스캐폴딩 후 확정)
+## 명령어
 ```bash
 uv run pytest        # 테스트
 uv run ruff check .  # 린트
-uv run pyright       # 타입 검사
+uv run pyright       # 타입 검사 (strict)
+uv run uvicorn carenote.main:app --reload   # 개발 서버, GET /health
 ```
 
 ## 구조 (코드에서 안 보이는 것만)
@@ -39,5 +40,5 @@ uv run pyright       # 타입 검사
 - 대회 공고 미공개: 제출 형태·배점 확정 시 blueprint 5·9장 조정
 
 ## 현재 단계
-- 지금: 설계 (blueprint v1.1 (1인 기준, /court 반영))
-- 다음: ① 스캐폴딩 ② 골든셋 스키마 + 20건 ③ Eval Runner 뼈대 (2주차에 E2E 데모 v0)
+- 지금: 1주차. 스캐폴딩 완료 (uv + FastAPI `/health`, pytest·ruff·pyright 통과). 설계는 blueprint v1.1
+- 다음: ① 골든셋 스키마 + 합성 20건 ② Eval Runner 뼈대 (2주차에 E2E 데모 v0)

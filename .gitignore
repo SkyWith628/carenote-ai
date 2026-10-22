@@ -10,3 +10,5 @@ node_modules/
 .venv/
 .next/
 dist/
+.ruff_cache/
+.pytest_cache/
