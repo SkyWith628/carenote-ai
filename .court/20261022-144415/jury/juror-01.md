@@ -1,0 +1,4 @@
+VOTE: GUILTY
+REASON: The plan states a "최소 수상 라인" and a fixed 8-week schedule as if they were established, yet the record holds no scoring criteria, no team size, and no measured numbers, so the plan rests on hope rather than proof and should be re-based before it proceeds as written.
+DECIDING FACT: The blueprint labels the 4th-week ablation table "최소 수상 라인" while the case file says the announcement (criteria, format, scoring) is unpublished and the defense itself concedes that team size and "수상 가능" cannot be confirmed.
+WOULD FLIP IF: The record showed the announced scoring criteria and a confirmed team size, with the week-4 scope (Rule Engine, Clarifier, state machine, Verifier, Re-listener) shown to fit them, or the plan were rewritten to drop the "최소 수상 라인" claim and make scope conditional on those facts.

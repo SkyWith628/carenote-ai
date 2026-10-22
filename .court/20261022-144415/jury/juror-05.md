@@ -1,0 +1,4 @@
+VOTE: NOT GUILTY
+REASON: As a parent weighing time, money and safety, I see eight weeks of effort with no real patient data, no payments and a plan that downgrades itself to "A deep, B/C partial" when it slips, so the downside is bounded and the plan is worth starting.
+DECIDING FACT: Section 8 says that if B and C slip the plan drops to "설계 + 부분 시연" and goes deeper on A, and the Non-goals and section 7 use only synthetic data, so the worst case is lost time, not harm to anyone.
+WOULD FLIP IF: The record showed the team is one person or has no capacity for the 4-week gate (Rule Engine, Clarifier, state machine, Verifier and Re-listener), or that the announced criteria weight a polished live demo over the ablation numbers, since then the schedule would waste the family's time on the wrong things.

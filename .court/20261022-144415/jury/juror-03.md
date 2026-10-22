@@ -1,0 +1,4 @@
+VOTE: GUILTY
+REASON: Plans that stack three research-grade innovations, six agents and a UI into 8 weeks with an unknown team slip far more often than they land, and the headline claim of 0% unsupported values rests on only 60 self-made synthetic cases, where even zero errors only bounds the true rate at about 5% (rule of three).
+DECIDING FACT: The record gives no team size (open decision 5 is deferred until after the announcement), yet the schedule fixes A, B and C plus a 60-case golden set and a 5-row ablation table into 8 weeks, and the "minimum winning line" is set without any announced criteria.
+WOULD FLIP IF: The record showed a team of 3 or more with a named owner for each of A, B and C, or an announced scoring rubric that rewards the ablation-backed core (A plus a live demo) so that dropping B and C still counts as a win.

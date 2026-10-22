@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+node_modules/
+*.pt
+*.pth
+*.safetensors
+.DS_Store
+.venv/
+.next/
+dist/
