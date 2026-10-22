@@ -40,5 +40,5 @@ uv run uvicorn carenote.main:app --reload   # 개발 서버, GET /health
 - 대회 공고 미공개: 제출 형태·배점 확정 시 blueprint 5·9장 조정
 
 ## 현재 단계
-- 지금: 1주차. 스캐폴딩 완료 (uv + FastAPI `/health`, pytest·ruff·pyright 통과). 설계는 blueprint v1.1
-- 다음: ① 골든셋 스키마 + 합성 20건 ② Eval Runner 뼈대 (2주차에 E2E 데모 v0)
+- 지금: 1주차. 스캐폴딩 완료, 골든셋 스키마 확정 (시드 4건, `docs/golden-schema.md`)
+- 다음: ① 골든셋 20건으로 확장 (dialect·stt_error·risk_combo 추가) ② Eval Runner 뼈대 (2주차에 E2E 데모 v0)
