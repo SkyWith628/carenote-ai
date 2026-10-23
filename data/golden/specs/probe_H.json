@@ -83,7 +83,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "gray_fields": []
     },
     {
       "spec_id": "H2",
@@ -165,7 +166,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "gray_fields": []
     },
     {
       "spec_id": "H3",
@@ -248,7 +250,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "gray_fields": []
     },
     {
       "spec_id": "H4",
@@ -327,7 +330,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "gray_fields": []
     },
     {
       "spec_id": "H5",
@@ -406,7 +410,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "gray_fields": []
     },
     {
       "spec_id": "H6",
@@ -489,7 +494,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "gray_fields": []
     }
   ]
 }

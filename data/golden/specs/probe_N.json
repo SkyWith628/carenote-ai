@@ -1,0 +1,346 @@
+{
+  "version": 1,
+  "probe": "N",
+  "specs": [
+    {
+      "spec_id": "N1",
+      "probe": "N",
+      "split": "dev",
+      "title": "오늘은 안 넘어졌지만 사흘 전 낙상 보고",
+      "scene": "'오늘은 넘어지진 않으셨어요'라고 말한 뒤 이어서 '근데 사흘 전 저녁에 화장실 앞에서 넘어지셨대요'라고 전해 듣은 이야기를 한다. 나머지는 정상적으로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        280
+      ],
+      "must_include": [
+        "오늘은 안 넘어지심",
+        "사흘 전 저녁 화장실 앞에서 넘어지셨다는 전언",
+        "혈압 130에 84",
+        "맥박 80",
+        "방문 시각 오후 2시",
+        "점심 절반",
+        "약 복용"
+      ],
+      "must_not": [
+        "낙상 부위·상처 이야기"
+      ],
+      "traps": "'넘어지진 않으셨어요'를 보고 없음으로 기록한다.",
+      "hypothesis": "Flagger의 risk 판정 대상이므로 틀리면 위험 신호를 놓치는 사고. 양 변형 모두 갈릴 수 있다.",
+      "policy": "정책 #7(최근 7일 보고된 낙상은 있음)",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "130/84",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "있음",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "N2",
+      "probe": "N",
+      "split": "test",
+      "title": "작년 낙상 이력은 현재 낙상이 아님",
+      "scene": "'작년에 한 번 넘어지셔서 고관절 수술하셨어요'라고 이력을 말하고 '요즘은 안 넘어지세요'라고 덧붙인다. 나머지는 정상적으로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        280
+      ],
+      "must_include": [
+        "작년 낙상과 고관절 수술",
+        "요즘은 안 넘어지심",
+        "혈압 118에 74",
+        "맥박 64",
+        "방문 시각 오전 9시",
+        "점심 절반",
+        "약 복용"
+      ],
+      "must_not": [
+        "최근 낙상 암시"
+      ],
+      "traps": "'넘어지셔서'를 보고 낙상 있음(risk)으로 기록한다. 오경보 유도.",
+      "hypothesis": "시점 구분. 오래된 이야기를 위험으로 올리면 경보 피로의 원인이 된다.",
+      "policy": "정책 #7(7일보다 오래된 이야기는 제외)",
+      "label_risk": "medium",
+      "gray_fields": [
+        "special_notes"
+      ],
+      "gold": {
+        "visit_start": {
+          "value": "09:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "118/74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "64",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "N3",
+      "probe": "N",
+      "split": "test",
+      "title": "미래 계획과 오늘의 미측정이 섞임",
+      "scene": "'오늘은 혈압을 못 쟀어요, 내일 병원 가시면 재실 거예요'라고 말하고 '약은 다음 주에 바꾸신대요'라고 계획을 말한다. 오늘 아침 약을 드셨는지는 분명히 말한다. 맥박과 낙상은 언급하지 않는다.",
+      "style": {
+        "화자": "50대 남성",
+        "지역": "충청",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        280
+      ],
+      "must_include": [
+        "오늘 혈압 못 쟀음(내일 병원)",
+        "다음 주에 약 바꿈(계획)",
+        "오늘 아침 약은 드셨음",
+        "방문 시각 오후 2시",
+        "점심 절반"
+      ],
+      "must_not": [
+        "맥박 언급",
+        "낙상 언급"
+      ],
+      "traps": "'내일 재실 거예요'를 오늘 측정으로 읽거나 '약 바꾸신대요'를 미복용으로 읽는다.",
+      "hypothesis": "미래·계획 문장을 사실로 읽는지.",
+      "policy": "정책 #1·#2",
+      "label_risk": "medium",
+      "gray_fields": [
+        "special_notes"
+      ],
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "pulse": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "N4",
+      "probe": "N",
+      "split": "test",
+      "title": "가정·조언 문맥에 위험 키워드가 들어 있음",
+      "scene": "'혹시 넘어지시면 바로 연락 달라고 말씀드렸어요', '약 안 드시면 큰일 난다고 설명드렸어요' 같은 조언 문장을 말한다. 실제 상태는 모두 정상이다: 넘어진 적 없고 약 잘 드심.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        180,
+        300
+      ],
+      "must_include": [
+        "넘어지시면 연락 달라는 조언",
+        "약 안 드시면 큰일이라는 설명",
+        "아직 넘어지신 적은 없음",
+        "약은 챙겨 드심",
+        "혈압 122에 80",
+        "맥박 66",
+        "방문 시각 오후 4시",
+        "점심 전량"
+      ],
+      "must_not": [
+        "실제로 낙상·미복용이라는 암시"
+      ],
+      "traps": "조언 문장의 '넘어지시면', '안 드시면'에 반응해 낙상 있음 또는 미복용(risk)으로 기록한다.",
+      "hypothesis": "키워드 매칭형 오류. 오경보를 만든다.",
+      "policy": "정책 #1(가정은 사실이 아님)",
+      "label_risk": "low",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "16:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "66",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    }
+  ]
+}

@@ -53,6 +53,16 @@ def test_spec_metadata_is_valid(spec: dict[str, Any]) -> None:
     low, high = cast(list[int], spec["length_chars"])
     assert 0 < low < high
     assert spec["traps"] and spec["hypothesis"] and spec["policy"]
+    assert set(spec["gray_fields"]) <= {k.value for k in FieldKey}
+
+
+def test_each_probe_has_exactly_one_dev_spec_so_far() -> None:
+    """프로브당 dev는 1건이다 (설계 6장: 신규 40건 중 dev 10건)."""
+    dev_per_probe: dict[str, int] = {}
+    for spec in _specs():
+        if spec["split"] == "dev":
+            dev_per_probe[spec["probe"]] = dev_per_probe.get(spec["probe"], 0) + 1
+    assert dev_per_probe and all(n == 1 for n in dev_per_probe.values()), dev_per_probe
 
 
 def test_missing_risk_fields_in_specs_need_confirm() -> None:

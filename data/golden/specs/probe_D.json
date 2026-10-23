@@ -1,0 +1,433 @@
+{
+  "version": 1,
+  "probe": "D",
+  "specs": [
+    {
+      "spec_id": "D1",
+      "probe": "D",
+      "split": "dev",
+      "title": "약 용량·개수 숫자가 섞임",
+      "scene": "방문 시각을 말한 뒤 복약 이야기를 한다. 약 이름과 용량(혈압약 5밀리, 당뇨약 500), 개수(하루 두 알)를 숫자로 말한다. 그 뒤에 실제 혈압과 맥박을 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "방문 시각 아홉 시 반",
+        "혈압약 5밀리 한 알, 당뇨약 500 한 알이라는 설명",
+        "오늘 혈압 128에 80",
+        "맥박 74",
+        "점심 전량",
+        "약 아침에 드심",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "약 용량을 혈압 또는 맥박으로 오인할 만한 암시"
+      ],
+      "traps": "'5', '500', '2알' 같은 숫자를 맥박이나 혈압으로 가져간다.",
+      "hypothesis": "대부분 정확하지만 Haiku가 맥박에 용량을 넣을 수 있다. 근거 인용(B1)이 어느 문장을 가리키는지 확인.",
+      "policy": "정책 #6(방해 수치는 필드에 넣지 않음)",
+      "label_risk": "low",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "09:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "128/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "D2",
+      "probe": "D",
+      "split": "test",
+      "title": "어제·평소 수치와 오늘 측정이 같이 나옴",
+      "scene": "병원에서 어제 재었다는 혈압(150에 90)과 평소 수치(120에 80 정도)를 먼저 이야기하고, 오늘 방문 중 직접 잰 혈압 132에 84를 말한다. 나머지는 정상적으로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        200,
+        320
+      ],
+      "must_include": [
+        "어제 병원 150에 90",
+        "평소 120에 80 정도",
+        "오늘 제가 재니 132에 84",
+        "맥박 72",
+        "방문 시각 오전 11시",
+        "점심 전량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "어제·평소 수치를 오늘 수치처럼 말하는 표현"
+      ],
+      "traps": "가장 먼저 나온 수치(150/90)나 평소 수치를 기록한다.",
+      "hypothesis": "수치 오류의 대표 케이스. 모델이 맥락(어제, 평소)을 구분하는지가 갈린다.",
+      "policy": "정책 #5·#6",
+      "label_risk": "medium",
+      "gray_fields": [
+        "special_notes"
+      ],
+      "gold": {
+        "visit_start": {
+          "value": "11:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "132/84",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "D3",
+      "probe": "D",
+      "split": "test",
+      "title": "화자 본인·가족의 건강 수치가 잡담으로 섞임",
+      "scene": "방문 중 잡담으로 '저희 남편도 혈압이 150대래요', '저도 요즘 맥박이 빠르대요 90 넘는다고' 같은 화자 본인과 가족의 수치를 말한다. 어르신의 실제 혈압 122에 78, 맥박 70은 따로 분명히 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        220,
+        340
+      ],
+      "must_include": [
+        "남편 혈압 150대",
+        "화자 본인 맥박 90 넘음",
+        "어르신 혈압 122에 78",
+        "어르신 맥박 70",
+        "방문 시각 오후 1시",
+        "점심 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "어르신의 수치와 헷갈리게 하는 지시어 생략('이분도' 등)"
+      ],
+      "traps": "화자 본인·가족의 수치(150대, 90 넘음)를 어르신 필드에 기록한다.",
+      "hypothesis": "사람 구분이 어려워지는 지점. B0·B1 모두 일부 틀릴 수 있다.",
+      "policy": "정책 #6(제3자 수치 제외)",
+      "label_risk": "low",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "13:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "D4",
+      "probe": "D",
+      "split": "test",
+      "title": "필드가 아닌 측정값(체온·체중·혈당)이 섞임",
+      "scene": "체온 36.5도, 체중 52킬로, 혈당 110을 말하고, 혈압 126에 82와 맥박 70도 말한다. 네 가지 이상의 측정값이 한 호흡에 이어진다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        180,
+        300
+      ],
+      "must_include": [
+        "체온 36.5",
+        "체중 52킬로",
+        "혈당 110",
+        "혈압 126에 82",
+        "맥박 70",
+        "방문 시각 오전 10시 반",
+        "점심 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "측정값을 어떤 필드로 가져가라는 암시"
+      ],
+      "traps": "혈당 110이나 체온 36.5를 맥박·혈압 필드로 가져간다. 특이사항에 측정값을 넣는다.",
+      "hypothesis": "범위 안의 숫자(110, 52)가 Flagger를 통과해 사고가 되는 유형. 특이사항에 넣는 환각 여부도 본다.",
+      "policy": "정책 #6",
+      "label_risk": "low",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "10:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "126/82",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "D5",
+      "probe": "D",
+      "split": "test",
+      "title": "호수·예약 시각·약 시간 같은 숫자가 많음",
+      "scene": "'502호'에 가서 '열 시'에 도착했다고 말하고, 병원 예약이 '오후 3시'라는 것, 어르신이 약을 '아침 8시'에 드신다는 것을 말한다. 혈압 128에 76, 맥박 68을 말한다.",
+      "style": {
+        "화자": "30대 남성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "없음"
+      },
+      "length_chars": [
+        160,
+        280
+      ],
+      "must_include": [
+        "502호",
+        "도착 열 시",
+        "병원 예약 오후 3시",
+        "약은 아침 8시에 드심(오늘 드셨음)",
+        "혈압 128에 76",
+        "맥박 68",
+        "점심 전량",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "방문 시각을 헷갈리게 하는 정정"
+      ],
+      "traps": "방문 시각을 병원 예약(15:00)이나 약 시각(08:00)으로 기록한다. 호수를 수치로 오인한다.",
+      "hypothesis": "방문 시각 필드의 방해 시간 처리.",
+      "policy": "정책 #6",
+      "label_risk": "low",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "128/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "68",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    }
+  ]
+}
