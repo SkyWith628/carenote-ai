@@ -22,3 +22,9 @@
 - 지표 6개(F1, 근거 없는 값, 환각, 수치 오류, 위험 recall, 확인 recall)와 분모 규칙은 `docs/eval-runner.md`가 원본이다.
 - Extractor 경계는 `extract(transcript)`로 고정. 골든셋 정답은 extractor에 전달하지 않는다.
 - 기준선: oracle(만점), null(하한 0)로 평가기 자체를 검증한다. ablation 표의 "단일 LLM" 행은 2주차 Extractor 완성 후 채운다.
+
+## 2026-10-23 — Extractor 설계 (2주차)
+- B0(단일 LLM)와 B1(+근거 강제) 두 변형으로 ablation 첫 두 행을 측정한다. 상세는 `docs/extractor-design.md`.
+- flag는 LLM이 내지 않고 코드(Flagger)가 계산한다. 3주차 Rule Engine이 대체한다.
+- `special_notes`는 v0에서 값 유무로 채점한다. 정확 일치는 불가능하다.
+- 모델은 설정값, 기본 `claude-opus-5-5`로 품질 상한을 먼저 보고 Sonnet·Haiku 행을 추가한다 (사용자 확인 대기).
