@@ -123,8 +123,12 @@ def test_dry_run_counts_cache_hits(
     """캐시에 있는 케이스는 호출 예정에서 빠진다."""
     cases = load_golden(GOLDEN_DIR)
     client = _GoldClient(cases)
-    assert main(_args(tmp_path, "--limit", "5", "--approve-cost", "5"),
-                settings=settings, client_factory=lambda _: cast(ParseClient, client)) == 0  # fmt: skip
+    first_run = main(
+        _args(tmp_path, "--limit", "5", "--approve-cost", "5"),
+        settings=settings,
+        client_factory=lambda _: cast(ParseClient, client),
+    )
+    assert first_run == 0
     capsys.readouterr()
     main(
         _args(tmp_path, "--dry-run"),
