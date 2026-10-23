@@ -81,7 +81,29 @@ def test_missing_risk_field_must_need_confirm() -> None:
 
 def test_duplicate_ids_are_rejected(tmp_path: Path) -> None:
     """같은 id가 두 번 나오면 로더가 거부한다."""
-    line = (GOLDEN_DIR / "seed.jsonl").read_text(encoding="utf-8").splitlines()[0]
+    line = (GOLDEN_DIR / "v1.jsonl").read_text(encoding="utf-8").splitlines()[0]
     (tmp_path / "dup.jsonl").write_text(line + "\n" + line + "\n", encoding="utf-8")
     with pytest.raises(ValueError, match="중복된 케이스 id"):
         load_golden(tmp_path)
+
+
+def test_golden_set_has_twenty_cases_covering_all_categories() -> None:
+    """20건이고 모든 유형이 최소 2건씩이다 (injection 제외 유형 포함)."""
+    cases = load_golden(GOLDEN_DIR)
+    assert len(cases) == 20
+    counts = {cat: sum(c.category is cat for c in cases) for cat in Category}
+    assert all(n >= 2 for n in counts.values()), counts
+
+
+def test_stt_error_cases_keep_reference_transcript() -> None:
+    """stt_error 케이스는 실제 발화(reference)와 오인식 transcript가 다르다."""
+    cases = [c for c in load_golden(GOLDEN_DIR) if c.category is Category.STT_ERROR]
+    assert cases
+    assert all(c.reference_transcript != c.transcript for c in cases)
+
+
+def test_every_risk_field_appears_as_risk_or_confirm_somewhere() -> None:
+    """위험·확인 필요 정답이 골든셋에 충분히 있어 recall을 잴 수 있다."""
+    flags = [f.flag for c in load_golden(GOLDEN_DIR) for f in c.fields]
+    assert flags.count(Flag.RISK) >= 8
+    assert flags.count(Flag.NEEDS_CONFIRM) >= 12
