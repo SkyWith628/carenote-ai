@@ -28,3 +28,9 @@
 - flag는 LLM이 내지 않고 코드(Flagger)가 계산한다. 3주차 Rule Engine이 대체한다.
 - `special_notes`는 v0에서 값 유무로 채점한다. 정확 일치는 불가능하다.
 - 모델은 설정값, 기본 `claude-sonnet-5-5` (사용자 결정). Opus 5.5(상한)·Haiku 5.5(하한)는 같은 골든셋으로 비교 행을 추가한다.
+
+## 2026-10-23 — Flagger (임시 규칙)
+- flag는 코드가 계산: 위험 필드 누락·후보 2개 이상·불가능한 수치 → 확인 필요, 미복용·중복 복용 의심·낙상 있음 → risk.
+- 수치 범위(수축기 70~260, 이완기 30~160, 맥박 30~220)는 임상 기준이 아니라 STT 오인식 탐지용이다. 고혈압 risk 임계값은 Rule Engine에서 확정한다.
+- `FlaggingExtractor`는 빠진 키를 missing으로 채워 위험 필드가 조용히 ok가 되는 것을 막는다.
+- 정답 값 기준 상한: 위험 recall 60%, 확인 recall 85%. 나머지는 Rule Engine·Sentinel·Verifier의 몫이다 (`docs/extractor-design.md` 11장).

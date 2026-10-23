@@ -113,9 +113,22 @@ class LLMExtraction(BaseModel):
 
 ## 9. 진행 상태 (2026-10-23)
 - 8장 1·2단계 구현 완료: `src/carenote/extraction/` (schema, prompts, llm_extractor). 가짜 클라이언트 테스트 통과, 실제 API 호출은 아직 없음.
-- 3단계(Flagger)부터 남음. 구현 중 달라진 점: `PredictedField`에 `candidates` 추가, 러너 보고서에 `usage` 추가.
+- 3단계 Flagger 구현 완료: `src/carenote/extraction/flagger.py` (`flag_field`, `FlaggingExtractor`). 4단계(실측)부터 남음. 구현 중 달라진 점: `PredictedField`에 `candidates` 추가, 러너 보고서에 `usage` 추가.
 
 ## 10. 열린 질문
 1. (해결) 기본 모델은 Sonnet 5.5
 2. 4단계 실측에 쓸 API 키 준비와 비용 승인 (약 1달러 이내 추정)
 3. Verifier의 "다른 모델 계열"을 Claude 내 다른 티어로 볼지, 타 제공사로 볼지 (4주차에 결정, 지금은 영향 없음)
+
+## 11. Flagger 상한 (추출이 완벽하다고 가정)
+정답 값을 그대로 낸 extractor에 Flagger만 붙여 골든셋 20건을 채점한 결과:
+
+| 지표 | 값 | 못 잡는 것 |
+|---|---|---|
+| 위험 recall | 60% (6/10) | 고혈압 risk 2건(gs-017·018 혈압), 특이사항 risk 2건(gs-017·018) |
+| 확인 recall | 85% (17/20) | 미끄러질 뻔함(gs-013), stt_error 2건 |
+
+- stt_error 2건(gs-014·015)은 이 측정에서 놓친 것으로 나오지만, 정답 값이 reference 기준이라서다. 실제 extractor는 오인식 값(13/80, 40/90)을 내고 그 값은 범위 규칙에 걸린다(테스트로 확인).
+- 즉 **Flagger만으로는 위험 recall 60%가 상한**이다. 나머지 40%는 Rule Engine(임상 임계값)과 Sentinel(통증·상태 변화)이 채울 몫이다. 이 격차가 3주차 이후 작업의 근거 수치다.
+- 놓치는 목록은 `tests/test_flagger.py`의 `KNOWN_GAPS`로 고정했다. 목록이 늘면 규칙 퇴행, 줄면 개선이다.
+- 실패한 호출은 모든 필드가 missing이 되어 위험 필드가 확인 필요로 표시된다(사람에게 넘기는 안전한 방향). 대신 확인 recall이 올라가 보일 수 있으니 보고서의 `failures`를 함께 본다.
