@@ -5,7 +5,7 @@ extractor는 transcript만 받는다. 정답(GoldenCase)을 볼 수 없게 해�
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from pydantic import BaseModel, ConfigDict
 
@@ -22,6 +22,8 @@ class PredictedField(BaseModel):
     source: Source = Source.MISSING
     evidence: tuple[Evidence, ...] = ()
     flag: Flag = Flag.OK
+    # 모호한 값의 해석 후보. value는 None이다.
+    candidates: tuple[str, ...] = ()
 
 
 class Extractor(Protocol):
@@ -29,6 +31,15 @@ class Extractor(Protocol):
 
     def extract(self, transcript: str) -> list[PredictedField]:
         """필드 목록을 반환한다."""
+        ...
+
+
+@runtime_checkable
+class SupportsUsage(Protocol):
+    """호출 수·토큰·지연을 집계하는 extractor. 러너가 보고서에 싣는다."""
+
+    def usage_summary(self) -> dict[str, object]:
+        """사용량 요약."""
         ...
 
 
@@ -54,7 +65,12 @@ class OracleExtractor:
         case = self._by_transcript[transcript]
         return [
             PredictedField(
-                key=f.key, value=f.value, source=f.source, evidence=f.evidence, flag=f.flag
+                key=f.key,
+                value=f.value,
+                source=f.source,
+                evidence=f.evidence,
+                flag=f.flag,
+                candidates=f.candidates,
             )
             for f in case.fields
         ]

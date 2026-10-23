@@ -27,4 +27,4 @@
 - B0(단일 LLM)와 B1(+근거 강제) 두 변형으로 ablation 첫 두 행을 측정한다. 상세는 `docs/extractor-design.md`.
 - flag는 LLM이 내지 않고 코드(Flagger)가 계산한다. 3주차 Rule Engine이 대체한다.
 - `special_notes`는 v0에서 값 유무로 채점한다. 정확 일치는 불가능하다.
-- 모델은 설정값, 기본 `claude-opus-5-5`로 품질 상한을 먼저 보고 Sonnet·Haiku 행을 추가한다 (사용자 확인 대기).
+- 모델은 설정값, 기본 `claude-sonnet-5-5` (사용자 결정). Opus 5.5(상한)·Haiku 5.5(하한)는 같은 골든셋으로 비교 행을 추가한다.

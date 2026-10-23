@@ -7,6 +7,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "anthropic>=2.1.0",
     "fastapi>=0.161.1",
     "pydantic-settings>=2.16.1",
     "uvicorn[standard]>=0.54.0",
@@ -43,3 +44,6 @@ extraPaths = ["src"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 asyncio_mode = "auto"
+
+[tool.ruff.lint.per-file-ignores]
+"src/carenote/extraction/prompts.py" = ["E501"]  # 프롬프트 본문은 줄 길이 제한을 두지 않는다

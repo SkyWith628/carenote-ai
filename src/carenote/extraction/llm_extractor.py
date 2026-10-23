@@ -1,0 +1,250 @@
+"""LLM Extractor (B0: 단일 LLM, B1: + 근거 강제).
+
+transcript만 입력으로 받는다. flag는 여기서 정하지 않는다 (Flagger 담당).
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import time
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Protocol, cast
+
+import anthropic
+from pydantic import BaseModel
+
+from carenote.config import Settings
+from carenote.evaluation.extractor import PredictedField
+from carenote.evaluation.schema import Evidence, FieldKey, Source
+from carenote.extraction.prompts import (
+    PROMPT_VERSION,
+    Variant,
+    build_system_prompt,
+    build_user_message,
+)
+from carenote.extraction.schema import (
+    LLMExtractionB0,
+    LLMExtractionB1,
+    LLMFieldB0,
+    LLMFieldB1,
+)
+
+MAX_TOKENS = 16000
+# 출력 토큰 한도에 걸리거나 거절된 응답은 일부만 담겨 있을 수 있어 쓰지 않는다.
+_UNUSABLE_STOP_REASONS = frozenset({"refusal", "max_tokens"})
+
+
+class UsageLike(Protocol):
+    """응답 사용량 (anthropic.types.Usage의 부분집합)."""
+
+    @property
+    def input_tokens(self) -> int: ...
+    @property
+    def output_tokens(self) -> int: ...
+    @property
+    def cache_read_input_tokens(self) -> int | None: ...
+
+
+class ParseResponse(Protocol):
+    """messages.parse 응답의 부분집합."""
+
+    @property
+    def stop_reason(self) -> str | None: ...
+    @property
+    def parsed_output(self) -> object | None: ...
+    @property
+    def usage(self) -> UsageLike: ...
+
+
+class MessagesAPI(Protocol):
+    """테스트에서 가짜로 바꿀 수 있는 최소 인터페이스."""
+
+    def parse(
+        self,
+        *,
+        model: str,
+        max_tokens: int,
+        system: str,
+        messages: list[dict[str, str]],
+        output_format: type[BaseModel],
+        output_config: dict[str, str],
+    ) -> ParseResponse: ...
+
+
+class ParseClient(Protocol):
+    """anthropic.Anthropic 호환 클라이언트."""
+
+    @property
+    def messages(self) -> MessagesAPI: ...
+
+
+def build_client(settings: Settings) -> ParseClient:
+    """설정의 API 키로 실제 클라이언트를 만든다. 키가 없으면 ValueError."""
+    if settings.anthropic_api_key is None:
+        raise ValueError("ANTHROPIC_API_KEY가 설정되지 않았다 (.env에 넣는다)")
+    client = anthropic.Anthropic(api_key=settings.anthropic_api_key.get_secret_value())
+    return cast(ParseClient, client)
+
+
+@dataclass
+class ExtractorStats:
+    """호출 집계. ablation 표의 비용·지연 열의 원천."""
+
+    calls: int = 0
+    cache_hits: int = 0
+    failures: int = 0
+    demoted_fields: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cache_read_tokens: int = 0
+    latency_s: float = 0.0
+
+
+class LLMExtractor:
+    """transcript에서 필드를 추출한다."""
+
+    def __init__(
+        self,
+        client: ParseClient,
+        *,
+        variant: Variant,
+        model: str,
+        effort: str,
+        cache_dir: Path | None = None,
+    ) -> None:
+        self._client = client
+        self._variant: Variant = variant
+        self._model = model
+        self._effort = effort
+        self._cache_dir = cache_dir
+        self._system = build_system_prompt(variant)
+        self._schema: type[LLMExtractionB0] | type[LLMExtractionB1] = (
+            LLMExtractionB1 if variant == "b1" else LLMExtractionB0
+        )
+        self.stats = ExtractorStats()
+
+    def usage_summary(self) -> dict[str, object]:
+        """보고서용 사용량 요약."""
+        return {
+            "variant": self._variant,
+            "model": self._model,
+            "effort": self._effort,
+            "prompt_version": PROMPT_VERSION,
+            **asdict(self.stats),
+        }
+
+    def extract(self, transcript: str) -> list[PredictedField]:
+        """필드를 추출한다. 호출 실패 시 빈 목록(전부 missing으로 채점됨)을 반환한다."""
+        key = self._cache_key(transcript)
+        extraction = self._read_cache(key)
+        if extraction is not None:
+            self.stats.cache_hits += 1
+        else:
+            extraction = self._call(transcript)
+            if extraction is None:
+                self.stats.failures += 1
+                return []
+            self._write_cache(key, extraction)
+        return self._convert(extraction, transcript)
+
+    # -- API 호출 -------------------------------------------------------------
+
+    def _call(self, transcript: str) -> LLMExtractionB0 | LLMExtractionB1 | None:
+        started = time.perf_counter()
+        try:
+            response = self._client.messages.parse(
+                model=self._model,
+                max_tokens=MAX_TOKENS,
+                system=self._system,
+                messages=[{"role": "user", "content": build_user_message(transcript)}],
+                output_format=self._schema,
+                output_config={"effort": self._effort},
+            )
+        except anthropic.APIError:
+            return None
+        finally:
+            self.stats.latency_s += time.perf_counter() - started
+        self.stats.calls += 1
+        self.stats.input_tokens += response.usage.input_tokens
+        self.stats.output_tokens += response.usage.output_tokens
+        self.stats.cache_read_tokens += response.usage.cache_read_input_tokens or 0
+        if response.stop_reason in _UNUSABLE_STOP_REASONS:
+            return None
+        parsed = response.parsed_output
+        if isinstance(parsed, self._schema):
+            return parsed
+        return None
+
+    # -- 캐시 -----------------------------------------------------------------
+
+    def _cache_key(self, transcript: str) -> str:
+        payload = json.dumps(
+            [self._model, self._effort, self._variant, PROMPT_VERSION, transcript],
+            ensure_ascii=False,
+        )
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    def _read_cache(self, key: str) -> LLMExtractionB0 | LLMExtractionB1 | None:
+        if self._cache_dir is None:
+            return None
+        path = self._cache_dir / f"{key}.json"
+        try:
+            return self._schema.model_validate_json(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+
+    def _write_cache(self, key: str, extraction: LLMExtractionB0 | LLMExtractionB1) -> None:
+        if self._cache_dir is None:
+            return
+        self._cache_dir.mkdir(parents=True, exist_ok=True)
+        (self._cache_dir / f"{key}.json").write_text(
+            extraction.model_dump_json(), encoding="utf-8"
+        )
+
+    # -- 변환과 근거 검증 -------------------------------------------------------
+
+    def _convert(
+        self, extraction: LLMExtractionB0 | LLMExtractionB1, transcript: str
+    ) -> list[PredictedField]:
+        seen: set[FieldKey] = set()
+        result: list[PredictedField] = []
+        for raw in extraction.fields:
+            if raw.key in seen:
+                continue
+            seen.add(raw.key)
+            result.append(self._convert_field(raw, transcript))
+        return result
+
+    def _convert_field(self, raw: LLMFieldB0 | LLMFieldB1, transcript: str) -> PredictedField:
+        missing = PredictedField(key=raw.key)
+        if raw.source == "missing":
+            return missing
+
+        value = (raw.value or "").strip() or None
+        candidates = tuple(c.strip() for c in raw.candidates if c.strip())
+        if len(candidates) >= 2:
+            value = None  # 모호한 값은 임의 선택하지 않는다
+        elif len(candidates) == 1 and value is None:
+            value, candidates = candidates[0], ()
+        else:
+            candidates = ()
+        if value is None and not candidates:
+            return missing
+
+        evidence: tuple[Evidence, ...] = ()
+        if isinstance(raw, LLMFieldB1):
+            quotes = [q for q in raw.evidence if q.strip()]
+            if not quotes or not all(q in transcript for q in quotes):
+                self.stats.demoted_fields += 1
+                return missing  # 근거 강제: 원문에 없는 인용이면 값을 버린다
+            evidence = tuple(Evidence(text=q) for q in quotes)
+
+        return PredictedField(
+            key=raw.key,
+            value=value,
+            source=Source(raw.source),
+            evidence=evidence,
+            candidates=candidates,
+        )

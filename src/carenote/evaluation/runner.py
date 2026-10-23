@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from carenote.evaluation.extractor import Extractor
+from carenote.evaluation.extractor import Extractor, SupportsUsage
 from carenote.evaluation.metrics import Counts, Metrics, Ratio, score_case
 from carenote.evaluation.schema import GoldenCase
 
@@ -16,6 +16,7 @@ class EvalReport:
     case_count: int
     overall: Metrics
     by_category: dict[str, Metrics]
+    usage: dict[str, object] | None = None
 
     def to_dict(self) -> dict[str, object]:
         """JSON 직렬화용 dict."""
@@ -39,6 +40,7 @@ class EvalReport:
             "case_count": self.case_count,
             "overall": metrics(self.overall),
             "by_category": {k: metrics(v) for k, v in self.by_category.items()},
+            "usage": self.usage,
         }
 
 
@@ -55,4 +57,5 @@ def evaluate(extractor: Extractor, cases: list[GoldenCase]) -> EvalReport:
         case_count=len(cases),
         overall=Metrics.from_counts(total),
         by_category={k: Metrics.from_counts(v) for k, v in sorted(per_category.items())},
+        usage=extractor.usage_summary() if isinstance(extractor, SupportsUsage) else None,
     )
