@@ -21,7 +21,7 @@ mode: work
 uv run pytest        # 테스트
 uv run ruff check .  # 린트
 uv run pyright       # 타입 검사 (strict)
-uv run uvicorn carenote.main:app --reload   # 개발 서버, GET /health
+uv run uvicorn carenote.main:app --app-dir src --reload   # 개발 서버, GET /health
 ```
 
 ## 구조 (코드에서 안 보이는 것만)
@@ -37,7 +37,7 @@ uv run uvicorn carenote.main:app --reload   # 개발 서버, GET /health
 ## 함정 / 제약
 - 음성은 STT 전에 마스킹 불가 → 온디바이스 STT 또는 센터 동의 설계 필요
 - Harness2는 2차 보도만 확인(원문 미확인) → 의존 전 repo·논문 확인
-- iCloud 경로의 `.venv`는 `.pth`에 macOS hidden 플래그가 붙어 `ModuleNotFoundError: carenote`가 날 수 있다 → `chflags nohidden .venv/lib/python3.12/site-packages/carenote.pth`
+- iCloud 경로에서는 `.venv`의 editable `.pth`에 hidden 플래그가 붙어 `import carenote`가 실패할 수 있다. pytest·pyright는 `src`를 직접 경로로 잡아 우회하고, 스크립트·uvicorn은 `--app-dir src` 또는 `PYTHONPATH=src`를 쓴다
 - 대회 공고 미공개: 제출 형태·배점 확정 시 blueprint 5·9장 조정
 
 ## 현재 단계
