@@ -37,6 +37,7 @@ uv run uvicorn carenote.main:app --reload   # 개발 서버, GET /health
 ## 함정 / 제약
 - 음성은 STT 전에 마스킹 불가 → 온디바이스 STT 또는 센터 동의 설계 필요
 - Harness2는 2차 보도만 확인(원문 미확인) → 의존 전 repo·논문 확인
+- iCloud 경로의 `.venv`는 `.pth`에 macOS hidden 플래그가 붙어 `ModuleNotFoundError: carenote`가 날 수 있다 → `chflags nohidden .venv/lib/python3.12/site-packages/carenote.pth`
 - 대회 공고 미공개: 제출 형태·배점 확정 시 blueprint 5·9장 조정
 
 ## 현재 단계
