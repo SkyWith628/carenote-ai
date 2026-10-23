@@ -44,5 +44,5 @@ uv run uvicorn carenote.main:app --app-dir src --reload   # 개발 서버, GET /
 ## 현재 단계
 - 지금: 1주차 완료분. 스캐폴딩, 골든셋 v1 20건, Eval Runner 뼈대 (`docs/eval-runner.md`)
 - 지금 2주차: LLM Extractor B0/B1과 Flagger 구현 완료(가짜 클라이언트 테스트만, API 미호출), 설계 `docs/extractor-design.md`
-- 1차 ablation 완료(`docs/ablation.md`): 20건은 포화돼 구성 간 차이가 노이즈. 다음은 골든셋을 어려운 케이스 중심 40~60건으로 확장
+- 1차 ablation 완료(`docs/ablation.md`): 20건은 포화돼 구성 간 차이가 노이즈. 다음: 골든셋 확장(설계 `docs/golden-expansion-design.md`, 열린 결정 5개 확인 필요)
 - 실측 CLI(준비됨: `--dry-run`으로 비용 확인 → `--approve-cost`로 승인 후 실행)(`.env`에 ANTHROPIC_API_KEY 필요, 비용 승인 후) → `POST /extract` → 검토 화면. 원래 목표 — Extractor(LLM, 구조화 출력 + evidence)를 `Extractor` 인터페이스로 구현해 단일 LLM 베이스라인 측정, 검토 화면(원문 보기)
