@@ -2,6 +2,8 @@
 
 지표 정의 (blueprint 7장):
 - 필드 F1: 값이 있는 정답 필드를 정확한 값으로 맞췄는가. 틀린 값은 FP와 FN 양쪽에 센다.
+  단 자유 문장인 special_notes는 값 유무만 본다(둘 다 값이 있으면 일치). 내용의 옳고 그름은
+  채점하지 않는다. 문장 유사도나 LLM 판정은 골든셋 확장 시 검토한다.
 - 근거 없는 값 비율: 값을 낸 필드 중 evidence가 없거나 transcript에 없는 것. 목표 0%.
 - 환각률: 정답에 값이 없는데(missing 또는 모호) 값을 낸 비율.
 - 수치 오류율: 혈압·맥박 값을 냈는데 정답과 다른 비율.
@@ -17,6 +19,8 @@ from carenote.evaluation.extractor import PredictedField
 from carenote.evaluation.schema import ExpectedField, FieldKey, Flag, GoldenCase
 
 NUMERIC_FIELDS: frozenset[FieldKey] = frozenset({FieldKey.BLOOD_PRESSURE, FieldKey.PULSE})
+# 자유 문장이라 정확 일치가 불가능한 필드. 값 유무로만 채점한다.
+PRESENCE_ONLY_FIELDS: frozenset[FieldKey] = frozenset({FieldKey.SPECIAL_NOTES})
 
 
 def _norm(value: str | None) -> str | None:
@@ -74,7 +78,11 @@ def _score_field(gold: ExpectedField, pred: PredictedField | None, transcript: s
     gold_value = _norm(gold.value)
     pred_flag = pred.flag if pred else Flag.OK
 
-    tp = int(gold_value is not None and pred_value == gold_value)
+    if gold.key in PRESENCE_ONLY_FIELDS:
+        matched = pred_value is not None
+    else:
+        matched = pred_value == gold_value
+    tp = int(gold_value is not None and matched)
     fp = int(pred_value is not None and not tp)
     fn = int(gold_value is not None and not tp)
 

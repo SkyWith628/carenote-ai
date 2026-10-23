@@ -123,3 +123,67 @@ def test_format_report_handles_none_metrics() -> None:
     """None 지표도 표로 출력된다."""
     report = evaluate(NullExtractor(), [])
     assert "n/a" in format_report(report)
+
+
+def _notes_case(cases: list[GoldenCase]) -> GoldenCase:
+    """special_notes에 값이 있는 케이스 (gs-005: 무릎 통증 호소)."""
+    return next(c for c in cases if c.field(FieldKey.SPECIAL_NOTES).value is not None)
+
+
+def _oracle_with(
+    case: GoldenCase, key: FieldKey, replacement: PredictedField | None
+) -> list[PredictedField]:
+    """정답 그대로의 예측에서 한 필드만 바꾸거나(None이면 제거) 뺀다."""
+    base = OracleExtractor([case]).extract(case.transcript)
+    kept = [p for p in base if p.key is not key]
+    return kept if replacement is None else [*kept, replacement]
+
+
+def test_special_notes_scored_by_presence_not_wording(cases: list[GoldenCase]) -> None:
+    """특이사항은 표현이 달라도 값이 있으면 TP다 (나머지는 정답이라 FP·FN 0)."""
+    case = _notes_case(cases)
+    gold = case.field(FieldKey.SPECIAL_NOTES)
+    reworded = PredictedField(
+        key=FieldKey.SPECIAL_NOTES,
+        value="전혀 다른 표현의 요약",
+        source=Source.STATED,
+        evidence=gold.evidence,
+    )
+    assert gold.value != reworded.value
+    counts = score_case(case, _oracle_with(case, FieldKey.SPECIAL_NOTES, reworded))
+    assert (counts.fp, counts.fn) == (0, 0)
+    assert counts.tp == len([f for f in case.fields if f.value is not None])
+
+
+def test_special_notes_missing_prediction_is_fn(cases: list[GoldenCase]) -> None:
+    """정답에 특이사항이 있는데 못 내면 FN 1건이다."""
+    case = _notes_case(cases)
+    counts = score_case(case, _oracle_with(case, FieldKey.SPECIAL_NOTES, None))
+    assert (counts.fp, counts.fn) == (0, 1)
+
+
+def test_special_notes_invented_is_fp_and_hallucination(cases: list[GoldenCase]) -> None:
+    """정답에 특이사항이 없는데 지어내면 FP 1건이고 환각이다."""
+    case = next(c for c in cases if c.field(FieldKey.SPECIAL_NOTES).value is None)
+    invented = PredictedField(
+        key=FieldKey.SPECIAL_NOTES,
+        value="지어낸 특이사항",
+        source=Source.STATED,
+        evidence=(Evidence(text=case.transcript[:5]),),
+    )
+    base = score_case(case, OracleExtractor([case]).extract(case.transcript))
+    counts = score_case(case, _oracle_with(case, FieldKey.SPECIAL_NOTES, invented))
+    assert (counts.fp, counts.fn) == (1, 0)
+    assert counts.hallucinated.num == base.hallucinated.num + 1
+
+
+def test_other_fields_still_require_exact_value(cases: list[GoldenCase]) -> None:
+    """특이사항 외 필드는 값이 정확히 같아야 한다 (틀린 값은 FP와 FN 각 1건)."""
+    case = cases[0]
+    gold = case.field(FieldKey.MOOD)
+    assert gold.value == "양호"
+    wrong = PredictedField(
+        key=FieldKey.MOOD, value="저조", source=Source.STATED, evidence=gold.evidence
+    )
+    counts = score_case(case, _oracle_with(case, FieldKey.MOOD, wrong))
+    assert (counts.fp, counts.fn) == (1, 1)
