@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from carenote.config import Settings
 from carenote.evaluation.extractor import PredictedField
 from carenote.evaluation.schema import Evidence, FieldKey, Source
+from carenote.extraction.pricing import CostGuard, cost_usd, price_for
 from carenote.extraction.prompts import (
     PROMPT_VERSION,
     Variant,
@@ -113,21 +114,39 @@ class LLMExtractor:
         model: str,
         effort: str,
         cache_dir: Path | None = None,
+        guard: CostGuard | None = None,
     ) -> None:
         self._client = client
         self._variant: Variant = variant
         self._model = model
         self._effort = effort
         self._cache_dir = cache_dir
+        self._guard = guard
         self._system = build_system_prompt(variant)
         self._schema: type[LLMExtractionB0] | type[LLMExtractionB1] = (
             LLMExtractionB1 if variant == "b1" else LLMExtractionB0
         )
         self.stats = ExtractorStats()
 
+    @property
+    def system_prompt(self) -> str:
+        """이 변형의 시스템 프롬프트."""
+        return self._system
+
+    def is_cached(self, transcript: str) -> bool:
+        """이 transcript의 결과가 캐시에 있는가 (dry-run 추정용)."""
+        return self._read_cache(self._cache_key(transcript)) is not None
+
     def usage_summary(self) -> dict[str, object]:
         """보고서용 사용량 요약."""
+        price = price_for(self._model)
+        cost = (
+            None
+            if price is None
+            else round(cost_usd(price, self.stats.input_tokens, self.stats.output_tokens), 6)
+        )
         return {
+            "estimated_cost_usd": cost,
             "variant": self._variant,
             "model": self._model,
             "effort": self._effort,
@@ -152,6 +171,8 @@ class LLMExtractor:
     # -- API 호출 -------------------------------------------------------------
 
     def _call(self, transcript: str) -> LLMExtractionB0 | LLMExtractionB1 | None:
+        if self._guard is not None:
+            self._guard.check()  # BudgetExceeded는 잡지 않고 실행 전체를 멈춘다
         started = time.perf_counter()
         try:
             response = self._client.messages.parse(
@@ -170,6 +191,8 @@ class LLMExtractor:
         self.stats.input_tokens += response.usage.input_tokens
         self.stats.output_tokens += response.usage.output_tokens
         self.stats.cache_read_tokens += response.usage.cache_read_input_tokens or 0
+        if self._guard is not None:
+            self._guard.add(response.usage.input_tokens, response.usage.output_tokens)
         if response.stop_reason in _UNUSABLE_STOP_REASONS:
             return None
         parsed = response.parsed_output

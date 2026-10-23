@@ -8,6 +8,27 @@ PYTHONPATH=src uv run python -m carenote.evaluation --extractor null     # 하�
 PYTHONPATH=src uv run python -m carenote.evaluation --extractor oracle --out report.json
 ```
 
+## LLM 실측 CLI (비용이 든다)
+```bash
+# 1) 예상 비용만 보기. 네트워크·API 키 불필요
+PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b1 --dry-run
+PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b0 --model claude-haiku-5-5 --dry-run
+
+# 2) 실행. .env에 ANTHROPIC_API_KEY가 있어야 하고, 승인할 최대 금액(USD)을 직접 지정한다
+PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b1 --approve-cost 1.00 --out b1.json
+
+# 처음에는 소수 케이스로
+PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b1 --limit 3 --approve-cost 0.30
+```
+옵션: `--model`(기본 설정값 `claude-sonnet-5-5`), `--effort`(기본 `medium`), `--limit N`, `--cache-dir`, `--out`.
+
+안전장치
+- `--approve-cost`가 없으면 추정만 보여주고 **실행을 거부**한다(종료 코드 2). 키가 없거나 단가표에 없는 모델도 거부한다.
+- 추정 최대 비용이 승인액을 넘으면 거부한다. 실행 중 누적 비용이 승인액에 도달하면 중단한다(종료 코드 3). 한도를 넘는 양은 최대 호출 1회분이다.
+- 끝낸 호출은 `.cache/extractions/`에 저장되므로 승인액을 올려 다시 실행하면 이어서 진행된다. 캐시 적중은 비용이 0이다.
+- 추정은 글자 수 기반이라 오차가 크다(입력은 비교적 맞고 출력은 추론량 때문에 5배 범위). 실제 비용은 보고서의 `usage`에 찍힌다. 단가는 2026-10-06 기준 캐시이므로 실측 전에 공식 가격을 다시 확인한다.
+- LLM 실행 결과에는 항상 Flagger가 붙는다(`FlaggingExtractor`).
+
 ## 경계
 `Extractor.extract(transcript) -> list[PredictedField]`. **transcript만** 받는다(정답 누수 방지). 빠뜨린 키는 missing으로 채점한다. 2주차의 실제 Extractor는 이 인터페이스만 구현하면 된다.
 

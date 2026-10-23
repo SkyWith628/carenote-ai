@@ -113,7 +113,7 @@ class LLMExtraction(BaseModel):
 
 ## 9. 진행 상태 (2026-10-23)
 - 8장 1·2단계 구현 완료: `src/carenote/extraction/` (schema, prompts, llm_extractor). 가짜 클라이언트 테스트 통과, 실제 API 호출은 아직 없음.
-- 3단계 Flagger 구현 완료: `src/carenote/extraction/flagger.py` (`flag_field`, `FlaggingExtractor`). 4단계(실측)부터 남음. 구현 중 달라진 점: `PredictedField`에 `candidates` 추가, 러너 보고서에 `usage` 추가.
+- 3단계 Flagger 구현 완료: `src/carenote/extraction/flagger.py` (`flag_field`, `FlaggingExtractor`). 실측용 CLI(`--extractor llm-b0|llm-b1`, dry-run, 비용 승인 게이트)도 구현 완료. 4단계 실측 실행만 남음(API 키와 비용 승인 필요, `docs/eval-runner.md`). 구현 중 달라진 점: `PredictedField`에 `candidates` 추가, 러너 보고서에 `usage` 추가.
 
 ## 10. 열린 질문
 1. (해결) 기본 모델은 Sonnet 5.5
