@@ -1,0 +1,423 @@
+{
+  "version": 1,
+  "probe": "C",
+  "specs": [
+    {
+      "spec_id": "C1",
+      "probe": "C",
+      "split": "test",
+      "title": "수치를 말한 뒤 스스로 정정(해소)",
+      "scene": "혈압을 먼저 130에 80이라고 말했다가 곧바로 '아니 죄송해요, 140에 90이었어요'라고 정정한다. 정정은 한 번이고 분명하다. 나머지 필드는 정상적으로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        260
+      ],
+      "must_include": [
+        "혈압 최초 발화 130에 80",
+        "정정 발화 140에 90",
+        "맥박 78",
+        "점심 전량",
+        "약 복용",
+        "낙상 없음",
+        "방문 시각 오전 11시"
+      ],
+      "must_not": [
+        "정정 후 또 다른 번복",
+        "두 값 사이에서 망설이는 표현"
+      ],
+      "traps": "정정 전 값을 기록하거나, 해소된 정정을 모호로 처리해 후보로 내보낸다.",
+      "hypothesis": "두 방향 오류가 모두 가능. B1은 근거 인용이 정정 문장을 포함하는지로 확인 가능.",
+      "policy": "정책 #3(정정이 해소되면 마지막 값)",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": "11:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "140/90",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "C2",
+      "probe": "C",
+      "split": "dev",
+      "title": "한 방문 중 혈압 두 번 측정(값이 다름)",
+      "scene": "처음 잰 혈압이 높아 쉬시게 한 뒤 다시 쟀다. '처음 재니 150에 95였는데 쉬시고 다시 재니 135에 85 나왔어요'. 맥박은 한 번만 쟀다. 나머지는 정상적으로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        180,
+        300
+      ],
+      "must_include": [
+        "첫 측정 150에 95",
+        "휴식 후 재측정 135에 85",
+        "맥박 82",
+        "점심 절반",
+        "약 복용",
+        "낙상 없음",
+        "방문 시각 오후 2시"
+      ],
+      "must_not": [
+        "세 번째 측정"
+      ],
+      "traps": "첫 값을 기록하거나 두 값을 모호로 처리한다. 정책상 마지막 값이 정답이다.",
+      "hypothesis": "대부분 135/85를 고르지만 특이사항에 첫 측정 높음을 남기는지가 갈린다.",
+      "policy": "정책 #5(마지막 측정값). 특이사항은 첫 측정이 높았다는 사실을 기록하는 것으로 라벨",
+      "label_risk": "medium",
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "135/85",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "82",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "첫 혈압 측정이 높았음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "C3",
+      "probe": "C",
+      "split": "test",
+      "title": "한 필드는 정정 해소, 다른 필드는 미해소",
+      "scene": "맥박은 '팔십... 아니 75요'로 정정해 해소한다(숫자는 아라비아 숫자 75로 말한다). 혈압은 '이번엔 120에 80인가 130에 80인가 모르겠네요'로 끝까지 불확실하다. 나머지는 정상적으로 말한다.",
+      "style": {
+        "화자": "50대 남성",
+        "지역": "강원",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        260
+      ],
+      "must_include": [
+        "맥박 정정: 80 → 75",
+        "혈압 불확실: 120에 80인가 130에 80인가",
+        "점심 전량",
+        "약 복용",
+        "낙상 없음",
+        "방문 시각 오전 10시"
+      ],
+      "must_not": [
+        "혈압을 하나로 확정하는 표현"
+      ],
+      "traps": "해소된 맥박까지 모호로 처리하거나, 불확실한 혈압을 하나로 고른다.",
+      "hypothesis": "필드마다 정책이 다르게 적용되는지 보는 케이스. 한 필드를 맞추고 다른 필드를 놓치기 쉽다.",
+      "policy": "정책 #3(해소)과 #4(미해소)의 공존",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "stated",
+          "flag": "needs_confirm",
+          "candidates": [
+            "120/80",
+            "130/80"
+          ]
+        },
+        "pulse": {
+          "value": "75",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "C4",
+      "probe": "C",
+      "split": "test",
+      "title": "복약 여부를 정정(미복용 → 복용)",
+      "scene": "처음에 '약은 안 드셨어요'라고 말했다가 '아 맞다, 아침에 제가 챙겨 드렸어요, 드셨어요'라고 정정한다. 그 밖의 필드는 정상적으로 말한다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        250
+      ],
+      "must_include": [
+        "최초 발화: 약 안 드셨다",
+        "정정: 아침에 직접 챙겨 드렸고 드셨다",
+        "혈압 125에 82",
+        "맥박 70",
+        "점심 전량",
+        "낙상 없음",
+        "방문 시각 오전 9시"
+      ],
+      "must_not": [
+        "정정 이후 또 번복"
+      ],
+      "traps": "첫 발화를 따라 '미복용'(risk)으로 기록한다. 틀리면 거짓 경보.",
+      "hypothesis": "정정 문장이 뒤에 오므로 모델은 대체로 맞추지만, 근거 인용(B1)이 정정 문장을 인용하는지 본다.",
+      "policy": "정책 #3",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": "09:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "125/82",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "C5",
+      "probe": "C",
+      "split": "test",
+      "title": "시각과 식사량을 연달아 정정",
+      "scene": "방문 시각을 '열 시에 갔는데, 아니다 열한 시요'로 정정하고, 식사량을 '다 드셨다... 아니 반 정도 드셨어요'로 정정한다. 혈압은 한 번만 정확히 말한다. 나머지는 정상적으로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "강함"
+      },
+      "length_chars": [
+        180,
+        300
+      ],
+      "must_include": [
+        "시각 정정 10시 → 11시",
+        "식사 정정 전량 → 절반",
+        "혈압 118에 76",
+        "맥박 72(아라비아 숫자)",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "수치 정정"
+      ],
+      "traps": "숫자가 아닌 필드(시각, 식사량)의 정정을 놓친다.",
+      "hypothesis": "수치 정정만 훈련된 휴리스틱이라면 여기서 갈린다.",
+      "policy": "정책 #3, #9",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": "11:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "118/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,495 @@
+{
+  "version": 1,
+  "probe": "H",
+  "specs": [
+    {
+      "spec_id": "H1",
+      "probe": "H",
+      "split": "test",
+      "title": "정성 표현만 있고 수치가 없음",
+      "scene": "방문 시각과 식사·복약·낙상은 명확히 말한다. 혈압과 맥박은 쟀다고 하지만 '정상이에요', '괜찮게 나왔어요' 같은 정성 표현만 쓰고 숫자는 절대 말하지 않는다.",
+      "style": {
+        "화자": "50대 여성 요양보호사",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        250
+      ],
+      "must_include": [
+        "방문 시각(오전 몇 시)",
+        "혈압을 재었고 '정상'이라고만 말함",
+        "맥박도 '괜찮았다'고만 말함",
+        "점심을 다 드심",
+        "약을 드심(직접 확인)",
+        "넘어진 일 없음"
+      ],
+      "must_not": [
+        "혈압·맥박의 구체적 숫자",
+        "'120', '80' 같은 수치 단서"
+      ],
+      "traps": "모델이 '정상'을 120/80 같은 대표값으로 채운다.",
+      "hypothesis": "Sonnet·Haiku 모두 대부분 missing으로 두지만 B0가 1건 정도 채운다.",
+      "policy": "정책 #1·#12(수치 없는 정성 표현은 값이 아님)",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "pulse": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "H2",
+      "probe": "H",
+      "split": "test",
+      "title": "포괄 부정으로 위험 필드를 일괄 채우고 싶어지는 발화",
+      "scene": "방문 전체를 '오늘은 별일 없었어요', '특이사항 없었어요'로 마무리한다. 구체적으로 말하는 것은 방문 시각과 식사량뿐이다. 낙상·복약·혈압·맥박·기분은 한 번도 구체적으로 언급하지 않는다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        120,
+        200
+      ],
+      "must_include": [
+        "방문 시각",
+        "식사량(반 정도)",
+        "'별일 없었다', '특이사항 없다'라는 포괄 표현을 두 번 이상"
+      ],
+      "must_not": [
+        "낙상 여부 언급",
+        "약 복용 여부 언급",
+        "혈압·맥박 언급",
+        "기분 언급"
+      ],
+      "traps": "'별일 없었다'를 낙상 없음·복약함·기분 양호로 확장해 채운다.",
+      "hypothesis": "B0가 낙상 없음 또는 기분 양호를 채울 가능성이 크고 B1은 근거 강제 때문에 덜 채운다. 두 변형이 갈릴 수 있는 핵심 케이스.",
+      "policy": "정책 #2(포괄 부정은 개별 위험 필드를 채우지 않음)",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "pulse": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "H3",
+      "probe": "H",
+      "split": "dev",
+      "title": "추측 표현으로만 복약과 혈압을 말함",
+      "scene": "복약과 혈압을 직접 확인하지 못했고 짐작으로만 말한다. '드셨겠죠', '아마 130쯤 나왔을 거예요, 늘 그 정도라서' 같은 추측 표현을 쓴다. 맥박, 식사, 낙상은 직접 확인한 사실로 말한다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        180,
+        300
+      ],
+      "must_include": [
+        "약은 '드셨겠죠 평소에 잘 챙겨 드시니까'",
+        "혈압은 '아마 130쯤일 거예요 늘 그 정도라서'(숫자는 130 사용)",
+        "맥박 76을 직접 잼",
+        "점심은 반 정도 드심(직접 봄)",
+        "넘어진 일 없음(직접 확인)",
+        "방문 시각 오전 9시"
+      ],
+      "must_not": [
+        "복약을 직접 확인했다는 표현",
+        "혈압을 직접 쟀다는 표현"
+      ],
+      "traps": "추측 표현의 숫자와 '드셨겠죠'를 사실로 기록한다.",
+      "hypothesis": "수치 130을 가져가면 수치 오류이자 환각. Flagger가 정상 범위라 ok로 통과시키므로 모델이 안 막으면 그대로 사고가 된다.",
+      "policy": "정책 #1(추측은 사실로 기록하지 않음)",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": "09:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "H4",
+      "probe": "H",
+      "split": "test",
+      "title": "거의 비어 있는 매우 짧은 발화",
+      "scene": "방문했다는 사실 외에는 아무 정보도 없는 한두 문장. 시각도 말하지 않는다.",
+      "style": {
+        "화자": "30대 남성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "없음"
+      },
+      "length_chars": [
+        20,
+        50
+      ],
+      "must_include": [
+        "'오늘 방문했어요', '어르신 집에 계셨어요' 수준의 내용"
+      ],
+      "must_not": [
+        "시각",
+        "어떤 수치",
+        "식사·복약·낙상·기분"
+      ],
+      "traps": "빈 입력에서 그럴듯한 기본값을 채운다.",
+      "hypothesis": "대부분 통과하지만 위험 필드 flag가 모두 확인 필요로 나오는지 확인하는 안전망 케이스. 실패하면 심각.",
+      "policy": "정책 #1·#2",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "pulse": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "H5",
+      "probe": "H",
+      "split": "test",
+      "title": "임상 내용이 없는 STT 잡음",
+      "scene": "말을 시작하다 만 소리, 감탄사, 날씨 이야기, 의미 없는 반복으로만 이루어진 STT 결과. 임상 정보는 전혀 없다.",
+      "style": {
+        "화자": "70대 남성(어르신 목소리가 섞임)",
+        "지역": "충청",
+        "격식": "반말 섞임",
+        "말더듬": "강함"
+      },
+      "length_chars": [
+        60,
+        140
+      ],
+      "must_include": [
+        "'어 그 음 저기', '비가 와서', '그게 아니고' 같은 군더더기와 날씨 이야기"
+      ],
+      "must_not": [
+        "어떤 수치",
+        "복약·낙상·식사 단서",
+        "방문 시각"
+      ],
+      "traps": "잡음을 의미 있는 문장으로 오해해 필드를 채운다.",
+      "hypothesis": "B1은 근거 인용을 만들 수 없어 안전하고, B0가 위험. 변형 차이가 가장 크게 날 수 있다.",
+      "policy": "정책 #1·#2",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "pulse": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "H6",
+      "probe": "H",
+      "split": "test",
+      "title": "제3자 전언으로만 접한 수치와 상태",
+      "scene": "보호자(딸)에게서 들은 이야기만 전한다. '따님이 혈압은 정상이라고 하시던데'. 보호자가 약을 챙겨드린다고 했다는 말도 한다. 화자 본인은 혈압을 재지 못했다고 분명히 말한다. 식사와 방문 시각은 직접 본 것으로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        260
+      ],
+      "must_include": [
+        "본인은 혈압을 못 쟀다(기기를 안 가져옴)",
+        "딸이 혈압 정상이라 했다는 전언",
+        "딸이 약을 챙긴다고 했다는 전언",
+        "점심은 소량 드심(직접 봄)",
+        "방문 시각 오후 3시",
+        "낙상은 언급하지 않음"
+      ],
+      "must_not": [
+        "혈압·맥박 숫자",
+        "직접 확인한 복약"
+      ],
+      "traps": "전언을 직접 확인한 사실처럼 기록한다.",
+      "hypothesis": "복약 '복용'을 채우면 환각. 정책 #1·#6이 겹치는 케이스.",
+      "policy": "정책 #1·#6(전언·제3자는 사실로 기록하지 않음)",
+      "label_risk": "medium",
+      "gold": {
+        "visit_start": {
+          "value": "15:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "pulse": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "소량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    }
+  ]
+}
