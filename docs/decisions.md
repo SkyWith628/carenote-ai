@@ -17,3 +17,8 @@
 - 유형별 3건씩(injection 2건). 방언은 경상·전라·충청, stt_error는 숫자 탈락·자릿수 오인식·낙상 키워드 변형.
 - 주의: 20건은 스키마와 러너 검증용이다. 수치 주장은 60건 이후에 한다. 방언·말투는 작성자(1인)가 쓴 합성문이라 실제 구어체와 다를 수 있다.
 - 위험 flag 수치 기준은 임시. Rule Engine 확정 시 재정렬.
+
+## 2026-10-23 — Eval Runner 지표 정의
+- 지표 6개(F1, 근거 없는 값, 환각, 수치 오류, 위험 recall, 확인 recall)와 분모 규칙은 `docs/eval-runner.md`가 원본이다.
+- Extractor 경계는 `extract(transcript)`로 고정. 골든셋 정답은 extractor에 전달하지 않는다.
+- 기준선: oracle(만점), null(하한 0)로 평가기 자체를 검증한다. ablation 표의 "단일 LLM" 행은 2주차 Extractor 완성 후 채운다.

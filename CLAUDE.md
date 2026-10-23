@@ -21,6 +21,7 @@ mode: work
 uv run pytest        # 테스트
 uv run ruff check .  # 린트
 uv run pyright       # 타입 검사 (strict)
+uv run python -m carenote.evaluation --extractor oracle   # 골든셋 평가 (PYTHONPATH=src 필요 시)
 uv run uvicorn carenote.main:app --app-dir src --reload   # 개발 서버, GET /health
 ```
 
@@ -41,5 +42,5 @@ uv run uvicorn carenote.main:app --app-dir src --reload   # 개발 서버, GET /
 - 대회 공고 미공개: 제출 형태·배점 확정 시 blueprint 5·9장 조정
 
 ## 현재 단계
-- 지금: 1주차. 스캐폴딩 완료, 골든셋 스키마 확정 (v1 20건, `docs/golden-schema.md`)
-- 다음: ① Eval Runner 뼈대 (F1·근거 없는 값 비율·위험 recall) ② 2주차 E2E 데모 v0
+- 지금: 1주차 완료분. 스캐폴딩, 골든셋 v1 20건, Eval Runner 뼈대 (`docs/eval-runner.md`)
+- 다음: 2주차 E2E 데모 v0 — Extractor(LLM, 구조화 출력 + evidence)를 `Extractor` 인터페이스로 구현해 단일 LLM 베이스라인 측정, 검토 화면(원문 보기)
