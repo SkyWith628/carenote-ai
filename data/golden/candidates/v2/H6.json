@@ -120,7 +120,38 @@
       "message": ""
     }
   ],
-  "batch_checks": [],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
   "review": {
     "status": "pending",
     "date": null,

@@ -1,0 +1,176 @@
+{
+  "spec_id": "L4",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "아침 9시 딱 맞춰서 들어갔는데요, 현관 신발장 앞에 못 보던 운동화가 한 켤레 놓여 있더라고요. 누구 건가 했더니 아드님이 지난 주말에 와서 갈아 신고 그냥 두고 간 거라고 하시네요. 그래서 그건 신발장 안에 넣어 드렸고요. 들어가서 이불 정리하는데 어르신이 먼저 말씀하시더라고요, 어제 밤에 침대에서 떨어지셨는데 다치진 않으셨대요. 혼자 다시 올라가서 주무셨다고 하시고요. 그 얘기 끝나고는 미국 사는 따님하고 그저께 영상통화 하신 얘기를 한참 하셨어요. 거기는 밤이라 손녀는 자고 있었고 사위가 화면에 잠깐 나왔다고. 따님이 올 가을에 한국 들어온다는 얘기도 하셨고요. 그리고 다음 주 화요일에 병원 정기 진료 있다고 달력에 동그라미 쳐 놓으셨더라고요. 그날은 아드님이 모시고 가기로 했다고 하셔서, 음, 일단 저도 메모는 해 뒀습니다. 베란다 화분 얘기도 하셨는데 제라늄이 빨간 꽃을 세 송이 피웠다고 보여 주셔서 물을 좀 줬어요. 옆에 있는 군자란은 아직 꽃대가 안 올라왔고요. 아침은 죽 데워 드리고 냉장고에 있던 멸치볶음이랑 시금치나물 꺼내서 같이 차려 드렸는데, 몇 숟가락 뜨시더니 수저를 금방 내려놓으시더라고요. 그래서 조금밖에 안 드셨어요. 반찬은 남은 거 다시 통에 담아서 넣어 놨고 시금치는 오늘내일 중에 드셔야 할 것 같아요. 약은 드셨어요. 그러고 나서 설거지하고 방 바닥 한 번 닦고, 침대 옆에 있던 전기장판 선이 좀 걸리적거려서 벽 쪽으로 붙여 놨습니다. 어, 나오려고 가방 챙기다가 생각났는데, 아 맞다 혈압 재야 하는데 깜빡할 뻔했네, 140에 90이네요.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "아침 9시 딱 맞춰서 들어갔는데요, 현관 신발장 앞에 못 보던 운동화가 한 켤레 놓여 있더라고요."
+    ],
+    "fall_event": [
+      "들어가서 이불 정리하는데 어르신이 먼저 말씀하시더라고요, 어제 밤에 침대에서 떨어지셨는데 다치진 않으셨대요."
+    ],
+    "meal_intake": [
+      "몇 숟가락 뜨시더니 수저를 금방 내려놓으시더라고요.",
+      "그래서 조금밖에 안 드셨어요."
+    ],
+    "medication_taken": [
+      "약은 드셨어요."
+    ],
+    "blood_pressure": [
+      "아 맞다 혈압 재야 하는데 깜빡할 뻔했네, 140에 90이네요."
+    ]
+  },
+  "notes": "scene과 must_include가 방문 시각을 맨 앞에 요구해 첫 문장에 시각과 opening_scene(신발장 앞 신발)을 함께 넣었고, scene이 요구한 병원·반찬 이야기를 chatter_topics와 함께 포함함.",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 2,
+    "diversity": {
+      "opening_type": "도착하기 직전 현관이나 복도에서 있었던 일",
+      "opening_scene": "신발장 앞에 못 보던 신발이 놓여 있었음",
+      "chatter_topics": [
+        "해외 사는 자녀와 영상통화",
+        "베란다 화분과 꽃"
+      ],
+      "field_order": [
+        "visit_start",
+        "fall_event",
+        "pulse",
+        "meal_intake",
+        "medication_taken",
+        "blood_pressure"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "수저를 금방 내려놓으셨다는 쪽에서 말한다",
+        "medication_taken": "아주 짧게 한마디로 말한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "L",
+    "split": "test",
+    "label_risk": "low"
+  }
+}

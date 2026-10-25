@@ -134,7 +134,38 @@
       "message": ""
     }
   ],
-  "batch_checks": [],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['fall_event']"
+    }
+  ],
   "review": {
     "status": "pending",
     "date": null,

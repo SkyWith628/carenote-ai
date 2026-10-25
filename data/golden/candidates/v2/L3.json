@@ -138,7 +138,38 @@
       "message": ""
     }
   ],
-  "batch_checks": [],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "warn",
+      "message": "끝맺음 '했어요'이(가) 4건에서 반복됨"
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['fall_event', 'meal_intake']"
+    }
+  ],
   "review": {
     "status": "pending",
     "date": null,

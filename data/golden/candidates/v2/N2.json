@@ -1,0 +1,180 @@
+{
+  "spec_id": "N2",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "베란다에 화분이 하나 더 늘었데예, 저번엔 없던 긴데. 어, 혈압은 118에 74 나왔고예. 아침은 반쯤 드시고 나머지는 남기셨어요. 아침 혈압약이랑 영양제, 식후에 다 드셨고예. 음, 맥박은 64였어예. 라디오 아침 프로그램 틀어놓고 계시더라고예. 작년에 한 번 넘어지셔서 고관절 수술하셨어요, 그래도 요즘은 안 넘어지세요. 오늘도 낙상은 없었어예. 그, 제가 아홉 시에 들어갔는데 거실 벽시계는 아직 멈춘 채로 있더라고예.",
+  "reference_transcript": null,
+  "evidence": {
+    "blood_pressure": [
+      "어, 혈압은 118에 74 나왔고예."
+    ],
+    "meal_intake": [
+      "아침은 반쯤 드시고 나머지는 남기셨어요."
+    ],
+    "medication_taken": [
+      "아침 혈압약이랑 영양제, 식후에 다 드셨고예."
+    ],
+    "pulse": [
+      "음, 맥박은 64였어예."
+    ],
+    "fall_event": [
+      "작년에 한 번 넘어지셔서 고관절 수술하셨어요, 그래도 요즘은 안 넘어지세요.",
+      "오늘도 낙상은 없었어예."
+    ],
+    "visit_start": [
+      "그, 제가 아홉 시에 들어갔는데 거실 벽시계는 아직 멈춘 채로 있더라고예."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "지난 방문 때와 달라진 점 한 가지",
+      "opening_scene": "화분이 하나 늘어 있었음",
+      "chatter_topics": [
+        "멈춘 벽시계",
+        "아침 라디오 프로그램"
+      ],
+      "field_order": [
+        "blood_pressure",
+        "meal_intake",
+        "medication_taken",
+        "pulse",
+        "fall_event",
+        "visit_start"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "반쯤 드시고 남겼다는 쪽에서 말한다",
+        "medication_taken": "약 종류나 시간대를 함께 언급하며 말한다",
+        "fall_event": "'낙상'이나 '사고' 같은 사무적인 단어를 써서 짧게 끝낸다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['meal_intake']"
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "N",
+    "split": "test",
+    "label_risk": "medium"
+  }
+}

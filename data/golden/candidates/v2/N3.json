@@ -1,0 +1,169 @@
+{
+  "spec_id": "N3",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "거실이 오늘은 말끔허게 치워져 있더라구유. 어, 오늘 아침 약은 어르신이 드셨구유, 저는 약통에 저녁 거 챙겨서 칸마다 넣어 드렸슈. 약은 다음 주에 바꾸신대요. 아침 산책길에 동네 한 바퀴 도셨다는 얘기 허시고, 음, 트로트 가수 나오는 방송 얘기도 좀 허셨슈. 점심은 절반 정도 드셨어유. 그, 오늘은 혈압을 못 쟀어요, 내일 병원 가시면 재실 거예요. 제가 들어간 게 오후 2시였는디, 어 그때 이미 점심 상은 다 치워 놓으셨더라구유.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "제가 들어간 게 오후 2시였는디, 어 그때 이미 점심 상은 다 치워 놓으셨더라구유."
+    ],
+    "meal_intake": [
+      "점심은 절반 정도 드셨어유."
+    ],
+    "medication_taken": [
+      "어, 오늘 아침 약은 어르신이 드셨구유, 저는 약통에 저녁 거 챙겨서 칸마다 넣어 드렸슈."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "집 안에 들어섰을 때의 첫인상(냄새, 정돈 상태, 켜 둔 TV 등)",
+      "opening_scene": "거실이 말끔하게 정돈되어 있었음",
+      "chatter_topics": [
+        "아침 산책길",
+        "트로트 가수 이야기"
+      ],
+      "field_order": [
+        "medication_taken",
+        "fall_event",
+        "meal_intake",
+        "blood_pressure",
+        "pulse",
+        "visit_start"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "절반 정도라고 직설적으로 말한다",
+        "medication_taken": "챙겨 드린 행동을 중심으로 말한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['meal_intake']"
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "N",
+    "split": "test",
+    "label_risk": "medium"
+  }
+}
