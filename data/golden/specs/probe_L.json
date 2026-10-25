@@ -169,7 +169,7 @@
           "candidates": []
         },
         "special_notes": {
-          "value": "약 복용 거부",
+          "value": "약 복용 거부, 맥박 측정 누락",
           "source": "stated",
           "flag": "ok",
           "candidates": []
