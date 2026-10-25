@@ -250,3 +250,36 @@ def test_elder_quote_hints_require_the_fact_to_be_explicit() -> None:
     med = [h for h in PHRASING_POOLS[(FieldKey.MEDICATION_TAKEN, "복용")] if "어르신이 한 말" in h]
     assert fall and all("분명히 읽히게" in h for h in fall)
     assert med and all("분명히 읽히게" in h for h in med)
+
+
+def test_phrasing_hints_are_distinct_within_a_split_when_the_pool_allows(
+    all_specs: list[Spec],
+) -> None:
+    """같은 분할·항목·값의 스펙은 풀 크기 이하라면 서로 다른 표현 방식을 받는다 (g7 수렴 대응)."""
+    from collections import defaultdict  # noqa: PLC0415
+
+    from carenote.generation.diversity import PHRASING_POOLS  # noqa: PLC0415
+
+    assignment = assign_diversity(all_specs)
+    slots: dict[tuple[str, str, str], list[str]] = defaultdict(list)
+    for spec in all_specs:
+        for key, hint in assignment[spec.spec_id].phrasing:
+            slots[(spec.split, key.value, spec.gold[key].value or "")].append(hint)
+    assert slots
+    for (_, key, value), hints in slots.items():
+        pool = PHRASING_POOLS[(FieldKey(key), value)]
+        window = hints[: len(pool)]
+        assert len(set(window)) == len(window), (key, value)
+
+
+def test_dev_specs_that_shared_the_elder_quote_hint_in_g7_now_differ(
+    spec_by_id: dict[str, Spec],
+) -> None:
+    """H3·C2·S1이 모두 '어르신이 한 말' 낙상 힌트를 받던 g7과 달리 이제 한 건만 받는다."""
+    assignment = assign_diversity(spec_by_id.values())
+    elder = [
+        sid
+        for sid in ("H3", "C2", "S1")
+        if "어르신이 한 말" in dict(assignment[sid].phrasing).get(FieldKey.FALL_EVENT, "")
+    ]
+    assert len(elder) <= 1

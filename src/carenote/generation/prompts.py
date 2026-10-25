@@ -11,7 +11,7 @@ import json
 from carenote.generation.diversity import Diversity
 from carenote.generation.spec import Spec
 
-GENERATION_PROMPT_VERSION = "g7"
+GENERATION_PROMPT_VERSION = "g8"
 
 SYSTEM_PROMPT = """\
 당신은 요양보호사가 방문 직후 휴대폰에 말해서 남기는 구술 기록을 합성하는 작성자입니다.

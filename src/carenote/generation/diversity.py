@@ -4,7 +4,7 @@
 전체 스펙 목록에서 spec_id마다 아래를 미리 배정해 사용자 메시지에 넣는다.
 - 잡담 소재 2개와 첫 문장 유형 1개 (g4: 따님·반찬·냉장고 모티프 반복 대응)
 - 항목 언급 순서 (g5: 7건 중 5건이 스키마 순서대로 읽던 문제 대응)
-- 정상 항목(낙상·복약·식사량)의 표현 방식 (g5: "넘어지신 일은 없었어요"가 4건에 반복된 문제 대응)
+- 정상 항목(낙상·복약·식사량)의 표현 방식, g8부터 분할별 라운드로빈 (g5: 같은 문장 4건 반복)
 같은 스펙 집합이면 항상 같은 배정이 나온다 (난수는 spec_id 문자열로 시드한다).
 """
 
@@ -238,17 +238,28 @@ def _order_for(spec_id: str) -> tuple[FieldKey, ...]:
     return tuple(order)
 
 
-def _phrasing_for(spec: Spec) -> tuple[tuple[FieldKey, str], ...]:
-    """정답이 단순 정상 값인 항목에만 표현 방식을 배정한다."""
-    hints: list[tuple[FieldKey, str]] = []
-    for key in (FieldKey.MEAL_INTAKE, FieldKey.MEDICATION_TAKEN, FieldKey.FALL_EVENT):
-        gold = spec.gold[key]
-        pool = PHRASING_POOLS.get((key, gold.value or ""))
-        if pool is None or gold.source.value != "stated":
-            continue
-        rng = random.Random(f"phrase:{key.value}:{spec.spec_id}")
-        hints.append((key, pool[rng.randrange(len(pool))]))
-    return tuple(hints)
+def _assign_phrasing(
+    ordered: list[Spec],
+) -> dict[str, tuple[tuple[FieldKey, str], ...]]:
+    """정답이 단순 정상 값(stated)인 항목에 표현 방식을 분할별 라운드로빈으로 배정한다.
+
+    같은 분할·같은 항목·같은 값을 가진 스펙끼리 id순으로 풀을 한 칸씩 돌아, 풀 크기 이하의 스펙은
+    서로 다른 방식을 받는다 (g7: 무작위 배정으로 세 건이 같은 "어르신이 한 말로 전한다" 힌트를 받아
+    같은 발화로 수렴했다).
+    """
+    counters: dict[tuple[str, FieldKey, str], int] = {}
+    result: dict[str, list[tuple[FieldKey, str]]] = {s.spec_id: [] for s in ordered}
+    for spec in ordered:
+        for key in (FieldKey.MEAL_INTAKE, FieldKey.MEDICATION_TAKEN, FieldKey.FALL_EVENT):
+            gold = spec.gold[key]
+            pool = PHRASING_POOLS.get((key, gold.value or ""))
+            if pool is None or gold.source.value != "stated":
+                continue
+            slot = (spec.split, key, gold.value or "")
+            count = counters.get(slot, 0)
+            counters[slot] = count + 1
+            result[spec.spec_id].append((key, pool[count % len(pool)]))
+    return {sid: tuple(hints) for sid, hints in result.items()}
 
 
 def assign_diversity(specs: Iterable[Spec]) -> dict[str, Diversity]:
@@ -256,6 +267,7 @@ def assign_diversity(specs: Iterable[Spec]) -> dict[str, Diversity]:
 
     - 소재: 전체 스펙을 id순으로 세워 첫 소재는 풀을 순서대로, 둘째 소재는 반 바퀴 뒤에서 고르되
       한 바퀴를 돌 때마다 간격을 1씩 늘려 쌍이 반복되지 않게 한다. 40건 안에서 한 소재는 최대 2번.
+    - 표현 방식: 분할별·항목별·값별 라운드로빈 (`_assign_phrasing`).
     - 첫 문장 유형과 구체 장면: **분할(dev/test)별로** id순 라운드로빈. 같은 분할 안에서 유형이
       고르게 쓰이고, 같은 유형이 다시 나올 때마다 다른 구체 장면을 받는다 (g5에서 같은 유형을 받은
       두 건이 같은 표현으로 수렴한 문제의 대응).
@@ -267,6 +279,7 @@ def assign_diversity(specs: Iterable[Spec]) -> dict[str, Diversity]:
     for spec in ordered:
         split_rank[spec.spec_id] = counters.get(spec.split, 0)
         counters[spec.split] = split_rank[spec.spec_id] + 1
+    phrasing = _assign_phrasing(ordered)
     assignment: dict[str, Diversity] = {}
     for i, spec in enumerate(ordered):
         rank = split_rank[spec.spec_id]
@@ -280,6 +293,6 @@ def assign_diversity(specs: Iterable[Spec]) -> dict[str, Diversity]:
                 TOPICS[(i + half + i // half) % len(TOPICS)],
             ),
             field_order=_order_for(spec.spec_id),
-            phrasing=_phrasing_for(spec),
+            phrasing=phrasing[spec.spec_id],
         )
     return assignment

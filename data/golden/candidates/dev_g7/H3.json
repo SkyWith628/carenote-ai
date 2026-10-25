@@ -1,0 +1,167 @@
+{
+  "spec_id": "H3",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "들어가니까 거실에서 TV랑 라디오가 같이 틀어져 있어서 좀 정신이 없더라고요. 어르신이 '나 요새 한 번도 안 넘어졌어, 걱정 말어' 하시더라고요. 혈압은 아마 130쯤일 거예요, 늘 그 정도라서. 약은 드셨겠죠, 평소에 잘 챙겨 드시니까. 어, 아침 9시에 도착했는데 택배 아저씨가 마침 문 앞에 상자 내려놓고 가시는 중이었어요. 맥박은 제가 재 보니까 76 나왔고요. 아침은 절반 정도 드셨어요, 딱 반 남기셨어요. 마당 감나무에 감이 꽤 달렸다고 다음에 오면 같이 따자고 하시네요.",
+  "reference_transcript": null,
+  "evidence": {
+    "fall_event": [
+      "어르신이 '나 요새 한 번도 안 넘어졌어, 걱정 말어' 하시더라고요."
+    ],
+    "visit_start": [
+      "어, 아침 9시에 도착했는데 택배 아저씨가 마침 문 앞에 상자 내려놓고 가시는 중이었어요."
+    ],
+    "pulse": [
+      "맥박은 제가 재 보니까 76 나왔고요."
+    ],
+    "meal_intake": [
+      "아침은 절반 정도 드셨어요, 딱 반 남기셨어요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g7",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "집 안에 들어섰을 때의 첫인상(냄새, 정돈 상태, 켜 둔 TV 등)",
+      "opening_scene": "TV와 라디오 소리가 동시에 들림",
+      "chatter_topics": [
+        "택배 아저씨",
+        "마당의 감나무"
+      ],
+      "field_order": [
+        "fall_event",
+        "blood_pressure",
+        "medication_taken",
+        "visit_start",
+        "pulse",
+        "meal_intake"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "절반 정도라고 직설적으로 말한다",
+        "fall_event": "어르신이 한 말로 전한다. 표현은 직접 지어내되 흔한 관용구는 피하고, 낙상이 없었다는 뜻이 그 문장에서 분명히 읽히게 한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['fall_event']"
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "H",
+    "split": "dev",
+    "label_risk": "low"
+  }
+}
