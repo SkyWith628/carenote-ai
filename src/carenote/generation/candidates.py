@@ -201,7 +201,13 @@ transcript만 보고 8개 필드를 라벨한다. 정답은 보이지 않는다.
 - `flag`: 기본 `ok`. 위험 필드(혈압·맥박·복약·낙상)가 `missing`이거나 candidates가 있거나
   불가능한 수치면 `needs_confirm`.
   미복용·중복 복용 의심·낙상 있음·위험한 특이사항이면 `risk`
-- 추측("드셨겠죠")은 사실이 아니다. 해석이 갈리면 `inferred`로 표시하고 메모를 남겨도 된다
+- 추측("드셨겠죠", "아마 130쯤")은 사실이 아니다. **추측한 값은 value에 넣지 않고 비운다**
+  (source `missing`, 위험 필드면 flag `needs_confirm`).
+  해석이 갈리면 `inferred`로 표시하고 메모를 남겨도 된다
+- 낙상: 오늘은 없었어도 최근 7일 안에 낙상 보고가 있으면 `있음`이다
+- 복약 거부 보고는 `미복용`과 별개로 특이사항에도 적는다
+- 특이사항이 가슴 답답함·호흡곤란·말 어눌함·한쪽 힘 빠짐·낙상 후 통증·며칠째 식사 거부·
+  갑작스러운 부종·출혈 같은 위험 신호면 그 필드의 flag를 `risk`로 한다 (`docs/label-policy.md`)
 
 라벨은 `*.labels.json`의 각 케이스에 채운다 (value는 문자열, 없으면 빈 문자열).
 채운 뒤 `python -m carenote.generation --compare-blind <labels.json>`으로 정답과 비교한다.

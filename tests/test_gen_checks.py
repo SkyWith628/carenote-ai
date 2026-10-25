@@ -439,3 +439,29 @@ def test_r_ignores_specs_without_a_stated_fall(spec_by_id: dict[str, Spec]) -> N
         transcript="오늘 방문했어요.", reference_transcript=None, evidence=[], notes=""
     )
     assert check_r_explicit_fall(spec_by_id["H4"], empty).level == "pass"
+
+
+def test_t_fails_on_affect_cues_the_spec_does_not_ask_for(spec_by_id: dict[str, Spec]) -> None:
+    """기분 불일치를 만든 표현(B03 '웃으시더라', B07 '좋아하시면서')을 잡는다."""
+    from carenote.generation.checks import check_t_affect_cues  # noqa: PLC0415
+
+    d1 = spec_by_id["D1"]
+    assert check_t_affect_cues(d1, GOOD_D1).level == "pass"
+    for sentence in (
+        "그분이 먼저 웃으시더라고요.",
+        "동창 모임 날짜가 나왔다고 좋아하시면서 보여주셨어요.",
+    ):
+        leaked = GOOD_D1.model_copy(update={"transcript": GOOD_D1.transcript + " " + sentence})
+        result = check_t_affect_cues(d1, leaked)
+        assert result.level == "fail" and "감정" in result.message
+
+
+def test_t_allows_affect_words_when_the_spec_calls_for_them(spec_by_id: dict[str, Spec]) -> None:
+    """L1은 웃으며 이야기를 많이 하셨다는 단서가 scene에 있으므로 같은 계열은 허용한다."""
+    from carenote.generation.checks import check_t_affect_cues  # noqa: PLC0415
+
+    assert "웃으" in GOOD_CASES["L1"].transcript
+    assert check_t_affect_cues(spec_by_id["L1"], GOOD_CASES["L1"]).level == "pass"
+    assert (
+        check_t_affect_cues(spec_by_id["V3"], GOOD_D1).level == "pass"
+    )  # V3 정답 자체가 기분 변화

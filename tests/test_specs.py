@@ -132,3 +132,16 @@ def test_c2_special_notes_is_a_gray_field() -> None:
     """C2의 '첫 혈압 측정이 높았음'은 transcript에 '높다'는 표현이 없을 수 있어 회색 필드다."""
     c2 = next(s for s in _specs() if s["spec_id"] == "C2")
     assert c2["gray_fields"] == ["special_notes"]
+
+
+def test_label_policy_document_keeps_the_2026_10_26_clarifications() -> None:
+    """블라인드 라벨링(83.9%) 후 보완한 정책 문구가 문서에서 사라지지 않는다."""
+    text = (Path(__file__).parent.parent / "docs" / "label-policy.md").read_text(encoding="utf-8")
+    for fragment in (
+        '사흘 전에 넘어지셨다"가 함께 나오면 `있음`',  # #7 예시
+        "추측한 값(130)도 value에 넣지 않고",  # #1
+        "숟가락 두세 번·서너 번",  # #9
+        "복약을 거부했다는 보고는",  # #13
+        "특이사항 risk 기준",
+    ):
+        assert fragment in text, fragment

@@ -1,0 +1,167 @@
+{
+  "spec_id": "H3",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "들어가니까 TV랑 라디오가 같이 켜져 있어서 집 안이 엄청 시끄럽더라고요. 어르신 지난번 방문 이후로 한 번도 안 넘어지셨어요. 혈압은 아마 130쯤일 거예요, 늘 그 정도라서. 약은 드셨겠죠, 평소에 잘 챙겨 드시니까. 어, 오늘 9시에 왔는데 마침 택배 아저씨가 문 앞에 상자 두고 가시더라고요. 맥박은 제가 재 보니까 76 나왔고요. 아침은 절반 정도 드셨어요, 밥이랑 국 반씩 남기시고. 마당 감나무에 감이 꽤 달렸는데 다음 주쯤 따 드리기로 했어요.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "어, 오늘 9시에 왔는데 마침 택배 아저씨가 문 앞에 상자 두고 가시더라고요."
+    ],
+    "pulse": [
+      "맥박은 제가 재 보니까 76 나왔고요."
+    ],
+    "meal_intake": [
+      "아침은 절반 정도 드셨어요, 밥이랑 국 반씩 남기시고."
+    ],
+    "fall_event": [
+      "어르신 지난번 방문 이후로 한 번도 안 넘어지셨어요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g8",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "집 안에 들어섰을 때의 첫인상(냄새, 정돈 상태, 켜 둔 TV 등)",
+      "opening_scene": "TV와 라디오 소리가 동시에 들림",
+      "chatter_topics": [
+        "택배 아저씨",
+        "마당의 감나무"
+      ],
+      "field_order": [
+        "fall_event",
+        "blood_pressure",
+        "medication_taken",
+        "visit_start",
+        "pulse",
+        "meal_intake"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "절반 정도라고 직설적으로 말한다",
+        "fall_event": "'안 ~셨다' 꼴의 부정 서술로 말한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "H",
+    "split": "dev",
+    "label_risk": "low"
+  }
+}
