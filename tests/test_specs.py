@@ -145,6 +145,7 @@ def test_label_policy_document_keeps_the_2026_10_26_clarifications() -> None:
         "복약을 거부했다는 보고는",  # #13
         "앞선 측정을 특이사항에 기록",  # #5 (2026-10-26 후속)
         "필드가 이미 담는 내용은 특이사항에 중복 기록하지 않는다",  # #11
+        "확인·질문을 못 한 항목",  # #11(b) 확장
         "특이사항 risk 기준",
         "측정을 못 했거나 빠뜨린 사유",  # #11 범위 (2026-10-26)
         "감정·표정·기색을 직접 말했을 때만",  # #10 기분 추론 기준
@@ -159,3 +160,15 @@ def test_measurement_omission_specs_record_it_in_special_notes() -> None:
         notes = cast(dict[str, Any], by_id[sid]["gold"])["special_notes"]
         assert notes["value"] and notes["source"] == "stated", sid
     assert "special_notes" not in by_id["N3"]["gray_fields"]
+
+
+def test_gs002_special_notes_records_the_unasked_medication_check() -> None:
+    """정책 #11(b) 확장(2026-10-26): 확인 누락도 특이사항. gs-008과 같은 방향의 정답이다."""
+    from carenote.evaluation.loader import load_golden
+    from carenote.evaluation.schema import FieldKey
+
+    path = Path(__file__).parent.parent / "data" / "golden" / "v1.jsonl"
+    case = next(c for c in load_golden(path) if c.id == "gs-002")
+    notes = case.field(FieldKey.SPECIAL_NOTES)
+    assert notes.value == "복약 여부 확인 못 함"
+    assert [e.text for e in notes.evidence] == ["약 드셨는지는 제가 못 물어봤어요"]
