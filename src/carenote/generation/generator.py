@@ -17,6 +17,7 @@ import anthropic
 from carenote.extraction.llm_extractor import ParseClient
 from carenote.extraction.pricing import CostGuard
 from carenote.generation.checks import failures, run_candidate_checks
+from carenote.generation.diversity import Diversity
 from carenote.generation.prompts import (
     GENERATION_PROMPT_VERSION,
     SYSTEM_PROMPT,
@@ -69,6 +70,7 @@ class Generator:
         cache_dir: Path | None = None,
         guard: CostGuard | None = None,
         max_attempts: int = DEFAULT_MAX_ATTEMPTS,
+        diversity: dict[str, Diversity] | None = None,
     ) -> None:
         self._client = client
         self.model = model
@@ -76,6 +78,7 @@ class Generator:
         self._cache_dir = cache_dir
         self._guard = guard
         self._max_attempts = max_attempts
+        self._diversity = diversity or {}
         self.stats = GenerationStats()
 
     def usage_summary(self) -> dict[str, object]:
@@ -102,7 +105,7 @@ class Generator:
                 return GenerationResult(
                     spec.spec_id, "api_failure", attempt, last_case, last_checks, comparison_only
                 )
-            checks = run_candidate_checks(spec, case)
+            checks = run_candidate_checks(spec, case, self._diversity.get(spec.spec_id))
             failed = failures(checks)
             if not failed:
                 return GenerationResult(
@@ -136,7 +139,7 @@ class Generator:
                 model=self.model,
                 max_tokens=MAX_TOKENS,
                 system=SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": build_user_message(spec, feedback)}],
+                messages=[{"role": "user", "content": self.request_message(spec, feedback)}],
                 output_format=GeneratedCase,
                 output_config={"effort": self.effort},
             )
@@ -154,9 +157,18 @@ class Generator:
         parsed = response.parsed_output
         return parsed if isinstance(parsed, GeneratedCase) else None
 
+    def diversity_for(self, spec_id: str) -> Diversity | None:
+        """스펙에 배정된 다양성 지시."""
+        return self._diversity.get(spec_id)
+
+    def request_message(self, spec: Spec, feedback: str | None = None) -> str:
+        """API로 보내는 사용자 메시지 (배정된 다양성 포함)."""
+        return build_user_message(spec, feedback, self._diversity.get(spec.spec_id))
+
     def _cache_key(self, spec: Spec, attempt: int, feedback: str | None) -> str:
         # 가설은 프롬프트에 들어가지 않으므로 키에서 제외해 가설 수정이 캐시를 깨지 않게 한다
         spec_payload = spec.model_dump(mode="json", exclude={"hypothesis", "policy"})
+        diversity = self._diversity.get(spec.spec_id)
         payload = json.dumps(
             [
                 spec_payload,
@@ -165,6 +177,7 @@ class Generator:
                 self.effort,
                 attempt,
                 feedback or "",
+                diversity.to_payload() if diversity else None,
             ],
             ensure_ascii=False,
             sort_keys=True,

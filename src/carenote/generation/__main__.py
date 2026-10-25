@@ -30,6 +30,7 @@ from carenote.generation.candidates import (
     render_review_sheet,
     write_candidate,
 )
+from carenote.generation.diversity import assign_diversity
 from carenote.generation.estimate import estimate_generation, format_estimate
 from carenote.generation.generator import DEFAULT_MAX_ATTEMPTS, Generator
 from carenote.generation.spec import Spec, load_specs
@@ -117,12 +118,16 @@ def main(
         return EXIT_REFUSED
 
     cache_dir = args.cache_dir or Path(settings.generation_cache_dir)
+    diversity = assign_diversity(
+        s.spec_id for s in specs
+    )  # 전체 스펙 기준이라 부분 실행도 같은 배정
     probe = Generator(
         _NoClient(),  # type: ignore[arg-type]
         model=model,
         effort=effort,
         cache_dir=cache_dir,
         max_attempts=args.max_attempts,
+        diversity=diversity,
     )
     estimate = estimate_generation(probe, [s for s, _ in selected], price)
     print(format_estimate(model, effort, estimate, PRICES_AS_OF))
@@ -160,6 +165,7 @@ def main(
         cache_dir=cache_dir,
         guard=guard,
         max_attempts=args.max_attempts,
+        diversity=diversity,
     )
     try:
         for spec, is_comparison in selected:

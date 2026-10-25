@@ -13,6 +13,7 @@ from carenote.generation.checks import (
     check_k_closings,
     check_k_openings,
     check_k_time_openings,
+    check_k_weather_openings,
 )
 from carenote.generation.generator import GenerationResult, Generator
 from carenote.generation.prompts import GENERATION_PROMPT_VERSION
@@ -47,6 +48,9 @@ def write_candidate(
             "effort": generator.effort,
             "prompt_version": GENERATION_PROMPT_VERSION,
             "attempts": result.attempts,
+            "diversity": (
+                d.to_payload() if (d := generator.diversity_for(result.spec_id)) else None
+            ),
         },
         "checks": [c.model_dump() for c in result.checks],
         "batch_checks": [],
@@ -75,10 +79,11 @@ def apply_batch_checks(out_dir: Path, golden_dir: Path | None) -> dict[str, list
     k = check_k_openings(items)
     k_end = check_k_closings(items)
     k_time = check_k_time_openings(items)
+    k_weather = check_k_weather_openings(items)
     summary: dict[str, list[str]] = {}
     for doc in docs:
         sid = str(doc["spec_id"])
-        results = [h[sid], k[sid], k_end[sid], k_time[sid]]
+        results = [h[sid], k[sid], k_end[sid], k_time[sid], k_weather[sid]]
         doc["batch_checks"] = [r.model_dump() for r in results]
         (out_dir / f"{sid}.json").write_text(
             json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8"

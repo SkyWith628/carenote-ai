@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from carenote.extraction.estimate import CHARS_PER_TOKEN, INPUT_HIGH_FACTOR
 from carenote.extraction.pricing import Price, cost_usd
 from carenote.generation.generator import Generator
-from carenote.generation.prompts import SYSTEM_PROMPT, build_user_message
+from carenote.generation.prompts import SYSTEM_PROMPT
 from carenote.generation.spec import Spec
 
 OUTPUT_TOKENS_LOW = 800
@@ -41,7 +41,8 @@ def estimate_generation(
     """캐시에 1차 결과가 없는 스펙만 호출한다고 보고 범위를 추정한다."""
     pending = [s for s in specs if not generator.is_cached(s)]
     input_low = sum(
-        int((len(SYSTEM_PROMPT) + len(build_user_message(s))) / CHARS_PER_TOKEN) for s in pending
+        int((len(SYSTEM_PROMPT) + len(generator.request_message(s))) / CHARS_PER_TOKEN)
+        for s in pending
     )
     input_high = int(input_low * INPUT_HIGH_FACTOR * RETRY_FACTOR_HIGH)
     input_low = int(input_low * RETRY_FACTOR_LOW)

@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import json
 
+from carenote.generation.diversity import Diversity
 from carenote.generation.spec import Spec
 
-GENERATION_PROMPT_VERSION = "g3"
+GENERATION_PROMPT_VERSION = "g4"
 
 SYSTEM_PROMPT = """\
 당신은 요양보호사가 방문 직후 휴대폰에 말해서 남기는 구술 기록을 합성하는 작성자입니다.
@@ -29,6 +30,7 @@ SYSTEM_PROMPT = """\
   - source가 "missing"이면 그 항목의 값을 발화에서 말하지 않습니다 (must_include에 따라 모호한 언급만 허용).
   - candidates가 있으면 화자가 번복하거나 확신하지 못해 그 해석들 사이에서 정하지 못한 상태로 말합니다.
 - stt_errors: (있을 때만) 참고 발화와 오인식된 표기의 쌍
+- diversity: (있을 때만) opening_type(첫 문장 유형)과 chatter_topics(잡담 소재 2개)
 
 ## 작성 규칙
 1. 말을 받아쓴 느낌으로 씁니다: 군더더기, 끊김, 어순 도치, 존댓말과 구어체. 완성된 문어체 보고서처럼 쓰지 않습니다.
@@ -49,6 +51,8 @@ SYSTEM_PROMPT = """\
 12. 첫 문장: 방문 시각으로 시작하지 않습니다. 시각은 다른 이야기 도중에 자연스럽게 흘리거나 중간에 말합니다. 날씨, 어르신의 첫인상, 지난 방문 이야기, 도착 직후의 일 등으로 시작을 다양하게 합니다.
 13. 새 임상 사실 금지: scene, must_include, facts에 없는 증상·통증·상처·멍·부종·어지러움·기침·식욕 외 건강 상태·사고·측정값을 새로 지어내지 않습니다. "멍이 없었다", "아픈 데는 없으셨다"처럼 **없다는 서술도 새 임상 사실**이라 넣지 않습니다. 날씨, 가족, 반찬, 동네 이야기 같은 비임상 잡담은 자유롭게 넣어도 됩니다.
 
+14. diversity가 있으면 따릅니다. 첫 문장은 opening_type의 장면으로 시작하고, 잡담이 필요하면 chatter_topics의 소재만 씁니다. 이 소재 밖의 흔한 잡담(날씨, 따님이 가져온 반찬, 냉장고 정리, 손주 자랑 등)은 쓰지 않습니다. 날씨로 첫 문장을 시작하지 않습니다. length_chars의 최댓값이 150 미만인 짧은 발화나 임상 내용이 없는 잡음에는 잡담과 첫 문장 유형을 적용하지 않아도 됩니다.
+
 ## 출력
 - transcript: STT 결과 형태의 발화
 - reference_transcript: 규칙 8
@@ -57,8 +61,13 @@ SYSTEM_PROMPT = """\
 """
 
 
-def build_user_message(spec: Spec, feedback: str | None = None) -> str:
-    """스펙 1건을 생성 요청 JSON으로 만든다. feedback은 이전 시도의 점검 실패 사유."""
+def build_user_message(
+    spec: Spec, feedback: str | None = None, diversity: Diversity | None = None
+) -> str:
+    """스펙 1건을 생성 요청 JSON으로 만든다.
+
+    feedback은 이전 시도의 점검 실패 사유, diversity는 코드가 배정한 소재·첫 문장 유형이다.
+    """
     payload: dict[str, object] = {
         "scene": spec.scene,
         "style": spec.style,
@@ -85,6 +94,8 @@ def build_user_message(spec: Spec, feedback: str | None = None) -> str:
             }
             for e in spec.stt.errors
         ]
+    if diversity is not None:
+        payload["diversity"] = diversity.to_payload()
     message = json.dumps(payload, ensure_ascii=False, indent=2)
     if feedback:
         message += (

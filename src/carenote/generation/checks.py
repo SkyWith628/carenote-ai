@@ -3,7 +3,8 @@
 A 스키마 · B 근거 · C 길이 · D 개인정보 · E 수치 존재 · F 모호 수사 · G 라벨 누설 ·
 H 중복(배치) · I STT 메타(지정 외 오인식 포함) · J 인젝션 ·
 K 문두·종결 다양성(정형 종결 문구는 후보 단위 실패, 문두·종결 반복은 배치 경고) ·
-M 스펙에 없는 임상 키워드(새 임상 사실 방지)
+M 스펙에 없는 임상 키워드(새 임상 사실 방지) ·
+N 배정된 잡담 소재 사용 여부(경고) · 배치 K: 날씨로 시작하는 후보 쏠림 경고
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from carenote.evaluation.schema import (
     ExpectedField,
     FieldKey,
 )
+from carenote.generation.diversity import Diversity
 from carenote.generation.numerals import (
     extract_hours,
     extract_numbers,
@@ -42,16 +44,9 @@ _STOCK_CLOSER = re.compile(
 )
 # 스펙(scene, must_include, 정답, 제목)에 없는데 transcript에 나오면 새 임상 사실로 의심한다
 _CLINICAL_FAMILIES = (
-    (
-        "통증",
-        "아프",
-        "아파",
-        "쑤시",
-        "쑤신",
-        "시큰",
-        "저리",
-    ),  # 통증 계열: 스펙에 하나라도 있으면 허용
-    ("부어", "붓", "부종"),
+    # 통증 계열: 스펙에 하나라도 있으면 같은 계열을 허용한다 ('아파트' 오탐을 피해 '아파'는 제외)
+    ("통증", "아프", "아파서", "아파요", "아파하", "아팠", "쑤시", "쑤신", "시큰", "저려", "저린"),
+    ("부어", "부은", "붓고", "붓기", "부종"),
     ("어지러", "어지럽"),
     ("멍", "상처", "출혈", "피가", "욕창"),
     ("기침", "열이"),
@@ -290,6 +285,17 @@ def check_m_new_clinical_facts(spec: Spec, case: GeneratedCase) -> CheckResult:
     return _ok("M")
 
 
+def check_n_diversity(spec: Spec, case: GeneratedCase, diversity: Diversity | None) -> CheckResult:
+    """긴 발화(상한 150자 이상)는 배정된 잡담 소재의 키워드가 하나라도 나와야 한다 (경고)."""
+    if diversity is None or spec.length_chars[1] < 150:
+        return _ok("N")
+    keywords = [kw for topic in diversity.topics for kw in topic.keywords]
+    if any(kw in case.transcript for kw in keywords):
+        return _ok("N")
+    labels = [t.label for t in diversity.topics]
+    return _warn("N", f"배정된 잡담 소재를 쓰지 않음: {labels}")
+
+
 _CANDIDATE_CHECKS = (
     check_a_schema,
     check_b_evidence,
@@ -305,9 +311,13 @@ _CANDIDATE_CHECKS = (
 )
 
 
-def run_candidate_checks(spec: Spec, case: GeneratedCase) -> list[CheckResult]:
-    """후보 한 건에 대한 점검 A~G, I, J."""
-    return [check(spec, case) for check in _CANDIDATE_CHECKS]
+def run_candidate_checks(
+    spec: Spec, case: GeneratedCase, diversity: Diversity | None = None
+) -> list[CheckResult]:
+    """후보 한 건에 대한 점검 A~G, I, J, K, M과 (배정이 있으면) N."""
+    results = [check(spec, case) for check in _CANDIDATE_CHECKS]
+    results.append(check_n_diversity(spec, case, diversity))
+    return results
 
 
 def failures(results: list[CheckResult]) -> list[CheckResult]:
@@ -360,6 +370,41 @@ def check_k_time_openings(items: list[tuple[str, str]]) -> dict[str, CheckResult
         else:
             results[sid] = _ok("K")
     return results
+
+
+_WEATHER_STEMS = (
+    "날씨",
+    "쌀쌀",
+    "비가",
+    "비 오",
+    "더워",
+    "더웠",
+    "추워",
+    "추웠",
+    "바람",
+    "눈이",
+    "안개",
+)
+WEATHER_OPENING_MAX_RATIO = 0.5
+
+
+def check_k_weather_openings(items: list[tuple[str, str]]) -> dict[str, CheckResult]:
+    """배치 점검: 첫 문장이 날씨 이야기인 후보가 절반 이상이면 그 후보들에 경고한다."""
+
+    def first_sentence(text: str) -> str:
+        return re.split(r"[.!?…]", text.strip(), maxsplit=1)[0]
+
+    starts = {
+        sid: any(stem in first_sentence(text) for stem in _WEATHER_STEMS) for sid, text in items
+    }
+    ratio = sum(starts.values()) / len(starts) if starts else 0.0
+    flagged = len(starts) >= TIME_OPENING_MIN_ITEMS and ratio >= WEATHER_OPENING_MAX_RATIO
+    return {
+        sid: _warn("K", f"날씨로 시작하는 후보가 {ratio:.0%}임")
+        if flagged and is_weather
+        else _ok("K")
+        for sid, is_weather in starts.items()
+    }
 
 
 def _last_word(text: str) -> str:
