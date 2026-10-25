@@ -12,6 +12,7 @@ dry-run:  python -m carenote.generation --pilot --dry-run
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -27,6 +28,12 @@ from carenote.extraction.pricing import (
 )
 from carenote.generation.candidates import (
     apply_batch_checks,
+    blind_ids,
+    blind_label_template,
+    compare_blind,
+    format_blind_report,
+    load_candidates,
+    render_blind_sheet,
     render_review_sheet,
     write_candidate,
 )
@@ -66,6 +73,12 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--approve-cost", type=float, default=None, metavar="USD")
     parser.add_argument("--render-review", type=Path, default=None, metavar="PATH")
+    parser.add_argument(
+        "--blind",
+        action="store_true",
+        help="--render-review와 함께: 정답을 숨긴 라벨링 시트와 빈 라벨 파일을 만든다",
+    )
+    parser.add_argument("--compare-blind", type=Path, default=None, metavar="LABELS_JSON")
     return parser
 
 
@@ -95,6 +108,28 @@ def main(
     args = _build_parser().parse_args(argv)
     settings = settings or get_settings()
     specs = load_specs(args.spec_dir)
+
+    if args.compare_blind is not None:
+        key_path = args.out_dir.parent / "blind_key.json"
+        key = json.loads(key_path.read_text(encoding="utf-8"))
+        labels = json.loads(args.compare_blind.read_text(encoding="utf-8"))
+        print(format_blind_report(compare_blind(labels, key, specs)))
+        return 0
+
+    if args.render_review is not None and args.blind:
+        ids = [str(d["spec_id"]) for d in load_candidates(args.out_dir) if d.get("transcript")]
+        key = blind_ids(ids)
+        args.render_review.parent.mkdir(parents=True, exist_ok=True)
+        args.render_review.write_text(render_blind_sheet(args.out_dir, key), encoding="utf-8")
+        template = args.render_review.with_suffix(".labels.json")
+        template.write_text(
+            json.dumps(blind_label_template(key), ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        (args.out_dir.parent / "blind_key.json").write_text(
+            json.dumps(key, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        print(f"블라인드 시트 저장: {args.render_review}\n라벨 파일: {template}")
+        return 0
 
     if args.render_review is not None:
         args.render_review.parent.mkdir(parents=True, exist_ok=True)

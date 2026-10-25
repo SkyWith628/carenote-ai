@@ -82,6 +82,18 @@ class FieldEvidence(BaseModel):
 - **자동 수정 금지**: 불일치는 사람 검토 대상으로만 올린다. 블라인드 결과로 정답을 고치면 모델에 맞춘 라벨이 된다.
 - 한계: 생성기와 같은 모델이라 같은 편향을 공유한다. 일치율이 높아도 사람 독립 라벨링(95% 기준)을 대체하지 않는다.
 
+### 6.0 블라인드 라벨링 도구 (구현 완료, 2026-10-26)
+
+```bash
+# 시트(정답·제목·프로브·위험도 숨김)와 빈 라벨 파일, 키(data/golden/candidates/blind_key.json) 생성. API 호출 없음
+PYTHONPATH=src uv run python -m carenote.generation --render-review docs/reports/v2-blind.md --blind
+# 사용자가 docs/reports/v2-blind.labels.json의 각 케이스를 채운 뒤 정답과 비교
+PYTHONPATH=src uv run python -m carenote.generation --compare-blind docs/reports/v2-blind.labels.json
+```
+- 케이스 id는 B01…로 가리고 순서를 섞는다 (시드 고정). S 프로브는 오인식된 transcript만 보여 준다.
+- 비교: 값 일치율(목표 95%), flag 일치율, 회색 필드(`gray_fields`)를 뺀 값 일치율, 불일치 목록. `special_notes`는 값 유무, 후보가 있는 정답은 후보 집합 일치로 비교한다 (러너와 같은 규칙).
+- 정답이 담긴 기존 검수 시트(`v2-review.md`)는 라벨링 전에 열지 않는다.
+
 ## 6. 사람 검수
 
 검수 시트(`docs/reports/v2-review.md` 자동 생성)에 케이스마다 transcript, 정답, 자동 점검 결과, 블라인드 불일치를 한 화면에 모은다.

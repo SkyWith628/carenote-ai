@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import json
 import random
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from carenote.evaluation.loader import load_golden
 from carenote.evaluation.schema import FieldKey
@@ -163,4 +164,173 @@ def render_review_sheet(out_dir: Path, specs: list[Spec]) -> str:
         if doc.get("notes"):
             lines += [f"생성기 메모: {doc['notes']}", ""]
         lines += ["검수: ☐ 승인  ☐ 반려 (사유: )", ""]
+    return "\n".join(lines)
+
+
+# -- 블라인드 검수 (독립 라벨링) ---------------------------------------------------
+
+BLIND_AGREEMENT_TARGET = 0.95
+_FIELD_ORDER = (
+    "visit_start",
+    "blood_pressure",
+    "pulse",
+    "meal_intake",
+    "medication_taken",
+    "fall_event",
+    "mood",
+    "special_notes",
+)
+
+BLIND_GUIDE = """\
+## 라벨링 방법
+
+transcript만 보고 8개 필드를 라벨한다. 정답은 보이지 않는다. 판단 기준은 `docs/label-policy.md`다.
+
+| 필드 | 값 |
+|---|---|
+| visit_start | `HH:MM` (24시간). 시각이 아니면 비움 |
+| blood_pressure | `수축기/이완기`. 번복·불확실하면 value 비우고 candidates에 해석들 |
+| pulse | 숫자 |
+| meal_intake | 전량 · 절반 · 소량 · 미섭취 · 미제공 |
+| medication_taken | 복용 · 미복용 · 중복 복용 의심 |
+| fall_event | 없음 · 있음 |
+| mood | 양호 · 저조 (어휘 밖이면 비움) |
+| special_notes | 위 항목에 못 들어가는 관찰·호소·사건을 짧게. 없으면 비움 |
+
+- `source`: 직접 말하면 `stated`, 말에서 해석하면 `inferred`, 말하지 않았으면 `missing` (value 비움)
+- `flag`: 기본 `ok`. 위험 필드(혈압·맥박·복약·낙상)가 `missing`이거나 candidates가 있거나
+  불가능한 수치면 `needs_confirm`.
+  미복용·중복 복용 의심·낙상 있음·위험한 특이사항이면 `risk`
+- 추측("드셨겠죠")은 사실이 아니다. 해석이 갈리면 `inferred`로 표시하고 메모를 남겨도 된다
+
+라벨은 `*.labels.json`의 각 케이스에 채운다 (value는 문자열, 없으면 빈 문자열).
+채운 뒤 `python -m carenote.generation --compare-blind <labels.json>`으로 정답과 비교한다.
+"""
+
+
+def blind_ids(spec_ids: list[str], seed: int = 0) -> dict[str, str]:
+    """spec_id를 B01, B02…로 가려서 순서도 섞는다 (id만으로 프로브를 짐작하지 못하게)."""
+    shuffled = sorted(spec_ids)
+    random.Random(seed).shuffle(shuffled)
+    return {sid: f"B{i + 1:02d}" for i, sid in enumerate(shuffled)}
+
+
+def render_blind_sheet(out_dir: Path, key: dict[str, str]) -> str:
+    """정답·제목·프로브·위험도를 숨기고 transcript만 보여 주는 라벨링 시트."""
+    docs = {str(d["spec_id"]): d for d in load_candidates(out_dir) if d.get("transcript")}
+    lines = ["# 골든셋 v2 후보 블라인드 라벨링", "", BLIND_GUIDE]
+    for sid, blind in sorted(key.items(), key=lambda kv: kv[1]):
+        doc = docs[sid]
+        lines += [f"## {blind}", "", f"> {doc['transcript']}", ""]
+    return "\n".join(lines)
+
+
+def blind_label_template(key: dict[str, str]) -> dict[str, Any]:
+    """사용자가 채울 빈 라벨 파일."""
+
+    def empty() -> dict[str, Any]:
+        return {"value": "", "source": "", "flag": "", "candidates": [], "memo": ""}
+
+    return {
+        "version": 1,
+        "labeler": "",
+        "cases": {blind: {f: empty() for f in _FIELD_ORDER} for blind in sorted(key.values())},
+    }
+
+
+def _norm(value: object) -> str:
+    return "".join(str(value or "").split())
+
+
+def _value_agrees(field: str, gold: Any, label: dict[str, Any]) -> bool:
+    raw_candidates = cast(list[object], label.get("candidates") or [])
+    label_candidates = {_norm(c) for c in raw_candidates}
+    gold_candidates = {_norm(c) for c in gold.candidates}
+    if gold_candidates:
+        return label_candidates == gold_candidates and not _norm(label.get("value"))
+    if label_candidates:
+        return False
+    if field == "special_notes":  # 자유 문장은 값 유무만 비교 (러너와 같은 규칙)
+        return bool(_norm(label.get("value"))) == bool(_norm(gold.value))
+    return _norm(label.get("value")) == _norm(gold.value)
+
+
+@dataclass
+class BlindReport:
+    """블라인드 라벨과 정답의 비교 결과."""
+
+    total: int = 0
+    value_agree: int = 0
+    flag_agree: int = 0
+    unlabeled: int = 0
+    gray_total: int = 0
+    gray_value_agree: int = 0
+    disagreements: list[str] = field(default_factory=lambda: list[str]())
+
+    @property
+    def value_rate(self) -> float | None:
+        """값 일치율."""
+        return None if self.total == 0 else self.value_agree / self.total
+
+    @property
+    def flag_rate(self) -> float | None:
+        """flag 일치율."""
+        return None if self.total == 0 else self.flag_agree / self.total
+
+    @property
+    def value_rate_excluding_gray(self) -> float | None:
+        """회색 필드(정책상 갈릴 수 있는 필드)를 뺀 값 일치율."""
+        rest = self.total - self.gray_total
+        return None if rest == 0 else (self.value_agree - self.gray_value_agree) / rest
+
+
+def compare_blind(labels: dict[str, Any], key: dict[str, str], specs: list[Spec]) -> BlindReport:
+    """사람 라벨을 스펙 정답과 비교한다. 값 일치와 flag 일치를 따로 센다."""
+    by_id = {s.spec_id: s for s in specs}
+    report = BlindReport()
+    for sid, blind in sorted(key.items(), key=lambda kv: kv[1]):
+        spec = by_id[sid]
+        case = labels.get("cases", {}).get(blind, {})
+        for fld in _FIELD_ORDER:
+            gold = spec.gold[FieldKey(fld)]
+            label = case.get(fld, {})
+            gray = FieldKey(fld) in spec.gray_fields
+            report.total += 1
+            report.gray_total += gray
+            if not (label.get("source") or label.get("flag") or _norm(label.get("value"))):
+                report.unlabeled += 1
+            value_ok = _value_agrees(fld, gold, label)
+            flag_ok = (label.get("flag") or "") == gold.flag.value
+            report.value_agree += value_ok
+            report.flag_agree += flag_ok
+            report.gray_value_agree += value_ok and gray
+            if not value_ok or not flag_ok:
+                cand_list = cast(list[object], label.get("candidates") or [])
+                shown_candidates = ", ".join(str(c) for c in cand_list)
+                shown = label.get("value") or shown_candidates or "(없음)"
+                gold_shown = gold.value or ", ".join(gold.candidates) or "(없음)"
+                report.disagreements.append(
+                    f"{sid} {fld}: 정답 {gold_shown}|{gold.flag.value}"
+                    f" ↔ 라벨 {shown}|{label.get('flag') or '-'}"
+                    + (" [gray]" if gray else "")
+                    + (f" 메모: {label['memo']}" if label.get("memo") else "")
+                )
+    return report
+
+
+def format_blind_report(report: BlindReport) -> str:
+    """사람이 읽는 비교 요약."""
+
+    def pct(v: float | None) -> str:
+        return "n/a" if v is None else f"{v * 100:.1f}%"
+
+    ok = (report.value_rate or 0) >= BLIND_AGREEMENT_TARGET
+    lines = [
+        f"필드 {report.total}개 (미작성 {report.unlabeled}개)",
+        f"값 일치율 {pct(report.value_rate)} (목표 {BLIND_AGREEMENT_TARGET:.0%}): "
+        f"{'달성' if ok else '미달'}",
+        f"  회색 필드 제외 {pct(report.value_rate_excluding_gray)}"
+        f" · flag 일치율 {pct(report.flag_rate)}",
+    ]
+    lines += [f"- {d}" for d in report.disagreements]
     return "\n".join(lines)
