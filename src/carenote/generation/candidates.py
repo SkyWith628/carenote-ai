@@ -8,12 +8,14 @@ from pathlib import Path
 from typing import Any
 
 from carenote.evaluation.loader import load_golden
+from carenote.evaluation.schema import FieldKey
 from carenote.generation.checks import (
     check_h_duplicates,
     check_k_closings,
     check_k_openings,
     check_k_time_openings,
     check_k_weather_openings,
+    check_p_repeated_phrases,
 )
 from carenote.generation.generator import GenerationResult, Generator
 from carenote.generation.prompts import GENERATION_PROMPT_VERSION
@@ -80,10 +82,22 @@ def apply_batch_checks(out_dir: Path, golden_dir: Path | None) -> dict[str, list
     k_end = check_k_closings(items)
     k_time = check_k_time_openings(items)
     k_weather = check_k_weather_openings(items)
+    phrase_items = [
+        (
+            str(d["spec_id"]),
+            {
+                FieldKey(key): quotes[0]
+                for key, quotes in dict(d.get("evidence") or {}).items()
+                if quotes
+            },
+        )
+        for d in docs
+    ]
+    p_repeat = check_p_repeated_phrases(phrase_items)
     summary: dict[str, list[str]] = {}
     for doc in docs:
         sid = str(doc["spec_id"])
-        results = [h[sid], k[sid], k_end[sid], k_time[sid], k_weather[sid]]
+        results = [h[sid], k[sid], k_end[sid], k_time[sid], k_weather[sid], p_repeat[sid]]
         doc["batch_checks"] = [r.model_dump() for r in results]
         (out_dir / f"{sid}.json").write_text(
             json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8"

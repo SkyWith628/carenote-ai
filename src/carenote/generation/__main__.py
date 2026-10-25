@@ -118,9 +118,7 @@ def main(
         return EXIT_REFUSED
 
     cache_dir = args.cache_dir or Path(settings.generation_cache_dir)
-    diversity = assign_diversity(
-        s.spec_id for s in specs
-    )  # 전체 스펙 기준이라 부분 실행도 같은 배정
+    diversity = assign_diversity(specs)  # 전체 스펙 기준이라 부분 실행도 같은 배정
     probe = Generator(
         _NoClient(),  # type: ignore[arg-type]
         model=model,

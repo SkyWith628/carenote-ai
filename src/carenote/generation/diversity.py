@@ -1,15 +1,21 @@
-"""케이스 간 다양성 배정: 잡담 소재와 첫 문장 유형을 코드가 결정적으로 정한다.
+"""케이스 간 다양성 배정: 코드가 결정적으로 정한다.
 
 생성 호출이 서로 독립이라 생성기는 다른 케이스를 모른다. 프롬프트로 "다양하게"라고 부탁하는 대신
-전체 스펙 목록에서 spec_id마다 소재 2개와 첫 문장 유형 1개를 미리 배정해 사용자 메시지에 넣는다
-(g3 파일럿에서 따님·반찬·냉장고 모티프가 3건에 반복된 문제의 대응).
-같은 spec_id 집합이면 항상 같은 배정이 나온다.
+전체 스펙 목록에서 spec_id마다 아래를 미리 배정해 사용자 메시지에 넣는다.
+- 잡담 소재 2개와 첫 문장 유형 1개 (g4: 따님·반찬·냉장고 모티프 반복 대응)
+- 항목 언급 순서 (g5: 7건 중 5건이 스키마 순서대로 읽던 문제 대응)
+- 정상 항목(낙상·복약·식사량)의 표현 방식 (g5: "넘어지신 일은 없었어요"가 4건에 반복된 문제 대응)
+같은 스펙 집합이면 항상 같은 배정이 나온다 (난수는 spec_id 문자열로 시드한다).
 """
 
 from __future__ import annotations
 
+import random
 from collections.abc import Iterable
 from dataclasses import dataclass
+
+from carenote.evaluation.schema import FieldKey
+from carenote.generation.spec import Spec
 
 
 @dataclass(frozen=True)
@@ -84,35 +90,107 @@ OPENING_TYPES: tuple[str, ...] = (
 )
 
 
+# 스키마(체크리스트) 순서. 생성물이 이 순서를 따르지 않도록 배정 순서는 이와 달라야 한다.
+CANONICAL_ORDER: tuple[FieldKey, ...] = (
+    FieldKey.VISIT_START,
+    FieldKey.BLOOD_PRESSURE,
+    FieldKey.PULSE,
+    FieldKey.MEAL_INTAKE,
+    FieldKey.MEDICATION_TAKEN,
+    FieldKey.FALL_EVENT,
+)
+
+# 정상 보고(정답이 단순 값인 항목)의 말하는 방식. scene·must_include가 정한 항목에는 쓰지 않는다.
+PHRASING_POOLS: dict[tuple[FieldKey, str], tuple[str, ...]] = {
+    (FieldKey.FALL_EVENT, "없음"): (
+        "'낙상'이나 '사고'라는 말을 쓰고 짧게 끝낸다",
+        "약·식사 이야기에 이어서 한 문장에 묶어 말한다",
+        "어르신의 말을 그대로 옮긴다 (넘어질 일이 뭐 있냐고 하시네요 식으로)",
+        "'안 ~셨어요' 부정형으로 말한다",
+        "다른 이야기 도중에 곁다리로 한마디 던진다",
+    ),
+    (FieldKey.MEDICATION_TAKEN, "복용"): (
+        "약 종류나 시간대를 함께 말한다 (아침 약은 드셨고 식으로)",
+        "챙겨 드린 행동으로 말한다 (물이랑 챙겨 드렸더니 식으로)",
+        "다른 항목과 한 문장에 묶어 말한다",
+        "어르신의 말을 옮긴다 (약은 먹었다고 하세요 식으로)",
+        "한마디로 짧게 말한다",
+    ),
+    (FieldKey.MEAL_INTAKE, "전량"): (
+        "남기신 게 없다는 식으로 말한다",
+        "그릇을 싹 비웠다는 식으로 말한다",
+        "다 드셨다고 직설적으로 말한다",
+    ),
+    (FieldKey.MEAL_INTAKE, "절반"): (
+        "반쯤 드시고 남기셨다는 식으로 말한다",
+        "절반 정도라고 직설적으로 말한다",
+        "밥은 반 공기쯤이라는 식으로 말한다",
+    ),
+    (FieldKey.MEAL_INTAKE, "소량"): (
+        "몇 숟가락만이라는 식으로 말한다",
+        "조금만 드셨다고 직설적으로 말한다",
+        "수저를 금방 내려놓으셨다는 식으로 말한다",
+    ),
+}
+
+
 @dataclass(frozen=True)
 class Diversity:
     """스펙 한 건에 배정된 다양성 지시."""
 
     opening_type: str
     topics: tuple[Topic, Topic]
+    field_order: tuple[FieldKey, ...]
+    phrasing: tuple[tuple[FieldKey, str], ...] = ()
 
     def to_payload(self) -> dict[str, object]:
         """사용자 메시지에 넣는 형태 (키워드는 숨긴다)."""
         return {
             "opening_type": self.opening_type,
             "chatter_topics": [t.label for t in self.topics],
+            "field_order": [k.value for k in self.field_order],
+            "phrasing_hints": {k.value: hint for k, hint in self.phrasing},
         }
 
 
-def assign_diversity(spec_ids: Iterable[str]) -> dict[str, Diversity]:
-    """정렬된 spec_id 순서로 소재 2개와 첫 문장 유형 1개를 배정한다.
+def _order_for(spec_id: str) -> tuple[FieldKey, ...]:
+    """spec_id로 시드한 항목 언급 순서. 스키마 순서와 같으면 다시 섞는다."""
+    rng = random.Random(f"order:{spec_id}")
+    order = list(CANONICAL_ORDER)
+    while tuple(order) == CANONICAL_ORDER:
+        rng.shuffle(order)
+    return tuple(order)
+
+
+def _phrasing_for(spec: Spec) -> tuple[tuple[FieldKey, str], ...]:
+    """정답이 단순 정상 값인 항목에만 표현 방식을 배정한다."""
+    hints: list[tuple[FieldKey, str]] = []
+    for key in (FieldKey.MEAL_INTAKE, FieldKey.MEDICATION_TAKEN, FieldKey.FALL_EVENT):
+        gold = spec.gold[key]
+        pool = PHRASING_POOLS.get((key, gold.value or ""))
+        if pool is None or gold.source.value != "stated":
+            continue
+        rng = random.Random(f"phrase:{key.value}:{spec.spec_id}")
+        hints.append((key, pool[rng.randrange(len(pool))]))
+    return tuple(hints)
+
+
+def assign_diversity(specs: Iterable[Spec]) -> dict[str, Diversity]:
+    """정렬된 spec_id 순서로 소재 2개, 첫 문장 유형 1개를 배정하고 순서·표현은 spec_id로 시드한다.
 
     첫 소재는 풀을 순서대로, 둘째 소재는 반 바퀴 뒤에서 고르되 한 바퀴를 돌 때마다 간격을 1씩
     늘려 같은 소재 쌍이 반복되지 않게 한다. 스펙 40건 안에서 한 소재는 최대 2번만 쓰인다.
     """
-    ordered = sorted(set(spec_ids))
+    ordered = sorted({s.spec_id: s for s in specs}.values(), key=lambda s: s.spec_id)
     half = len(TOPICS) // 2
     assignment: dict[str, Diversity] = {}
-    for i, spec_id in enumerate(ordered):
+    for i, spec in enumerate(ordered):
         first = TOPICS[i % len(TOPICS)]
         second = TOPICS[(i + half + i // half) % len(TOPICS)]
-        assignment[spec_id] = Diversity(
+        assignment[spec.spec_id] = Diversity(
             opening_type=OPENING_TYPES[i % len(OPENING_TYPES)],
             topics=(first, second),
+            field_order=_order_for(spec.spec_id),
+            phrasing=_phrasing_for(spec),
         )
     return assignment

@@ -8,6 +8,7 @@ from collections import Counter
 
 from conftest import GOOD_D1
 
+from carenote.evaluation.schema import FieldKey
 from carenote.generation.checks import (
     _CLINICAL_FAMILIES,  # pyright: ignore[reportPrivateUsage]
     check_k_weather_openings,
@@ -23,14 +24,13 @@ from carenote.generation.spec import Spec
 
 def test_assignment_is_deterministic_and_order_independent(all_specs: list[Spec]) -> None:
     """같은 spec_id 집합이면 입력 순서와 상관없이 같은 배정이 나온다."""
-    ids = [s.spec_id for s in all_specs]
-    assert assign_diversity(ids) == assign_diversity(reversed(ids))
-    assert assign_diversity(ids) == assign_diversity(ids)
+    assert assign_diversity(all_specs) == assign_diversity(reversed(all_specs))
+    assert assign_diversity(all_specs) == assign_diversity(all_specs)
 
 
 def test_assignment_spreads_topics_and_openings_across_all_specs(all_specs: list[Spec]) -> None:
     """40건 안에서 소재는 최대 2번, 소재 쌍은 반복 없이, 첫 문장 유형은 고르게 쓰인다."""
-    assignment = assign_diversity(s.spec_id for s in all_specs)
+    assignment = assign_diversity(all_specs)
     assert len(assignment) == 40
     topic_use = Counter(t.label for d in assignment.values() for t in d.topics)
     assert max(topic_use.values()) <= 2
@@ -55,7 +55,7 @@ def test_topics_are_non_clinical_and_numberless() -> None:
 
 def test_prompt_and_message_carry_the_assignment(spec_by_id: dict[str, Spec]) -> None:
     """사용자 메시지에는 첫 문장 유형과 소재 라벨이 들어가고 키워드는 숨겨진다."""
-    assignment = assign_diversity(spec_by_id)
+    assignment = assign_diversity(spec_by_id.values())
     spec = spec_by_id["H3"]
     payload = json.loads(build_user_message(spec, diversity=assignment["H3"]))
     div = payload["diversity"]
@@ -70,8 +70,9 @@ def test_generator_request_and_cache_key_depend_on_assignment(
 ) -> None:
     """배정이 다르면 요청 메시지와 캐시 키가 달라진다."""
     spec = spec_by_id["H3"]
-    base = assign_diversity(spec_by_id)
-    shifted = assign_diversity(["A0", *spec_by_id])  # 맨 앞에 끼워 넣어 정렬 위치를 한 칸씩 민다
+    base = assign_diversity(spec_by_id.values())
+    extra = spec_by_id["D1"].model_copy(update={"spec_id": "A0"})
+    shifted = assign_diversity([extra, *spec_by_id.values()])  # 맨 앞에 끼워 정렬 위치를 민다
     g1 = Generator(None, model="m", effort="medium", diversity=base)  # type: ignore[arg-type]
     g2 = Generator(None, model="m", effort="medium", diversity=shifted)  # type: ignore[arg-type]
     assert base["H3"] != shifted["H3"]
@@ -82,7 +83,7 @@ def test_generator_request_and_cache_key_depend_on_assignment(
 
 def test_n_warns_when_assigned_topic_is_unused(spec_by_id: dict[str, Spec]) -> None:
     """긴 발화에서 배정된 소재 키워드가 하나도 없으면 경고하고, 있으면 통과한다."""
-    assignment = assign_diversity(spec_by_id)
+    assignment = assign_diversity(spec_by_id.values())
     spec = spec_by_id["D1"]  # 상한 300자
     div = assignment["D1"]
     assert check_n_diversity(spec, GOOD_D1, div).level == "warn"
@@ -96,7 +97,7 @@ def test_n_warns_when_assigned_topic_is_unused(spec_by_id: dict[str, Spec]) -> N
 
 def test_n_is_skipped_for_short_specs(spec_by_id: dict[str, Spec]) -> None:
     """상한 150자 미만 스펙(H4, H5)에는 소재를 요구하지 않는다."""
-    assignment = assign_diversity(spec_by_id)
+    assignment = assign_diversity(spec_by_id.values())
     h4 = spec_by_id["H4"]
     case = GeneratedCase(
         transcript="오늘 방문했어요.", reference_transcript=None, evidence=[], notes=""
@@ -109,10 +110,13 @@ def test_run_candidate_checks_includes_n_only_with_assignment(
 ) -> None:
     """배정을 주면 결과 목록에 N이 들어가고, 안 주면 통과로 기록된다."""
     spec = spec_by_id["D1"]
-    codes = [r.code for r in run_candidate_checks(spec, GOOD_D1)]
-    assert codes[-1] == "N"
-    with_div = run_candidate_checks(spec, GOOD_D1, assign_diversity(spec_by_id)["D1"])
-    assert with_div[-1].code == "N" and with_div[-1].level == "warn"
+    without = {r.code: r for r in run_candidate_checks(spec, GOOD_D1)}
+    assert without["N"].level == "pass" and without["O"].level == "pass"
+    with_div = {
+        r.code: r
+        for r in run_candidate_checks(spec, GOOD_D1, assign_diversity(spec_by_id.values())["D1"])
+    }
+    assert with_div["N"].level == "warn"
 
 
 def test_k_weather_openings_warn_when_half_or_more_start_with_weather() -> None:
@@ -150,3 +154,45 @@ def _load_all() -> list[Spec]:
     from carenote.generation.spec import load_specs  # noqa: PLC0415
 
     return load_specs(SPEC_DIR)
+
+
+def test_field_order_is_a_non_canonical_permutation_and_deterministic(
+    all_specs: list[Spec],
+) -> None:
+    """항목 언급 순서는 6개 항목의 순열이고 스키마 순서와 다르며 같은 입력이면 같다."""
+    from carenote.generation.diversity import CANONICAL_ORDER  # noqa: PLC0415
+
+    first = assign_diversity(all_specs)
+    second = assign_diversity(reversed(all_specs))
+    for sid, div in first.items():
+        assert set(div.field_order) == set(CANONICAL_ORDER) and len(div.field_order) == 6
+        assert div.field_order != CANONICAL_ORDER
+        assert div.field_order == second[sid].field_order
+    assert len({d.field_order for d in first.values()}) > 20  # 40건이 서로 다른 순서를 폭넓게 쓴다
+
+
+def test_phrasing_hints_only_for_plain_stated_normal_values(
+    spec_by_id: dict[str, Spec],
+) -> None:
+    """정상 값(없음·복용·전량/절반/소량)을 말하는 항목에만 표현 방식이 배정된다."""
+    assignment = assign_diversity(spec_by_id.values())
+    d1 = dict(assignment["D1"].phrasing)  # 식사 전량, 복용, 낙상 없음 모두 단순 보고
+    assert set(d1) == {FieldKey.MEAL_INTAKE, FieldKey.MEDICATION_TAKEN, FieldKey.FALL_EVENT}
+    r2 = dict(assignment["R2"].phrasing)  # 식사 미섭취는 해당 풀이 없다
+    assert FieldKey.MEAL_INTAKE not in r2
+    h4 = dict(assignment["H4"].phrasing)  # 거의 비어 있는 발화: 정답이 전부 missing
+    assert h4 == {}
+    payload = assignment["D1"].to_payload()
+    assert payload["field_order"] and set(payload["phrasing_hints"]) == {  # type: ignore[arg-type]
+        "meal_intake",
+        "medication_taken",
+        "fall_event",
+    }
+
+
+def test_specs_no_longer_ask_for_lunch_on_morning_visits(all_specs: list[Spec]) -> None:
+    """오전(12시 이전) 방문 스펙의 scene·must_include에 '점심'이 남아 있지 않다 (20건 일반화)."""
+    for spec in all_specs:
+        visit = spec.gold[FieldKey.VISIT_START].value
+        if visit and int(visit.split(":")[0]) < 12:
+            assert "점심" not in spec.scene + " ".join(spec.must_include), spec.spec_id

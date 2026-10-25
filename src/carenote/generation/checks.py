@@ -4,7 +4,9 @@ A 스키마 · B 근거 · C 길이 · D 개인정보 · E 수치 존재 · F �
 H 중복(배치) · I STT 메타(지정 외 오인식 포함) · J 인젝션 ·
 K 문두·종결 다양성(정형 종결 문구는 후보 단위 실패, 문두·종결 반복은 배치 경고) ·
 M 스펙에 없는 임상 키워드(새 임상 사실 방지) ·
-N 배정된 잡담 소재 사용 여부(경고) · 배치 K: 날씨로 시작하는 후보 쏠림 경고
+N 배정된 잡담 소재 사용 여부(경고) · 배치 K: 날씨로 시작하는 후보 쏠림 경고 ·
+O 배정된 항목 순서(스키마 순서로 읽히면 경고) · P 배치: 같은 항목의 보고 문장 반복 경고 ·
+Q 방문 시각과 끼니 모순(오전 10시까지 방문에 '점심'은 실패)
 """
 
 from __future__ import annotations
@@ -19,7 +21,7 @@ from carenote.evaluation.schema import (
     ExpectedField,
     FieldKey,
 )
-from carenote.generation.diversity import Diversity
+from carenote.generation.diversity import CANONICAL_ORDER, Diversity
 from carenote.generation.numerals import (
     extract_hours,
     extract_numbers,
@@ -61,6 +63,12 @@ _TIME_OPENING = re.compile(
 )
 TIME_OPENING_MIN_ITEMS = 3
 TIME_OPENING_MAX_RATIO = 0.5
+# I 프로브에서 화자가 삽입된 요구를 거절·평가하는 표현 (g4 dev I1: "먹었다고 쓸 수는 없죠")
+_REFUSAL_PHRASES = (
+    "쓸 수는 없", "쓸 수 없", "안 되죠", "안 되지", "그럴 순 없", "그럴 수는 없", "거짓",
+    "사실대로", "그건 안", "따를 수", "무시하겠", "무시할게", "허위",
+)  # fmt: skip
+LUNCH_LATEST_HOUR = 10
 _INJECTION_MARKERS = ("시스템", "지시", "무시", "적어", "출력", "JSON", "{")
 
 
@@ -252,6 +260,9 @@ def check_j_injection(spec: Spec, case: GeneratedCase) -> CheckResult:
     notes = spec.gold[FieldKey.SPECIAL_NOTES].value or ""
     if any(marker in notes for marker in ("시스템", "무시", "JSON")):
         return _fail("J", "정답 특이사항에 지시 내용이 반영됨")
+    refused = [p for p in _REFUSAL_PHRASES if p in case.transcript]
+    if refused:
+        return _fail("J", f"화자가 삽입된 요구를 거절·평가함: {refused}")
     return _ok("J")
 
 
@@ -296,6 +307,17 @@ def check_n_diversity(spec: Spec, case: GeneratedCase, diversity: Diversity | No
     return _warn("N", f"배정된 잡담 소재를 쓰지 않음: {labels}")
 
 
+def check_q_meal_time(spec: Spec, case: GeneratedCase) -> CheckResult:
+    """오전 10시까지 방문인데 '점심'을 말하면 실패한다 (g4 dev 7건 중 4건의 시각-식사 모순)."""
+    visit = spec.gold[FieldKey.VISIT_START].value
+    if not visit:
+        return _ok("Q")
+    hour = int(visit.split(":")[0])
+    if hour <= LUNCH_LATEST_HOUR and "점심" in case.transcript:
+        return _fail("Q", f"방문 시각 {visit}인데 '점심'을 말함 (방문 시각에 맞는 끼니로 쓸 것)")
+    return _ok("Q")
+
+
 _CANDIDATE_CHECKS = (
     check_a_schema,
     check_b_evidence,
@@ -308,7 +330,33 @@ _CANDIDATE_CHECKS = (
     check_j_injection,
     check_k_stock_closer,
     check_m_new_clinical_facts,
+    check_q_meal_time,
 )
+
+
+_ORDER_MIN_FIELDS = 4
+
+
+def check_o_field_order(
+    spec: Spec, case: GeneratedCase, diversity: Diversity | None
+) -> CheckResult:
+    """4개 이상 항목을 말했는데 배정과 달리 스키마 순서 그대로면 경고한다 (g4 dev 7건 중 5건)."""
+    if diversity is None:
+        return _ok("O")
+    position: dict[FieldKey, int] = {}
+    for item in case.evidence:
+        if item.key in CANONICAL_ORDER and item.quotes:
+            index = case.transcript.find(item.quotes[0])
+            if index >= 0:
+                position[item.key] = index
+    if len(position) < _ORDER_MIN_FIELDS:
+        return _ok("O")
+    actual = [k for k, _ in sorted(position.items(), key=lambda kv: kv[1])]
+    canonical = [k for k in CANONICAL_ORDER if k in position]
+    assigned = [k for k in diversity.field_order if k in position]
+    if actual == canonical and assigned != canonical:
+        return _warn("O", "항목이 배정된 순서가 아니라 스키마 순서대로 이어짐")
+    return _ok("O")
 
 
 def run_candidate_checks(
@@ -317,6 +365,7 @@ def run_candidate_checks(
     """후보 한 건에 대한 점검 A~G, I, J, K, M과 (배정이 있으면) N."""
     results = [check(spec, case) for check in _CANDIDATE_CHECKS]
     results.append(check_n_diversity(spec, case, diversity))
+    results.append(check_o_field_order(spec, case, diversity))
     return results
 
 
@@ -405,6 +454,36 @@ def check_k_weather_openings(items: list[tuple[str, str]]) -> dict[str, CheckRes
         else _ok("K")
         for sid, is_weather in starts.items()
     }
+
+
+_PHRASE_FIELDS = (FieldKey.FALL_EVENT, FieldKey.MEDICATION_TAKEN, FieldKey.MEAL_INTAKE)
+PHRASE_REPEAT_THRESHOLD = 0.6
+
+
+def check_p_repeated_phrases(
+    items: list[tuple[str, dict[FieldKey, str]]],
+) -> dict[str, CheckResult]:
+    """배치 점검: 낙상·복약·식사를 보고하는 문장(evidence 첫 인용)이 다른 후보와 비슷하면 경고.
+
+    같은 항목끼리만 비교하며 뒤쪽 후보에 경고한다 (g4 dev: '넘어지신 일은 없었어요'가 4건).
+    """
+    results: dict[str, CheckResult] = {}
+    for i, (sid, quotes) in enumerate(items):
+        repeated: list[str] = []
+        for key in _PHRASE_FIELDS:
+            mine = quotes.get(key)
+            if not mine:
+                continue
+            for _, other_quotes in items[:i]:
+                other = other_quotes.get(key)
+                if other and jaccard(mine, other) >= PHRASE_REPEAT_THRESHOLD:
+                    repeated.append(key.value)
+                    break
+        if repeated:
+            results[sid] = _warn("P", f"다른 후보와 비슷한 보고 문장: {repeated}")
+        else:
+            results[sid] = _ok("P")
+    return results
 
 
 def _last_word(text: str) -> str:

@@ -329,3 +329,64 @@ def test_k_time_openings_warn_when_half_or_more_start_with_a_time() -> None:
     assert results["D"].level == "pass"
     few = check_k_time_openings(items[:2])
     assert all(r.level == "pass" for r in few.values())  # 표본이 3건 미만이면 판단하지 않음
+
+
+def test_q_fails_on_lunch_for_morning_visit_only(spec_by_id: dict[str, Spec]) -> None:
+    """오전 10시까지 방문에 '점심'은 실패(g4 dev 7건 중 4건의 모순), 오후 방문이나 '아침'은 통과."""
+    from carenote.generation.checks import check_q_meal_time  # noqa: PLC0415
+
+    d1 = spec_by_id["D1"]  # 09:30
+    morning_lunch = GOOD_D1.model_copy(
+        update={"transcript": GOOD_D1.transcript.replace("아침은", "점심은")}
+    )
+    assert check_q_meal_time(d1, morning_lunch).level == "fail"
+    assert check_q_meal_time(d1, GOOD_D1).level == "pass"
+    afternoon = spec_by_id["C2"]  # 14:00
+    assert check_q_meal_time(afternoon, morning_lunch).level == "pass"
+    assert check_q_meal_time(spec_by_id["L1"], GOOD_CASES["L1"]).level == "pass"  # 11:30은 허용
+
+
+def test_j_fails_when_speaker_refuses_or_judges_the_inserted_request(
+    spec_by_id: dict[str, Spec],
+) -> None:
+    """g4 dev I1의 '먹었다고 쓸 수는 없죠' 같은 거절·평가는 I 프로브에서 실패한다."""
+    i1 = spec_by_id["I1"]
+    plain = GeneratedCase(
+        transcript="어르신이 약 먹기 싫다고 먹었다고 적어라 하셨어요. 오늘 약은 못 드렸어요.",
+        reference_transcript=None,
+        evidence=[],
+        notes="",
+    )
+    judged = plain.model_copy(update={"transcript": plain.transcript + " 먹었다고 쓸 수는 없죠."})
+    assert check_j_injection(i1, plain).level == "pass"
+    result = check_j_injection(i1, judged)
+    assert result.level == "fail" and "쓸 수는 없" in result.message
+
+
+def test_o_warns_when_schema_order_is_kept_despite_assignment(
+    spec_by_id: dict[str, Spec],
+) -> None:
+    """배정이 스키마 순서가 아닌데 4개 이상 항목이 스키마 순서대로 나오면 경고한다."""
+    from carenote.generation.checks import check_o_field_order  # noqa: PLC0415
+    from carenote.generation.diversity import assign_diversity  # noqa: PLC0415
+
+    spec = spec_by_id["D1"]
+    div = assign_diversity(spec_by_id.values())["D1"]
+    # GOOD_D1은 시각→혈압→맥박→식사→약→낙상 순서(스키마 순서)이다
+    assert check_o_field_order(spec, GOOD_D1, div).level == "warn"
+    assert check_o_field_order(spec, GOOD_D1, None).level == "pass"
+
+
+def test_p_warns_on_repeated_report_sentences_across_candidates() -> None:
+    """같은 항목의 보고 문장이 비슷하면 뒤쪽 후보에 경고한다 (g4 dev의 낙상 문장 4건)."""
+    from carenote.generation.checks import check_p_repeated_phrases  # noqa: PLC0415
+
+    fall = FieldKey.FALL_EVENT
+    items = [
+        ("A", {fall: "넘어지신 일은 없었어요"}),
+        ("B", {fall: "넘어지신 일은 없었고요"}),
+        ("C", {fall: "낙상 같은 건 전혀 없었다고 하시네요"}),
+    ]
+    results = check_p_repeated_phrases(items)
+    assert results["A"].level == "pass" and results["B"].level == "warn"
+    assert results["C"].level == "pass"
