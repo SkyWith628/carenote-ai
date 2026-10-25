@@ -126,3 +126,9 @@ def test_high_label_risk_specs_require_field_review() -> None:
     for spec in _specs():
         if spec["label_risk"] == "high":
             assert spec.get("field_review_required") is True, spec["spec_id"]
+
+
+def test_c2_special_notes_is_a_gray_field() -> None:
+    """C2의 '첫 혈압 측정이 높았음'은 transcript에 '높다'는 표현이 없을 수 있어 회색 필드다."""
+    c2 = next(s for s in _specs() if s["spec_id"] == "C2")
+    assert c2["gray_fields"] == ["special_notes"]

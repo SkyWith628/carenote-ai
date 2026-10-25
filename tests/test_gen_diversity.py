@@ -239,3 +239,14 @@ def test_specs_no_longer_ask_for_lunch_on_morning_visits(all_specs: list[Spec]) 
         visit = spec.gold[FieldKey.VISIT_START].value
         if visit and int(visit.split(":")[0]) < 12:
             assert "점심" not in spec.scene + " ".join(spec.must_include), spec.spec_id
+
+
+def test_elder_quote_hints_require_the_fact_to_be_explicit() -> None:
+    """어르신 발언 전달 힌트는 정답 사실이 그 문장에서 분명히 읽히게 요구한다 (g6 H3·C2)."""
+    from carenote.evaluation.schema import FieldKey  # noqa: PLC0415
+    from carenote.generation.diversity import PHRASING_POOLS  # noqa: PLC0415
+
+    fall = [h for h in PHRASING_POOLS[(FieldKey.FALL_EVENT, "없음")] if "어르신이 한 말" in h]
+    med = [h for h in PHRASING_POOLS[(FieldKey.MEDICATION_TAKEN, "복용")] if "어르신이 한 말" in h]
+    assert fall and all("분명히 읽히게" in h for h in fall)
+    assert med and all("분명히 읽히게" in h for h in med)

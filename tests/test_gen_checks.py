@@ -407,3 +407,35 @@ def test_p_catches_copied_example_phrase_that_similarity_alone_misses() -> None:
         [("C2", {FieldKey.FALL_EVENT: c2}), ("H3", {FieldKey.FALL_EVENT: h3})]
     )
     assert results["C2"].level == "pass" and results["H3"].level == "warn"
+
+
+def test_r_requires_a_fall_word_in_the_fall_evidence(spec_by_id: dict[str, Spec]) -> None:
+    """낙상 정답의 근거 문장에 낙상 어휘가 없으면(g6 H3의 비유) 실패하고, 명시적이면 통과한다."""
+    from carenote.generation.checks import check_r_explicit_fall  # noqa: PLC0415
+
+    h3 = spec_by_id["H3"]
+    metaphor = (
+        "어르신이 요 며칠 발이 땅에 딱 붙어 다녔다고, 바닥 구경은 한 번도 안 했다고 하시더라고요"
+    )
+    case = GOOD_CASES["H3"].model_copy(
+        update={
+            "transcript": GOOD_CASES["H3"].transcript + " " + metaphor,
+            "evidence": [
+                *[e for e in GOOD_CASES["H3"].evidence if e.key is not FieldKey.FALL_EVENT],
+                FieldEvidence(key=FieldKey.FALL_EVENT, quotes=[metaphor]),
+            ],
+        }
+    )
+    result = check_r_explicit_fall(h3, case)
+    assert result.level == "fail" and "낙상 어휘" in result.message
+    assert check_r_explicit_fall(h3, GOOD_CASES["H3"]).level == "pass"
+
+
+def test_r_ignores_specs_without_a_stated_fall(spec_by_id: dict[str, Spec]) -> None:
+    """낙상 정답이 missing인 스펙(H4)에는 적용하지 않는다."""
+    from carenote.generation.checks import check_r_explicit_fall  # noqa: PLC0415
+
+    empty = GeneratedCase(
+        transcript="오늘 방문했어요.", reference_transcript=None, evidence=[], notes=""
+    )
+    assert check_r_explicit_fall(spec_by_id["H4"], empty).level == "pass"

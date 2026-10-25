@@ -6,7 +6,8 @@ K 문두·종결 다양성(정형 종결 문구는 후보 단위 실패, 문두�
 M 스펙에 없는 임상 키워드(새 임상 사실 방지) ·
 N 배정된 잡담 소재 사용 여부(경고) · 배치 K: 날씨로 시작하는 후보 쏠림 경고 ·
 O 배정된 항목 순서(스키마 순서로 읽히면 경고) · P 배치: 같은 항목의 보고 문장 반복 경고 ·
-Q 방문 시각과 끼니 모순(오전 10시까지 방문에 '점심'은 실패)
+Q 방문 시각과 끼니 모순(오전 10시까지 방문에 '점심'은 실패) ·
+R 낙상 보고 문장에 낙상 어휘가 있어야 함(비유로만 말하면 실패)
 """
 
 from __future__ import annotations
@@ -69,6 +70,7 @@ _REFUSAL_PHRASES = (
     "사실대로", "그건 안", "따를 수", "무시하겠", "무시할게", "허위",
 )  # fmt: skip
 LUNCH_LATEST_HOUR = 10
+_FALL_WORDS = ("넘어", "낙상", "쓰러", "미끄러", "주저앉", "사고", "떨어지")
 _INJECTION_MARKERS = ("시스템", "지시", "무시", "적어", "출력", "JSON", "{")
 
 
@@ -318,6 +320,19 @@ def check_q_meal_time(spec: Spec, case: GeneratedCase) -> CheckResult:
     return _ok("Q")
 
 
+def check_r_explicit_fall(spec: Spec, case: GeneratedCase) -> CheckResult:
+    """낙상 정답이 있으면 근거 문장에 낙상 어휘가 있어야 한다 (g6 H3: '바닥 구경은…')."""
+    gold = spec.gold[FieldKey.FALL_EVENT]
+    if gold.value is None or gold.source.value != "stated":
+        return _ok("R")
+    quotes = [q for item in case.evidence if item.key is FieldKey.FALL_EVENT for q in item.quotes]
+    if not quotes:
+        return _ok("R")  # 근거 누락은 A가 잡는다
+    if any(word in " ".join(quotes) for word in _FALL_WORDS):
+        return _ok("R")
+    return _fail("R", "낙상 근거 문장에 낙상 어휘가 없음 (비유·완곡이 아니라 명시적으로 말할 것)")
+
+
 _CANDIDATE_CHECKS = (
     check_a_schema,
     check_b_evidence,
@@ -331,6 +346,7 @@ _CANDIDATE_CHECKS = (
     check_k_stock_closer,
     check_m_new_clinical_facts,
     check_q_meal_time,
+    check_r_explicit_fall,
 )
 
 

@@ -170,7 +170,9 @@
           "candidates": []
         }
       },
-      "gray_fields": [],
+      "gray_fields": [
+        "special_notes"
+      ],
       "author": "llm"
     },
     {

@@ -1,0 +1,172 @@
+{
+  "spec_id": "R1",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "들어가는데 옆집 아주머니가 이불 널고 계셔서 인사 좀 하고, 그 집 강아지가 또 따라 나와서 한참 짖더라고요. 어르신 댁엔 열한 시쯤 들어갔어요. 낙상은 없었고요. 약은 물 한 컵 떠다 놓고 아침 약 봉지 뜯어서 손바닥에 올려 드렸더니 다 넘기셨어요. 맥박 82, 혈압은 128에 80이요. 아침 겸 간식으로 죽 데워 드렸는데 숟가락 서너 번 뜨시고 내려놓으셨어요. 어, 그리고 가슴이 답답하다고 하시면서 숨이 차서 말씀을 끝까지 못 이으시고 자꾸 쉬었다 하시더라고요.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "어르신 댁엔 열한 시쯤 들어갔어요."
+    ],
+    "fall_event": [
+      "낙상은 없었고요."
+    ],
+    "medication_taken": [
+      "약은 물 한 컵 떠다 놓고 아침 약 봉지 뜯어서 손바닥에 올려 드렸더니 다 넘기셨어요."
+    ],
+    "pulse": [
+      "맥박 82, 혈압은 128에 80이요."
+    ],
+    "blood_pressure": [
+      "맥박 82, 혈압은 128에 80이요."
+    ],
+    "meal_intake": [
+      "아침 겸 간식으로 죽 데워 드렸는데 숟가락 서너 번 뜨시고 내려놓으셨어요."
+    ],
+    "special_notes": [
+      "어, 그리고 가슴이 답답하다고 하시면서 숨이 차서 말씀을 끝까지 못 이으시고 자꾸 쉬었다 하시더라고요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g6",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "이웃이나 가족과 마주친 일",
+      "opening_scene": "옆집 아주머니와 인사를 나눔",
+      "chatter_topics": [
+        "이불 말리기",
+        "옆집 강아지"
+      ],
+      "field_order": [
+        "visit_start",
+        "fall_event",
+        "medication_taken",
+        "pulse",
+        "blood_pressure",
+        "meal_intake"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "숟가락질 횟수로 어림해서 말한다",
+        "medication_taken": "챙겨 드린 행동을 중심으로 말한다",
+        "fall_event": "'낙상'이나 '사고' 같은 사무적인 단어를 써서 짧게 끝낸다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "dev",
+    "label_risk": "medium"
+  }
+}
