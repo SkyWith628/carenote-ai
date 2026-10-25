@@ -56,6 +56,20 @@ def test_spec_metadata_is_valid(spec: dict[str, Any]) -> None:
     assert set(spec["gray_fields"]) <= {k.value for k in FieldKey}
 
 
+def test_stt_specs_carry_error_metadata_and_only_they_do() -> None:
+    """S 프로브는 오인식 메타데이터(대상 필드, 원문, 복원 가능 여부)를 가지고, 다른 프로브는 갖지 않는다."""
+    for spec in _specs():
+        errors = spec.get("stt", {}).get("errors", []) if "stt" in spec else []
+        if spec["probe"] == "S":
+            assert errors, spec["spec_id"]
+            for e in errors:
+                assert e["field"] in {k.value for k in FieldKey}
+                assert e["reference"] != e["heard"]
+                assert isinstance(e["recoverable_from_text"], bool)
+        else:
+            assert "stt" not in spec, spec["spec_id"]
+
+
 def test_each_probe_has_exactly_one_dev_spec_so_far() -> None:
     """프로브당 dev는 1건이다 (설계 6장: 신규 40건 중 dev 10건)."""
     dev_per_probe: dict[str, int] = {}

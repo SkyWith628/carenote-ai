@@ -1,0 +1,257 @@
+{
+  "version": 1,
+  "probe": "G",
+  "specs": [
+    {
+      "spec_id": "G1",
+      "probe": "G",
+      "split": "test",
+      "title": "제주 방언과 수치 읽는 방식",
+      "scene": "제주 방언 어미('~수다', '~우다')로 말한다. 혈압을 '일삼공에 팔공'(130/80)으로 읽는다. 맥박은 한글 수사 '육십오'로 말한다. 낙상은 '넘어진 일은 어수다'(없음)로 말한다. 방언 표기는 작성자 추정이며 원어민 확인이 필요하다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "제주",
+        "격식": "방언",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        280
+      ],
+      "must_include": [
+        "혈압 일삼공에 팔공",
+        "맥박 육십오",
+        "방문 시각 열 시",
+        "밥은 다 드셨수다",
+        "약은 드셨수다",
+        "넘어진 일은 어수다"
+      ],
+      "must_not": [
+        "표준어 번역투 문장"
+      ],
+      "traps": "방언 어미와 어휘를 못 읽어 값을 놓치거나 '어수다'(없다)를 반대로 읽는다.",
+      "hypothesis": "방언 이해도 편차. 대체로 맞추겠지만 '어수다'가 위험 필드라 틀리면 중대.",
+      "policy": "정책 해당 없음, 방언 표기 현장 확인 필요",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "130/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "65",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "G2",
+      "probe": "G",
+      "split": "dev",
+      "title": "강원 방언과 수치를 숫자 하나씩 읽는 방식",
+      "scene": "강원 방언 어미('~드래요', '~했시유')로 말한다. 혈압을 '일사공에 구공'(140/90)처럼 숫자 하나씩 읽는다. 맥박은 아라비아 숫자로 78이라고 한다. 식사는 '쪼금 드셨드래요'다.",
+      "style": {
+        "화자": "60대 남성",
+        "지역": "강원",
+        "격식": "방언",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        280
+      ],
+      "must_include": [
+        "혈압 일사공에 구공",
+        "맥박 78",
+        "방문 시각 오후 두 시",
+        "쪼금 드셨드래요",
+        "약은 챙겨 드셨드래요",
+        "넘어진 적은 없다드래요"
+      ],
+      "must_not": [
+        "표준어 수치 표현('백사십')"
+      ],
+      "traps": "'일사공'을 140이 아닌 다른 값(1 4 0, 14)으로 읽는다. '쪼금'을 절반으로 읽는다.",
+      "hypothesis": "수치 읽기 방식. 모델은 대체로 이해하지만 형식 오류(14/90)가 날 수 있다.",
+      "policy": "정책 #9(조금=소량)",
+      "label_risk": "low",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "140/90",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "소량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "G3",
+      "probe": "G",
+      "split": "test",
+      "title": "경상 방언의 하한만 말한 혈압",
+      "scene": "경상 방언('~카데예', '~아입니꺼')으로 말한다. '혈압이 백사십 넘었다 카데예'라고 하한만 전해 들은 대로 말하고 정확한 값은 말하지 않는다. 맥박은 70이라고 정확히 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "경상",
+        "격식": "방언",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        280
+      ],
+      "must_include": [
+        "혈압 백사십 넘었다 카데예(하한만)",
+        "맥박 70",
+        "방문 시각 아침 아홉 시",
+        "점심 반 정도",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "정확한 혈압 수치"
+      ],
+      "traps": "'백사십 넘었다'를 140/없음 또는 140/xx로 기록한다.",
+      "hypothesis": "정책 #12와 방언이 겹친다. 하한을 값으로 옮기면 수치 오류이자 환각.",
+      "policy": "정책 #12(하한만 말하면 값 없음 + 확인 필요)",
+      "label_risk": "low",
+      "gray_fields": [
+        "special_notes"
+      ],
+      "gold": {
+        "visit_start": {
+          "value": "09:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "version": 1,
+  "probe": "S",
+  "specs": [
+    {
+      "spec_id": "S1",
+      "probe": "S",
+      "split": "dev",
+      "title": "띄어쓰기·음절 분리 오인식 (텍스트로 복원 가능)",
+      "scene": "정상적인 방문 보고를 말하되, STT가 단어를 잘못 끊은 것처럼 transcript를 만든다. 참고 발화(reference)는 깔끔한 정상 문장이고, STT 결과(transcript)는 '혈 압은', '드 셨고', '넘어 지신' 처럼 음절이 끊긴 형태다. 숫자는 정확하다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        260
+      ],
+      "must_include": [
+        "방문 시각 오전 10시",
+        "혈 압은 130에 80",
+        "맥박 72(아라비아 숫자)",
+        "점심은 다 드 셨고",
+        "약도 드 셨어요",
+        "넘어 지신 적은 없어요"
+      ],
+      "must_not": [
+        "숫자 오인식",
+        "부정어 탈락"
+      ],
+      "traps": "끊긴 음절 때문에 '혈 압'을 놓치거나 '넘어 지신 적은 없어요'의 부정을 잘못 읽는다.",
+      "hypothesis": "대부분 맞춘다. STT 오류 중 텍스트로 복원 가능한 통제 케이스. 틀리면 토큰화 취약성을 의미.",
+      "policy": "stt_error, 정책 해당 없음",
+      "label_risk": "low",
+      "gray_fields": [],
+      "stt": {
+        "errors": [
+          {
+            "field": "blood_pressure",
+            "reference": "혈압은",
+            "heard": "혈 압은",
+            "kind": "spacing",
+            "recoverable_from_text": true
+          },
+          {
+            "field": "medication_taken",
+            "reference": "드셨어요",
+            "heard": "드 셨어요",
+            "kind": "spacing",
+            "recoverable_from_text": true
+          },
+          {
+            "field": "fall_event",
+            "reference": "넘어지신",
+            "heard": "넘어 지신",
+            "kind": "spacing",
+            "recoverable_from_text": true
+          }
+        ]
+      },
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "130/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "S2",
+      "probe": "S",
+      "split": "test",
+      "title": "부정어 탈락 (텍스트만으로는 복원 불가, 가장 위험한 STT 오류)",
+      "scene": "참고 발화에서는 '약은 안 드셨어요'라고 말한다. STT 결과에서는 '안'이 탈락해 '약은 드셨어요'가 된다. 나머지는 정상이다. transcript만 보면 정상적인 복용 보고로 읽힌다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        260
+      ],
+      "must_include": [
+        "방문 시각 오후 3시",
+        "혈압 126에 80",
+        "맥박 68",
+        "점심 절반",
+        "참고 발화: 약은 안 드셨어요 / STT: 약은 드셨어요",
+        "넘어진 일 없음"
+      ],
+      "must_not": [
+        "transcript 안에 부정어가 남아 있는 단서"
+      ],
+      "traps": "텍스트상 정상으로 보이므로 복용으로 기록한다. 정답은 reference 기준 미복용(risk)이다.",
+      "hypothesis": "모든 텍스트 전용 구성이 틀린다(구조적 오답). 오디오 재청취(Re-listener)가 있어야 복원 가능한 케이스. 모델 오류와 분리해 집계해야 한다.",
+      "policy": "stt_error(정답은 reference 기준), 정책 해당 없음",
+      "label_risk": "low",
+      "gray_fields": [],
+      "stt": {
+        "errors": [
+          {
+            "field": "medication_taken",
+            "reference": "약은 안 드셨어요",
+            "heard": "약은 드셨어요",
+            "kind": "negation_drop",
+            "recoverable_from_text": false
+          }
+        ]
+      },
+      "gold": {
+        "visit_start": {
+          "value": "15:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "126/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "68",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "미복용",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "S3",
+      "probe": "S",
+      "split": "test",
+      "title": "동음 오인식 (양 → 약), 문맥으로 부분 복원 가능",
+      "scene": "참고 발화는 '점심 양은 반 정도 드셨어요'다. STT 결과는 '점심 약은 반 정도 드셨어요'다. 복약은 따로 언급하지 않는다. 나머지는 정상이다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        260
+      ],
+      "must_include": [
+        "방문 시각 낮 열두 시",
+        "혈압 122에 78",
+        "맥박 70",
+        "참고 발화: 점심 양은 반 정도 / STT: 점심 약은 반 정도",
+        "넘어진 일 없음",
+        "복약은 언급하지 않음"
+      ],
+      "must_not": [
+        "복약을 직접 언급하는 문장"
+      ],
+      "traps": "'약은 반 정도 드셨어요'를 복약 필드(부분 복용)로 옮기거나 식사량을 놓친다.",
+      "hypothesis": "문맥('점심')으로 복원하는 모델과 못 하는 모델이 갈린다.",
+      "policy": "stt_error, 정책 #1(복약 미언급은 missing)",
+      "label_risk": "low",
+      "gray_fields": [],
+      "stt": {
+        "errors": [
+          {
+            "field": "meal_intake",
+            "reference": "점심 양은",
+            "heard": "점심 약은",
+            "kind": "homophone",
+            "recoverable_from_text": true
+          }
+        ]
+      },
+      "gold": {
+        "visit_start": {
+          "value": "12:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    }
+  ]
+}
