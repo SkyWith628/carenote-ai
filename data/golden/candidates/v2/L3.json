@@ -1,0 +1,152 @@
+{
+  "spec_id": "L3",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "아이고 선생님 잠깐만 있어 봐, 열쇠를 어따 뒀는가 모르겄네 하시면서 문 앞에서 한참 허둥대시다가, 결국 신발장 위에 있는 거 찾아서 문 열어 주셨어요. 들어가자마자 제가 어머니 오늘 괜찮으세요 하니까 아이고 나 괜찮아 괜찮아, 그라고 약 먹었어, 아침 묵고 바로 먹었당께 그러시더라고요. 그래서 약은 아침에 드셨고요. 아침 식사는 밥 한 공기에 된장국까지 남긴 거 없이 다 드셨어요. 어, 그라고 손자 얘기를 한참 하셨는데, 큰손자가 군대 가서 지난주에 전화가 왔다고, 강원도 어디 있다고 그러시대요. 휴가는 언제 나오냐고 물어봤는디 아직 모른다고 하시고. 그 얘기 하다가 제가 요새 다리는 어떠세요, 혹시 어디서 넘어지거나 그런 거 없으셨어요 하니까 넘어지긴 뭘 넘어져, 나 멀쩡해 하셔서, 넘어지신 일은 없었어요. 그러고 바로 또 작은손주 학교 운동회 얘기로 넘어가셨어요. 다음 주 토요일이 운동회라 며느리가 사진 찍어서 보내 준다 했다고, 달리기도 나간다고 그러시더라고요. 음, 제가 도착한 게 오전 10시, 그쯤이었고요. 얘기 좀 하다가 소파에 앉으셔서 맥박 먼저 쟀는데 84 나왔고, 혈압은 138에 88이었어요. 그, 재는 동안에도 어르신 밝은 표정으로 손주들 얘기를 계속 하셨고요. 운동회 날 손주 줄 간식은 뭘 사 가야 쓰겄냐고 물어보셔서 다음 방문 때 같이 생각해 보자고 했어요.",
+  "reference_transcript": null,
+  "evidence": {
+    "medication_taken": [
+      "아이고 나 괜찮아 괜찮아, 그라고 약 먹었어, 아침 묵고 바로 먹었당께 그러시더라고요.",
+      "그래서 약은 아침에 드셨고요."
+    ],
+    "meal_intake": [
+      "아침 식사는 밥 한 공기에 된장국까지 남긴 거 없이 다 드셨어요."
+    ],
+    "fall_event": [
+      "넘어지긴 뭘 넘어져, 나 멀쩡해 하셔서, 넘어지신 일은 없었어요."
+    ],
+    "visit_start": [
+      "음, 제가 도착한 게 오전 10시, 그쯤이었고요."
+    ],
+    "pulse": [
+      "맥박 먼저 쟀는데 84 나왔고"
+    ],
+    "blood_pressure": [
+      "혈압은 138에 88이었어요."
+    ],
+    "mood": [
+      "그, 재는 동안에도 어르신 밝은 표정으로 손주들 얘기를 계속 하셨고요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 2,
+    "diversity": {
+      "opening_type": "어르신이 문을 열어 주며 먼저 건넨 한마디",
+      "opening_scene": "열쇠를 못 찾겠다며 허둥대심",
+      "chatter_topics": [
+        "군대 간 손자",
+        "손주 학교 운동회"
+      ],
+      "field_order": [
+        "medication_taken",
+        "meal_intake",
+        "fall_event",
+        "visit_start",
+        "pulse",
+        "blood_pressure"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "다 드셨다고 직설적으로 말한다",
+        "medication_taken": "어르신이 한 말로 전한다. 표현은 직접 지어내되, 약을 드셨다는 뜻이 그 문장에서 분명히 읽히게 한다",
+        "fall_event": "다른 이야기 도중에 곁다리로 한마디 던진다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "L",
+    "split": "test",
+    "label_risk": "medium"
+  }
+}

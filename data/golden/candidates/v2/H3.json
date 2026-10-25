@@ -135,8 +135,8 @@
     },
     {
       "code": "K",
-      "level": "pass",
-      "message": ""
+      "level": "warn",
+      "message": "끝맺음 '했어요'이(가) 3건에서 반복됨"
     },
     {
       "code": "K",
@@ -150,8 +150,8 @@
     },
     {
       "code": "P",
-      "level": "pass",
-      "message": ""
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['fall_event']"
     }
   ],
   "review": {

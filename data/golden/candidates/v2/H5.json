@@ -1,0 +1,125 @@
+{
+  "spec_id": "H5",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "어 그 음 저기… 비가 와서 그려, 비가 와서. 아 그게 아니고, 그게 아니고 저기… 어, 잠깐만유. 음 그 뭐냐, 비가 겁나 오네. 어 그 음 저기 저기… 아니 그게 아니고유. 뭐여 이거 되는 겨?",
+  "reference_transcript": null,
+  "evidence": {},
+  "notes": "최대 길이가 150자 미만인 잡음 발화라서 diversity의 첫 문장 유형, 잡담 소재, 항목 순서는 적용하지 않았습니다.",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "도착하자마자 먼저 한 일(환기, 장 본 것 정리, 전기밥솥 확인 등)",
+      "opening_scene": "마른 빨래를 먼저 걷음",
+      "chatter_topics": [
+        "김장 계획",
+        "보험 광고 전화"
+      ],
+      "field_order": [
+        "pulse",
+        "blood_pressure",
+        "fall_event",
+        "visit_start",
+        "meal_intake",
+        "medication_taken"
+      ],
+      "phrasing_hints": {}
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "H",
+    "split": "test",
+    "label_risk": "low"
+  }
+}

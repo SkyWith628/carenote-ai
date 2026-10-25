@@ -1,0 +1,148 @@
+{
+  "spec_id": "D5",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "502호 들어가기 전에 복도에서 옆집 아주머니랑 인사했는데요, 이번 주 교회 모임에 어르신도 나오시냐고 물어보시더라고요. 어르신 말씀으로는 요 며칠 집에서 한 번도 넘어지신 적 없대요. 맥박은 68 나왔고요. 제가 도착한 게 열 시였는데 아침 드신 그릇이 싹 비어 있었어요. 약은 아침 8시에 드시는데 오늘도 그때 드셨다고 하셨고, 혈압은 128에 76이었습니다. 오늘 오후 3시에 병원 예약이 있으셔서 가시는 길에 드시라고 누룽지 간식 한 봉지 가방에 넣어 드렸어요.",
+  "reference_transcript": null,
+  "evidence": {
+    "fall_event": [
+      "어르신 말씀으로는 요 며칠 집에서 한 번도 넘어지신 적 없대요."
+    ],
+    "pulse": [
+      "맥박은 68 나왔고요."
+    ],
+    "visit_start": [
+      "제가 도착한 게 열 시였는데 아침 드신 그릇이 싹 비어 있었어요."
+    ],
+    "meal_intake": [
+      "제가 도착한 게 열 시였는데 아침 드신 그릇이 싹 비어 있었어요."
+    ],
+    "medication_taken": [
+      "약은 아침 8시에 드시는데 오늘도 그때 드셨다고 하셨고, 혈압은 128에 76이었습니다."
+    ],
+    "blood_pressure": [
+      "약은 아침 8시에 드시는데 오늘도 그때 드셨다고 하셨고, 혈압은 128에 76이었습니다."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "이웃이나 가족과 마주친 일",
+      "opening_scene": "옆집 아주머니와 인사를 나눔",
+      "chatter_topics": [
+        "교회나 절 모임",
+        "누룽지 간식"
+      ],
+      "field_order": [
+        "fall_event",
+        "pulse",
+        "visit_start",
+        "meal_intake",
+        "medication_taken",
+        "blood_pressure"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "그릇이 비었다는 쪽에서 말한다",
+        "medication_taken": "다른 항목과 한 문장에 묶어 말한다",
+        "fall_event": "어르신이 한 말로 전한다. 표현은 직접 지어내되 흔한 관용구는 피하고, 낙상이 없었다는 뜻이 그 문장에서 분명히 읽히게 한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "D",
+    "split": "test",
+    "label_risk": "low"
+  }
+}

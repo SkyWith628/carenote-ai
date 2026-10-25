@@ -1,0 +1,179 @@
+{
+  "spec_id": "D2",
+  "status": "needs_human",
+  "comparison_only": false,
+  "transcript": "창문부터 활짝 열어 놓고 환기 좀 시켰어요잉. 이불도 베란다에 널어 놨는디, 그 와중에 보니 어르신이 넘어지신 일은 없었고요. 어, 도착은 오전 11시였어요. 맥박은 72 나왔고요. 혈압이 음, 어제 병원 가셔서 재니께 150에 90 나왔다고 하시더라고요. 평소에는 120에 80 정도 되신당께요. 근디 오늘 제가 재니 132에 84였어요. 약은 드셨어요. 아침은 그, 국이랑 밥이랑 남기신 거 하나 없이 다 드셨고요. 시장 배추 값이 많이 올랐다고 어르신이 한참 말씀하셨어요.",
+  "reference_transcript": null,
+  "evidence": {
+    "fall_event": [
+      "이불도 베란다에 널어 놨는디, 그 와중에 보니 어르신이 넘어지신 일은 없었고요."
+    ],
+    "visit_start": [
+      "어, 도착은 오전 11시였어요."
+    ],
+    "pulse": [
+      "맥박은 72 나왔고요."
+    ],
+    "blood_pressure": [
+      "근디 오늘 제가 재니 132에 84였어요."
+    ],
+    "medication_taken": [
+      "약은 드셨어요."
+    ],
+    "meal_intake": [
+      "아침은 그, 국이랑 밥이랑 남기신 거 하나 없이 다 드셨고요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 3,
+    "diversity": {
+      "opening_type": "도착하자마자 먼저 한 일(환기, 장 본 것 정리, 전기밥솥 확인 등)",
+      "opening_scene": "창문부터 열어 환기시킴",
+      "chatter_topics": [
+        "시장 채소 값",
+        "이불 말리기"
+      ],
+      "field_order": [
+        "fall_event",
+        "visit_start",
+        "pulse",
+        "blood_pressure",
+        "medication_taken",
+        "meal_intake"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "남기신 게 없다는 쪽에서 말한다",
+        "medication_taken": "아주 짧게 한마디로 말한다",
+        "fall_event": "다른 이야기 도중에 곁다리로 한마디 던진다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "fail",
+      "message": "스펙에 없는 감정·기분 표현: ['활짝']"
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['meal_intake']"
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "D",
+    "split": "test",
+    "label_risk": "medium"
+  }
+}

@@ -31,6 +31,11 @@ DEFAULT_MAX_ATTEMPTS = 3
 _UNUSABLE_STOP_REASONS = frozenset({"refusal", "max_tokens"})
 
 Status = Literal["passed", "needs_human", "api_failure"]
+DEFAULT_MAX_CONSECUTIVE_FAILURES = 3
+
+
+class ApiUnavailable(RuntimeError):
+    """API 호출이 연속으로 실패해 실행을 멈춘다 (장애·한도 문제로 보고 계속 두드리지 않는다)."""
 
 
 @dataclass
@@ -44,6 +49,7 @@ class GenerationStats:
     input_tokens: int = 0
     output_tokens: int = 0
     latency_s: float = 0.0
+    last_error: str | None = None
 
 
 @dataclass
@@ -56,6 +62,7 @@ class GenerationResult:
     case: GeneratedCase | None
     checks: list[CheckResult] = field(default_factory=lambda: list[CheckResult]())
     comparison_only: bool = False
+    error: str | None = None
 
 
 class Generator:
@@ -71,6 +78,7 @@ class Generator:
         guard: CostGuard | None = None,
         max_attempts: int = DEFAULT_MAX_ATTEMPTS,
         diversity: dict[str, Diversity] | None = None,
+        max_consecutive_failures: int = DEFAULT_MAX_CONSECUTIVE_FAILURES,
     ) -> None:
         self._client = client
         self.model = model
@@ -79,6 +87,8 @@ class Generator:
         self._guard = guard
         self._max_attempts = max_attempts
         self._diversity = diversity or {}
+        self._max_consecutive_failures = max_consecutive_failures
+        self._consecutive_failures = 0
         self.stats = GenerationStats()
 
     def usage_summary(self) -> dict[str, object]:
@@ -102,9 +112,22 @@ class Generator:
             case = self._obtain(spec, attempt, feedback)
             if case is None:
                 self.stats.api_failures += 1
+                self._consecutive_failures += 1
+                if self._consecutive_failures >= self._max_consecutive_failures:
+                    raise ApiUnavailable(
+                        f"API 호출이 연속 {self._consecutive_failures}회 실패해 중단 "
+                        f"(마지막 오류: {self.stats.last_error})"
+                    )
                 return GenerationResult(
-                    spec.spec_id, "api_failure", attempt, last_case, last_checks, comparison_only
+                    spec.spec_id,
+                    "api_failure",
+                    attempt,
+                    last_case,
+                    last_checks,
+                    comparison_only,
+                    error=self.stats.last_error,
                 )
+            self._consecutive_failures = 0
             checks = run_candidate_checks(spec, case, self._diversity.get(spec.spec_id))
             failed = failures(checks)
             if not failed:
@@ -143,7 +166,8 @@ class Generator:
                 output_format=GeneratedCase,
                 output_config={"effort": self.effort},
             )
-        except anthropic.APIError:
+        except anthropic.APIError as exc:
+            self.stats.last_error = f"{type(exc).__name__}: {str(exc)[:200]}"
             return None
         finally:
             self.stats.latency_s += time.perf_counter() - started
@@ -153,9 +177,13 @@ class Generator:
         if self._guard is not None:
             self._guard.add(response.usage.input_tokens, response.usage.output_tokens)
         if response.stop_reason in _UNUSABLE_STOP_REASONS:
+            self.stats.last_error = f"stop_reason={response.stop_reason}"
             return None
         parsed = response.parsed_output
-        return parsed if isinstance(parsed, GeneratedCase) else None
+        if not isinstance(parsed, GeneratedCase):
+            self.stats.last_error = "parsed_output이 GeneratedCase가 아님"
+            return None
+        return parsed
 
     def diversity_for(self, spec_id: str) -> Diversity | None:
         """스펙에 배정된 다양성 지시."""

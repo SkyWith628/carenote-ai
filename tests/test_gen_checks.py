@@ -465,3 +465,17 @@ def test_t_allows_affect_words_when_the_spec_calls_for_them(spec_by_id: dict[str
     assert (
         check_t_affect_cues(spec_by_id["V3"], GOOD_D1).level == "pass"
     )  # V3 정답 자체가 기분 변화
+
+
+def test_t_does_not_flag_wide_open_windows_as_smiling(spec_by_id: dict[str, Spec]) -> None:
+    """D2에서 실제로 걸린 오탐: '창문부터 활짝 열어'는 감정 표현이 아니다."""
+    from carenote.generation.checks import check_t_affect_cues  # noqa: PLC0415
+
+    case = GOOD_D1.model_copy(
+        update={"transcript": GOOD_D1.transcript + " 창문부터 활짝 열어 놓았어요."}
+    )
+    assert check_t_affect_cues(spec_by_id["D1"], case).level == "pass"
+    smiling = GOOD_D1.model_copy(
+        update={"transcript": GOOD_D1.transcript + " 활짝 웃으시더라고요."}
+    )
+    assert check_t_affect_cues(spec_by_id["D1"], smiling).level == "fail"

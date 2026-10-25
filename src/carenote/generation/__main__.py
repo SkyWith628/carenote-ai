@@ -6,7 +6,7 @@ dry-run:  python -m carenote.generation --pilot --dry-run
 
 비용이 드는 실행은 --approve-cost(승인할 최대 USD)와 API 키가 모두 있어야 시작한다.
 추정 최대 비용이 승인액을 넘으면 거부하고, 실행 중 누적 비용이 승인액에 도달하면 중단한다.
-종료 코드: 0 성공 · 2 실행 거부 · 3 비용 한도로 중단
+종료 코드: 0 성공 · 2 실행 거부 · 3 비용 한도로 중단 · 4 API 연속 실패로 중단
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ from carenote.generation.candidates import (
 )
 from carenote.generation.diversity import assign_diversity
 from carenote.generation.estimate import estimate_generation, format_estimate
-from carenote.generation.generator import DEFAULT_MAX_ATTEMPTS, Generator
+from carenote.generation.generator import DEFAULT_MAX_ATTEMPTS, ApiUnavailable, Generator
 from carenote.generation.spec import Spec, load_specs
 
 DEFAULT_SPEC_DIR = Path("data/golden/specs")
@@ -48,6 +48,7 @@ DEFAULT_GOLDEN = Path("data/golden")
 PILOT_IDS = ("H3", "S1", "L1")
 EXIT_REFUSED = 2
 EXIT_BUDGET = 3
+EXIT_API = 4
 
 
 class _NoClient:
@@ -203,12 +204,22 @@ def main(
     try:
         for spec, is_comparison in selected:
             result = generator.generate(spec, comparison_only=is_comparison)
+            if result.status == "api_failure":
+                # 실패한 호출로 기존 후보를 덮어쓰거나 빈 껍데기 파일을 남기지 않는다
+                print(f"{result.spec_id:<4} api_failure  {result.error}")
+                continue
             path = write_candidate(args.out_dir, result, spec, generator)
             warns = [c.code for c in result.checks if c.level == "warn"]
             print(
                 f"{result.spec_id:<4} {result.status:<12} 시도 {result.attempts}회"
                 f" 경고 {warns or '-'} → {path}"
             )
+    except ApiUnavailable as exc:
+        print(
+            f"\n중단: {exc}. 끝낸 호출은 캐시에 있어 원인을 해결한 뒤 다시 실행하면 이어진다.",
+            file=sys.stderr,
+        )
+        return EXIT_API
     except BudgetExceeded as exc:
         print(
             f"\n중단: {exc}. 끝낸 호출은 캐시에 있어 승인액을 올려 다시 실행하면 이어진다.",

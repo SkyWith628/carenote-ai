@@ -164,8 +164,9 @@ def test_api_error_becomes_api_failure(spec_by_id: dict[str, Spec]) -> None:
     err = anthropic.APIConnectionError(request=httpx2.Request("POST", "https://example.invalid"))
     client, _ = _client_for(spec_by_id, _good_plan(), error=err)
     generator = _generator(client)
-    assert generator.generate(spec_by_id["D1"]).status == "api_failure"
-    assert generator.stats.api_failures == 1
+    result = generator.generate(spec_by_id["D1"])
+    assert result.status == "api_failure" and generator.stats.api_failures == 1
+    assert result.error is not None and result.error.startswith("APIConnectionError")
 
 
 def test_cache_replays_without_api_calls(spec_by_id: dict[str, Spec], tmp_path: Path) -> None:
@@ -412,3 +413,42 @@ def test_labeling_sample_includes_all_risky_llm_specs(all_specs: list[Spec]) -> 
     assert risky <= set(sample) and len(sample) >= 10
     assert sample == pick_labeling_sample(all_specs)
     assert not {s.spec_id for s in all_specs if s.author == "human"} & set(sample)
+
+
+def test_consecutive_api_failures_stop_the_run_with_the_last_error(
+    spec_by_id: dict[str, Spec],
+) -> None:
+    """연속 3회 API 실패면 마지막 오류와 함께 멈춘다. 성공이 끼면 횟수가 초기화된다."""
+    from carenote.generation.generator import ApiUnavailable  # noqa: PLC0415
+
+    err = anthropic.APIConnectionError(request=httpx2.Request("POST", "https://example.invalid"))
+    client, _ = _client_for(spec_by_id, _good_plan(), error=err)
+    generator = _generator(client, max_consecutive_failures=3)
+    assert generator.generate(spec_by_id["D1"]).status == "api_failure"
+    assert generator.generate(spec_by_id["H3"]).status == "api_failure"
+    with pytest.raises(ApiUnavailable, match="APIConnectionError"):
+        generator.generate(spec_by_id["S1"])
+
+    ok_client, _ = _client_for(spec_by_id, _good_plan())
+    healthy = _generator(ok_client, max_consecutive_failures=2)
+    assert healthy.generate(spec_by_id["D1"]).status == "passed"
+
+
+def test_cli_does_not_write_files_for_api_failures_and_exits_4(
+    settings: Settings,
+    spec_by_id: dict[str, Spec],
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """API 실패 스펙은 후보 파일을 만들지 않고, 연속 실패면 종료 코드 4로 멈춘다."""
+    err = anthropic.APIConnectionError(request=httpx2.Request("POST", "https://example.invalid"))
+    client, _ = _client_for(spec_by_id, _good_plan(), error=err)
+    code = main(
+        _args(tmp_path, "--spec", "D1", "--spec", "H3", "--spec", "S1", "--approve-cost", "5"),
+        settings=settings,
+        client_factory=lambda _: client,
+    )
+    captured = capsys.readouterr()
+    assert code == 4
+    assert "api_failure" in captured.out and "연속 3회 실패" in captured.err
+    assert not list((tmp_path / "cand").glob("*.json")) if (tmp_path / "cand").exists() else True

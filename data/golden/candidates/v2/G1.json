@@ -1,0 +1,148 @@
+{
+  "spec_id": "G1",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "어르신이 돋보기 쓰고 신문 보고 계셨수다. 음, 혈압은 일삼공에 팔공 나왔수다. 넘어진 일은 어수다, 요새 한 번도 안 넘어지셨댄 햄수다. 어, 들어간 게 열 시쯤이우다. 동창 모임 소식 들었댄 하셔서 그 얘기 좀 했수다. 어르신이 '아까 약 먹었주게' 하셔서, 약은 드셨수다. 호박죽은 늙은 호박으로 쑤어사 맛이 난댄 하셨수다. 아침 밥은 다 드셨수다. 그, 맥박은 육십오였수다.",
+  "reference_transcript": null,
+  "evidence": {
+    "blood_pressure": [
+      "음, 혈압은 일삼공에 팔공 나왔수다."
+    ],
+    "fall_event": [
+      "넘어진 일은 어수다, 요새 한 번도 안 넘어지셨댄 햄수다."
+    ],
+    "visit_start": [
+      "어, 들어간 게 열 시쯤이우다."
+    ],
+    "medication_taken": [
+      "어르신이 '아까 약 먹었주게' 하셔서, 약은 드셨수다."
+    ],
+    "meal_intake": [
+      "아침 밥은 다 드셨수다."
+    ],
+    "pulse": [
+      "그, 맥박은 육십오였수다."
+    ]
+  },
+  "notes": "제주 방언 표기는 작성자 추정이며 원어민 확인 필요.",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 2,
+    "diversity": {
+      "opening_type": "어르신이 하고 계시던 일(TV, 화분, 뜨개질 등)을 본 장면",
+      "opening_scene": "돋보기를 쓰고 신문을 읽고 계심",
+      "chatter_topics": [
+        "동창 모임 소식",
+        "호박죽 쑤기"
+      ],
+      "field_order": [
+        "blood_pressure",
+        "fall_event",
+        "visit_start",
+        "medication_taken",
+        "meal_intake",
+        "pulse"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "다 드셨다고 직설적으로 말한다",
+        "medication_taken": "어르신이 한 말로 전한다. 표현은 직접 지어내되, 약을 드셨다는 뜻이 그 문장에서 분명히 읽히게 한다",
+        "fall_event": "'안 ~셨다' 꼴의 부정 서술로 말한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "G",
+    "split": "test",
+    "label_risk": "medium"
+  }
+}
