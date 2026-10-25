@@ -23,6 +23,8 @@ from carenote.generation.checks import (
     check_k_closings,
     check_k_openings,
     check_k_stock_closer,
+    check_k_time_openings,
+    check_m_new_clinical_facts,
     failures,
     jaccard,
     run_candidate_checks,
@@ -140,8 +142,7 @@ def test_e_warns_when_bp_like_number_leaks_into_missing_bp_spec(
     spec = spec_by_id["H1"]
     leaky = GeneratedCase(
         transcript=(
-            "열 시에 갔고 혈압은 정상이래요, 120에 80이라고 해요. "
-            "맥박도 괜찮고 점심 다 드셨어요."
+            "열 시에 갔고 혈압은 정상이래요, 120에 80이라고 해요. 맥박도 괜찮고 점심 다 드셨어요."
         ),
         reference_transcript=None,
         evidence=[],
@@ -276,3 +277,55 @@ def test_k_warns_when_last_word_repeats_across_candidates() -> None:
     results = check_k_closings(items)
     assert all(results[f"X{i}"].level == "warn" for i in range(3))
     assert results["Y"].level == "pass"
+
+
+def test_m_fails_on_clinical_fact_not_in_spec(spec_by_id: dict[str, Spec]) -> None:
+    """g2 파일럿 H3처럼 스펙에 없는 '멍'을 지어내면 실패한다. 없다는 서술도 마찬가지다."""
+    h3 = spec_by_id["H3"]
+    leaked = GOOD_CASES["H3"].model_copy(
+        update={"transcript": GOOD_CASES["H3"].transcript + " 팔에 멍 같은 것도 없으셨고요."}
+    )
+    result = check_m_new_clinical_facts(h3, leaked)
+    assert result.level == "fail" and "멍" in result.message
+    assert check_m_new_clinical_facts(h3, GOOD_CASES["H3"]).level == "pass"
+
+
+def test_m_allows_synonyms_within_a_family_the_spec_mentions(
+    spec_by_id: dict[str, Spec],
+) -> None:
+    """L1은 무릎이 '아프다'를 허용하므로 같은 통증 계열의 '쑤신다'는 통과한다."""
+    l1 = spec_by_id["L1"]
+    assert "쑤신" in GOOD_CASES["L1"].transcript
+    assert check_m_new_clinical_facts(l1, GOOD_CASES["L1"]).level == "pass"
+    unrelated = GOOD_CASES["L1"].model_copy(
+        update={"transcript": GOOD_CASES["L1"].transcript + " 어지럽다고도 하셨어요."}
+    )
+    assert check_m_new_clinical_facts(l1, unrelated).level == "fail"
+
+
+def test_m_passes_for_specs_that_intend_the_symptom(spec_by_id: dict[str, Spec]) -> None:
+    """R 프로브처럼 증상이 scene에 있는 스펙은 같은 증상어를 써도 통과한다."""
+    r2 = spec_by_id["R2"]
+    case = GeneratedCase(
+        transcript="발이 퉁퉁 부어서 신발이 안 들어갔어요. 사흘째 식사를 거부하세요.",
+        reference_transcript=None,
+        evidence=[],
+        notes="",
+    )
+    assert "부어" in r2.scene
+    assert check_m_new_clinical_facts(r2, case).level == "pass"
+
+
+def test_k_time_openings_warn_when_half_or_more_start_with_a_time() -> None:
+    """방문 시각으로 시작하는 후보가 절반 이상이면 그 후보들에 경고한다."""
+    items = [
+        ("A", "오전 9시에 어르신 댁 들어갔어요. 별일 없었어요."),
+        ("B", "오늘 오전 열한 시 반에 도착했어요. 날이 쌀쌀했어요."),
+        ("C", "네, 오늘 어르신 댁에 오전 10시에 방문했고요."),
+        ("D", "비가 와서 우산을 챙겨 갔는데 어르신이 반겨 주셨어요."),
+    ]
+    results = check_k_time_openings(items)
+    assert [results[k].level for k in "ABC"] == ["warn", "warn", "warn"]
+    assert results["D"].level == "pass"
+    few = check_k_time_openings(items[:2])
+    assert all(r.level == "pass" for r in few.values())  # 표본이 3건 미만이면 판단하지 않음

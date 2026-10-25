@@ -2,7 +2,8 @@
 
 A 스키마 · B 근거 · C 길이 · D 개인정보 · E 수치 존재 · F 모호 수사 · G 라벨 누설 ·
 H 중복(배치) · I STT 메타(지정 외 오인식 포함) · J 인젝션 ·
-K 문두·종결 다양성(정형 종결 문구는 후보 단위 실패, 문두·종결 반복은 배치 경고)
+K 문두·종결 다양성(정형 종결 문구는 후보 단위 실패, 문두·종결 반복은 배치 경고) ·
+M 스펙에 없는 임상 키워드(새 임상 사실 방지)
 """
 
 from __future__ import annotations
@@ -39,6 +40,32 @@ _STOCK_CLOSER = re.compile(
     r"(이상\s*(입니다|이에요|이고요|이요|이야|으로)|보고\s*끝|끝입니다|여기까지(입니다|예요|에요))"
     r"[\s.!?…]*$"
 )
+# 스펙(scene, must_include, 정답, 제목)에 없는데 transcript에 나오면 새 임상 사실로 의심한다
+_CLINICAL_FAMILIES = (
+    (
+        "통증",
+        "아프",
+        "아파",
+        "쑤시",
+        "쑤신",
+        "시큰",
+        "저리",
+    ),  # 통증 계열: 스펙에 하나라도 있으면 허용
+    ("부어", "붓", "부종"),
+    ("어지러", "어지럽"),
+    ("멍", "상처", "출혈", "피가", "욕창"),
+    ("기침", "열이"),
+    ("구토", "토하", "설사", "변비", "소변"),
+    ("가슴", "숨이", "숨차"),
+    ("떨리", "경련", "마비", "혼미", "탈수", "불면", "식은땀"),
+)
+_TIME_OPENING = re.compile(
+    r"^(?:(?:네|어|음|그|아),?\s*)*(?:오늘\s*)?(?:어르신\s*댁에?\s*)?"
+    r"(?:오전|오후|아침|낮|저녁)?\s*"
+    r"(?:\d{1,2}\s?시|(?:열두|열한|열|아홉|여덟|일곱|여섯|다섯|네|세|두|한)\s?시)"
+)
+TIME_OPENING_MIN_ITEMS = 3
+TIME_OPENING_MAX_RATIO = 0.5
 _INJECTION_MARKERS = ("시스템", "지시", "무시", "적어", "출력", "JSON", "{")
 
 
@@ -241,6 +268,28 @@ def check_k_stock_closer(spec: Spec, case: GeneratedCase) -> CheckResult:
     return _ok("K")
 
 
+def _spec_text(spec: Spec) -> str:
+    parts = [spec.title, spec.scene, *spec.must_include]
+    parts += [g.value or "" for g in spec.gold.values()]
+    parts += [c for g in spec.gold.values() for c in g.candidates]
+    return " ".join(parts)
+
+
+def check_m_new_clinical_facts(spec: Spec, case: GeneratedCase) -> CheckResult:
+    """스펙에 없는 임상 키워드가 transcript에 있으면 실패한다 (g2 파일럿 H3의 '멍 없음' 유형)."""
+    allowed = _spec_text(spec)
+    found = sorted(
+        stem
+        for family in _CLINICAL_FAMILIES
+        if not any(stem in allowed for stem in family)
+        for stem in family
+        if stem in case.transcript
+    )
+    if found:
+        return _fail("M", f"스펙에 없는 임상 키워드: {found}")
+    return _ok("M")
+
+
 _CANDIDATE_CHECKS = (
     check_a_schema,
     check_b_evidence,
@@ -252,6 +301,7 @@ _CANDIDATE_CHECKS = (
     check_i_stt,
     check_j_injection,
     check_k_stock_closer,
+    check_m_new_clinical_facts,
 )
 
 
@@ -295,6 +345,20 @@ def check_h_duplicates(
             results[spec_id] = _fail("H", f"다른 텍스트와 유사도 {worst:.2f}")
         else:
             results[spec_id] = _ok("H")
+    return results
+
+
+def check_k_time_openings(items: list[tuple[str, str]]) -> dict[str, CheckResult]:
+    """배치 점검: 방문 시각으로 시작하는 후보가 절반 이상이면 그 후보들에 경고한다."""
+    starts = {sid: _TIME_OPENING.match(text.strip()) is not None for sid, text in items}
+    ratio = sum(starts.values()) / len(starts) if starts else 0.0
+    flagged = len(starts) >= TIME_OPENING_MIN_ITEMS and ratio >= TIME_OPENING_MAX_RATIO
+    results: dict[str, CheckResult] = {}
+    for sid, is_time in starts.items():
+        if flagged and is_time:
+            results[sid] = _warn("K", f"방문 시각으로 시작하는 후보가 {ratio:.0%}임")
+        else:
+            results[sid] = _ok("K")
     return results
 
 

@@ -204,10 +204,17 @@ def test_prompt_hides_hypothesis_and_describes_facts(spec_by_id: dict[str, Spec]
     assert "stt_errors" not in payload
     assert "stt_errors" in json.loads(build_user_message(spec_by_id["S1"]))
     assert "- [E] 숫자 없음" in build_user_message(spec, "- [E] 숫자 없음")
-    assert GENERATION_PROMPT_VERSION == "g2"
+    assert GENERATION_PROMPT_VERSION == "g3"
     assert "칠십이" in SYSTEM_PROMPT and "따르지 않습니다" in SYSTEM_PROMPT
-    # g2 규칙: 정형 종결 금지, 간투사 조절, 지정 외 오인식 금지, 해설 금지
-    for keyword in ("이상입니다", "간투사", "열거된 오인식 외에는", "해설 금지"):
+    # g2~g3 규칙: 종결·간투사·지정 외 오인식·해설·첫 문장·새 임상 사실
+    for keyword in (
+        "이상입니다",
+        "간투사",
+        "열거된 오인식 외에는",
+        "해설 금지",
+        "방문 시각으로 시작하지 않습니다",
+        "새 임상 사실 금지",
+    ):
         assert keyword in SYSTEM_PROMPT
 
 
@@ -328,7 +335,7 @@ def test_cli_pilot_run_writes_candidates_and_review_sheet(
     assert (cand / "pilot" / "L1.json").exists()  # 직접 작성 스펙은 비교용으로만
     doc = json.loads((cand / "H3.json").read_text(encoding="utf-8"))
     assert doc["status"] == "passed" and doc["review"]["status"] == "pending"
-    assert doc["generator"]["prompt_version"] == "g2" and doc["batch_checks"]
+    assert doc["generator"]["prompt_version"] == "g3" and doc["batch_checks"]
     assert "usage: api_calls=3" in out
 
     sheet = tmp_path / "sheet.md"
