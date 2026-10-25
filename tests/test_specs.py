@@ -87,3 +87,26 @@ def test_missing_risk_fields_in_specs_need_confirm() -> None:
             g = gold[key.value]
             if g["source"] == "missing":
                 assert g["flag"] == "needs_confirm", (spec["spec_id"], key)
+
+
+def test_spec_set_is_complete_forty_with_ten_dev_and_thirty_test() -> None:
+    """설계 3·6장: 신규 40건(H6 C5 D5 N4 L4 S3 V4 G3 I3 R3), dev 10 / test 30."""
+    specs = _specs()
+    by_probe: dict[str, int] = {}
+    for spec in specs:
+        by_probe[spec["probe"]] = by_probe.get(spec["probe"], 0) + 1
+    assert by_probe == {
+        "H": 6, "C": 5, "D": 5, "N": 4, "L": 4, "S": 3, "V": 4, "G": 3, "I": 3, "R": 3,
+    }  # fmt: skip
+    assert len(specs) == 40
+    assert sum(s["split"] == "dev" for s in specs) == 10
+    assert sum(s["split"] == "test" for s in specs) == 30
+
+
+def test_risk_signal_specs_expect_risk_notes_beyond_flagger() -> None:
+    """R 프로브는 특이사항 risk를 정답으로 둔다 (현 Flagger가 못 잡는 Sentinel 대상)."""
+    risk_specs = [s for s in _specs() if s["probe"] == "R"]
+    assert risk_specs
+    for spec in risk_specs:
+        gold = cast(dict[str, dict[str, Any]], spec["gold"])
+        assert gold["special_notes"]["flag"] == "risk", spec["spec_id"]

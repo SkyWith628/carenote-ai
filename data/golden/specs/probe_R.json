@@ -1,0 +1,263 @@
+{
+  "version": 1,
+  "probe": "R",
+  "specs": [
+    {
+      "spec_id": "R1",
+      "probe": "R",
+      "split": "dev",
+      "title": "흉부 답답함과 호흡곤란 호소",
+      "scene": "어르신이 '가슴이 답답하다'고 하시고 숨이 차서 말씀을 이어 하지 못하셨다고 말한다. 수치는 모두 정상 범위로 말한다. 화자는 당황하지 않은 담담한 말투다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        280
+      ],
+      "must_include": [
+        "가슴이 답답하다고 호소",
+        "숨이 차서 말을 이어 하지 못함",
+        "방문 시각 오전 11시",
+        "혈압 128에 80",
+        "맥박 82",
+        "점심 소량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "응급 조치를 했다는 표현",
+        "'병원에 가자'는 표현"
+      ],
+      "traps": "수치가 정상이라 위험을 낮게 보고 특이사항에 옮기지 않거나, 옮겨도 위험 표시가 안 붙는다.",
+      "hypothesis": "Flagger는 특이사항 위험을 잡지 못한다(알려진 한계). Sentinel 설계의 근거 케이스.",
+      "policy": "정책 #11, Sentinel 대상",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "11:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "128/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "82",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "소량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "흉부 답답함·호흡곤란 호소",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "R2",
+      "probe": "R",
+      "split": "test",
+      "title": "발 부종과 사흘째 식사 거부",
+      "scene": "'발이 퉁퉁 부어서 신발이 안 들어갔어요'라고 말하고, '사흘째 식사를 거부하세요, 오늘도 안 드셨어요'라고 말한다. 수치는 정상 범위다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        280
+      ],
+      "must_include": [
+        "발이 퉁퉁 부음",
+        "사흘째 식사 거부, 오늘도 안 드심",
+        "방문 시각 오후 2시",
+        "혈압 118에 72",
+        "맥박 70",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현"
+      ],
+      "traps": "식사 미섭취만 기록하고 부종과 지속 기간을 놓치거나, 위험 표시가 붙지 않는다.",
+      "hypothesis": "비정형 위험 신호(부종, 지속 식사 거부)는 룰로 잡기 어렵다. Sentinel 후보.",
+      "policy": "정책 #9, #11",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "118/72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "미섭취",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "발 부종, 사흘째 식사 거부",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "R3",
+      "probe": "R",
+      "split": "test",
+      "title": "팔의 여러 군데 멍과 보호자 방문 시 위축",
+      "scene": "'팔에 멍이 여러 군데 있으셨어요, 어르신은 부딪혔다고만 하세요'라고 말하고, '아드님이 오시면 어르신이 말을 잘 안 하세요'라고 말한다. 사실만 담담히 전하며 학대라는 단어나 추측은 쓰지 않는다. 수치는 정상 범위다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        180,
+        300
+      ],
+      "must_include": [
+        "팔에 멍이 여러 군데",
+        "어르신은 부딪혔다고만 함",
+        "아드님이 오시면 말을 잘 안 하심",
+        "방문 시각 오후 1시",
+        "혈압 122에 76",
+        "맥박 68",
+        "점심 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "학대·방임이라는 단어",
+        "화자의 추측성 해석"
+      ],
+      "traps": "멍과 관계 맥락을 특이사항에 남기지 않거나 중립 서술로 위험 표시 없이 지나간다.",
+      "hypothesis": "보고 의무 판단이 걸린 영역이라 정답 flag(risk)를 현장 기준으로 확인해야 한다. 지금은 임시로 risk.",
+      "policy": "정책 #11, 현장 확인 필요(학대 의심 보고 기준)",
+      "label_risk": "high",
+      "gray_fields": [],
+      "gold": {
+        "visit_start": {
+          "value": "13:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "68",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "팔에 멍이 여러 군데, 보호자 방문 시 위축",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    }
+  ]
+}
