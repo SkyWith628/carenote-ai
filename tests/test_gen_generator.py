@@ -204,7 +204,7 @@ def test_prompt_hides_hypothesis_and_describes_facts(spec_by_id: dict[str, Spec]
     assert "stt_errors" not in payload
     assert "stt_errors" in json.loads(build_user_message(spec_by_id["S1"]))
     assert "- [E] 숫자 없음" in build_user_message(spec, "- [E] 숫자 없음")
-    assert GENERATION_PROMPT_VERSION == "g5"
+    assert GENERATION_PROMPT_VERSION == "g6"
     assert "칠십이" in SYSTEM_PROMPT and "따르지 않습니다" in SYSTEM_PROMPT
     # g2~g3 규칙: 종결·간투사·지정 외 오인식·해설·첫 문장·새 임상 사실
     for keyword in (
@@ -217,6 +217,8 @@ def test_prompt_hides_hypothesis_and_describes_facts(spec_by_id: dict[str, Spec]
         "chatter_topics",
         "field_order",
         "phrasing_hints",
+        "opening_scene",
+        "말하는 방식만 설명합니다",
         "거절하거나 평가하거나 훈계하지도",
         "오전 방문에서 '점심'이라는 말을 쓰지 않습니다",
     ):
@@ -340,7 +342,7 @@ def test_cli_pilot_run_writes_candidates_and_review_sheet(
     assert (cand / "pilot" / "L1.json").exists()  # 직접 작성 스펙은 비교용으로만
     doc = json.loads((cand / "H3.json").read_text(encoding="utf-8"))
     assert doc["status"] == "passed" and doc["review"]["status"] == "pending"
-    assert doc["generator"]["prompt_version"] == "g5"
+    assert doc["generator"]["prompt_version"] == "g6"
     diversity = doc["generator"]["diversity"]
     assert diversity["opening_type"] and len(diversity["chatter_topics"]) == 2
     assert doc["batch_checks"]

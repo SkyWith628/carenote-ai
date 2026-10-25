@@ -102,36 +102,108 @@ CANONICAL_ORDER: tuple[FieldKey, ...] = (
 
 # 정상 보고(정답이 단순 값인 항목)의 말하는 방식. scene·must_include가 정한 항목에는 쓰지 않는다.
 PHRASING_POOLS: dict[tuple[FieldKey, str], tuple[str, ...]] = {
+    # 힌트는 말하는 틀만 설명한다. 예시 문장을 넣으면 그대로 복사된다 (g5 dev 3건).
     (FieldKey.FALL_EVENT, "없음"): (
-        "'낙상'이나 '사고'라는 말을 쓰고 짧게 끝낸다",
-        "약·식사 이야기에 이어서 한 문장에 묶어 말한다",
-        "어르신의 말을 그대로 옮긴다 (넘어질 일이 뭐 있냐고 하시네요 식으로)",
-        "'안 ~셨어요' 부정형으로 말한다",
+        "'낙상'이나 '사고' 같은 사무적인 단어를 써서 짧게 끝낸다",
+        "약이나 식사 이야기에 이어 붙여 한 문장 안에서 지나가듯 말한다",
+        "어르신이 한 말로 전한다. 어르신의 표현은 직접 지어내고 흔한 관용구는 피한다",
+        "'안 ~셨다' 꼴의 부정 서술로 말한다",
         "다른 이야기 도중에 곁다리로 한마디 던진다",
     ),
     (FieldKey.MEDICATION_TAKEN, "복용"): (
-        "약 종류나 시간대를 함께 말한다 (아침 약은 드셨고 식으로)",
-        "챙겨 드린 행동으로 말한다 (물이랑 챙겨 드렸더니 식으로)",
+        "약 종류나 시간대를 함께 언급하며 말한다",
+        "챙겨 드린 행동을 중심으로 말한다",
         "다른 항목과 한 문장에 묶어 말한다",
-        "어르신의 말을 옮긴다 (약은 먹었다고 하세요 식으로)",
-        "한마디로 짧게 말한다",
+        "어르신이 한 말로 전한다. 표현은 직접 지어낸다",
+        "아주 짧게 한마디로 말한다",
     ),
     (FieldKey.MEAL_INTAKE, "전량"): (
-        "남기신 게 없다는 식으로 말한다",
-        "그릇을 싹 비웠다는 식으로 말한다",
+        "남기신 게 없다는 쪽에서 말한다",
+        "그릇이 비었다는 쪽에서 말한다",
         "다 드셨다고 직설적으로 말한다",
     ),
     (FieldKey.MEAL_INTAKE, "절반"): (
-        "반쯤 드시고 남기셨다는 식으로 말한다",
+        "반쯤 드시고 남겼다는 쪽에서 말한다",
         "절반 정도라고 직설적으로 말한다",
-        "밥은 반 공기쯤이라는 식으로 말한다",
+        "밥의 양을 그릇 단위로 어림해서 말한다",
     ),
     (FieldKey.MEAL_INTAKE, "소량"): (
-        "몇 숟가락만이라는 식으로 말한다",
+        "숟가락질 횟수로 어림해서 말한다",
         "조금만 드셨다고 직설적으로 말한다",
-        "수저를 금방 내려놓으셨다는 식으로 말한다",
+        "수저를 금방 내려놓으셨다는 쪽에서 말한다",
     ),
 }
+
+
+# 유형마다 구체 장면 5개. 같은 유형이 한 분할에서 여러 번 쓰여도 장면이 겹치지 않게 순번으로 고른다
+# (g5: 같은 유형을 받은 두 건이 똑같이 "목이 좀 잠겨서"로 수렴했다). 날씨·시각·냉장고는 쓰지 않는다.
+OPENING_SEEDS: tuple[tuple[str, ...], ...] = (
+    (
+        "오늘은 왜 이렇게 늦었냐고 농담을 건넴",
+        "배고프지 않냐고 먼저 물어봄",
+        "열쇠를 못 찾겠다며 허둥대심",
+        "어제 본 프로그램 이야기를 바로 꺼냄",
+        "신발부터 가지런히 놓으라고 챙김",
+    ),
+    (
+        "복도에서 청소하시는 분과 마주침",
+        "현관 비밀번호를 잘못 눌러 헤맴",
+        "신발장 앞에 못 보던 신발이 놓여 있었음",
+        "엘리베이터 안내문을 읽다가 한 대 놓침",
+        "현관 센서등이 계속 깜빡거림",
+    ),
+    (
+        "가구 배치가 바뀌어 있었음",
+        "달력이 새것으로 바뀌어 있었음",
+        "화분이 하나 늘어 있었음",
+        "TV 위치가 달라져 있었음",
+        "현관 매트가 새것으로 바뀌어 있었음",
+    ),
+    (
+        "TV와 라디오 소리가 동시에 들림",
+        "방 안 공기가 답답하게 느껴짐",
+        "거실이 말끔하게 정돈되어 있었음",
+        "볕이 거실 깊숙이 들어와 있었음",
+        "주방에서 음식 냄새가 났음",
+    ),
+    (
+        "창문부터 열어 환기시킴",
+        "마른 빨래를 먼저 걷음",
+        "쌓인 신문을 정리함",
+        "현관 신발을 정리함",
+        "전기밥솥 상태를 먼저 확인함",
+    ),
+    (
+        "센터 담당자에게서 일정 변경 전화가 옴",
+        "가족이 보낸 부탁 문자를 받음",
+        "다른 보호사와 인수인계 통화를 함",
+        "약국에서 온 안내 문자를 확인함",
+        "어르신이 먼저 안부 전화를 걸어 옴",
+    ),
+    (
+        "어제 잠을 설쳐서 피곤했음",
+        "점심을 거르고 오느라 배가 고팠음",
+        "신발이 불편해 걷기 힘들었음",
+        "버스를 놓칠 뻔함",
+        "새로 산 가방이 무거웠음",
+    ),
+    (
+        "옆집 아주머니와 인사를 나눔",
+        "경비 아저씨가 당부 한마디를 함",
+        "어르신 아드님과 계단에서 마주침",
+        "이웃 아이가 먼저 인사를 함",
+        "앞 동 어르신과 짧게 대화함",
+    ),
+    (
+        "돋보기를 쓰고 신문을 읽고 계심",
+        "화투패를 만지작거리고 계심",
+        "TV 앞에서 깜빡 졸고 계심",
+        "화분에 물을 주고 계심",
+        "전화번호를 찾느라 수첩을 뒤지고 계심",
+    ),
+)
+
+SEEDS_PER_TYPE = 5
 
 
 @dataclass(frozen=True)
@@ -139,6 +211,7 @@ class Diversity:
     """스펙 한 건에 배정된 다양성 지시."""
 
     opening_type: str
+    opening_seed: str
     topics: tuple[Topic, Topic]
     field_order: tuple[FieldKey, ...]
     phrasing: tuple[tuple[FieldKey, str], ...] = ()
@@ -147,6 +220,7 @@ class Diversity:
         """사용자 메시지에 넣는 형태 (키워드는 숨긴다)."""
         return {
             "opening_type": self.opening_type,
+            "opening_scene": self.opening_seed,
             "chatter_topics": [t.label for t in self.topics],
             "field_order": [k.value for k in self.field_order],
             "phrasing_hints": {k.value: hint for k, hint in self.phrasing},
@@ -176,20 +250,33 @@ def _phrasing_for(spec: Spec) -> tuple[tuple[FieldKey, str], ...]:
 
 
 def assign_diversity(specs: Iterable[Spec]) -> dict[str, Diversity]:
-    """정렬된 spec_id 순서로 소재 2개, 첫 문장 유형 1개를 배정하고 순서·표현은 spec_id로 시드한다.
+    """소재·첫 문장은 순번으로, 항목 순서·표현은 spec_id로 시드해 배정한다.
 
-    첫 소재는 풀을 순서대로, 둘째 소재는 반 바퀴 뒤에서 고르되 한 바퀴를 돌 때마다 간격을 1씩
-    늘려 같은 소재 쌍이 반복되지 않게 한다. 스펙 40건 안에서 한 소재는 최대 2번만 쓰인다.
+    - 소재: 전체 스펙을 id순으로 세워 첫 소재는 풀을 순서대로, 둘째 소재는 반 바퀴 뒤에서 고르되
+      한 바퀴를 돌 때마다 간격을 1씩 늘려 쌍이 반복되지 않게 한다. 40건 안에서 한 소재는 최대 2번.
+    - 첫 문장 유형과 구체 장면: **분할(dev/test)별로** id순 라운드로빈. 같은 분할 안에서 유형이
+      고르게 쓰이고, 같은 유형이 다시 나올 때마다 다른 구체 장면을 받는다 (g5에서 같은 유형을 받은
+      두 건이 같은 표현으로 수렴한 문제의 대응).
     """
     ordered = sorted({s.spec_id: s for s in specs}.values(), key=lambda s: s.spec_id)
     half = len(TOPICS) // 2
+    split_rank: dict[str, int] = {}
+    counters: dict[str, int] = {}
+    for spec in ordered:
+        split_rank[spec.spec_id] = counters.get(spec.split, 0)
+        counters[spec.split] = split_rank[spec.spec_id] + 1
     assignment: dict[str, Diversity] = {}
     for i, spec in enumerate(ordered):
-        first = TOPICS[i % len(TOPICS)]
-        second = TOPICS[(i + half + i // half) % len(TOPICS)]
+        rank = split_rank[spec.spec_id]
+        type_index = rank % len(OPENING_TYPES)
+        seed_index = (rank // len(OPENING_TYPES)) % SEEDS_PER_TYPE
         assignment[spec.spec_id] = Diversity(
-            opening_type=OPENING_TYPES[i % len(OPENING_TYPES)],
-            topics=(first, second),
+            opening_type=OPENING_TYPES[type_index],
+            opening_seed=OPENING_SEEDS[type_index][seed_index],
+            topics=(
+                TOPICS[i % len(TOPICS)],
+                TOPICS[(i + half + i // half) % len(TOPICS)],
+            ),
             field_order=_order_for(spec.spec_id),
             phrasing=_phrasing_for(spec),
         )

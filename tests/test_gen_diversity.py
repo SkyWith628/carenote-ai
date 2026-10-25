@@ -28,8 +28,8 @@ def test_assignment_is_deterministic_and_order_independent(all_specs: list[Spec]
     assert assign_diversity(all_specs) == assign_diversity(all_specs)
 
 
-def test_assignment_spreads_topics_and_openings_across_all_specs(all_specs: list[Spec]) -> None:
-    """40건 안에서 소재는 최대 2번, 소재 쌍은 반복 없이, 첫 문장 유형은 고르게 쓰인다."""
+def test_assignment_spreads_topics_across_all_specs(all_specs: list[Spec]) -> None:
+    """40건 안에서 소재는 최대 2번 쓰이고 소재 쌍은 반복되지 않는다."""
     assignment = assign_diversity(all_specs)
     assert len(assignment) == 40
     topic_use = Counter(t.label for d in assignment.values() for t in d.topics)
@@ -38,9 +38,51 @@ def test_assignment_spreads_topics_and_openings_across_all_specs(all_specs: list
     assert len(set(pairs)) == len(pairs)
     for d in assignment.values():
         assert d.topics[0] != d.topics[1]
-    openings = Counter(d.opening_type for d in assignment.values())
-    assert set(openings) == set(OPENING_TYPES)
-    assert max(openings.values()) - min(openings.values()) <= 1
+
+
+def test_opening_types_are_balanced_within_each_split(all_specs: list[Spec]) -> None:
+    """첫 문장 유형은 분할 안에서 고르게 쓰이고, 같은 유형은 매번 다른 구체 장면을 받는다."""
+    assignment = assign_diversity(all_specs)
+    for split in ("dev", "test"):
+        members = [assignment[s.spec_id] for s in all_specs if s.split == split]
+        types = Counter(d.opening_type for d in members)
+        assert set(types) == set(OPENING_TYPES)  # dev 10건도 9개 유형을 모두 쓴다
+        assert max(types.values()) - min(types.values()) <= 1
+        by_type: dict[str, list[str]] = {}
+        for d in members:
+            by_type.setdefault(d.opening_type, []).append(d.opening_seed)
+        for seeds in by_type.values():
+            assert len(set(seeds)) == len(seeds)  # 같은 유형의 장면이 겹치지 않는다
+
+
+def test_dev_specs_that_collided_in_g5_now_get_different_openings(
+    spec_by_id: dict[str, Spec],
+) -> None:
+    """g5에서 같은 유형을 받아 같은 표현으로 수렴한 H3와 S1은 이제 다른 유형을 받는다."""
+    assignment = assign_diversity(spec_by_id.values())
+    assert assignment["H3"].opening_type != assignment["S1"].opening_type
+
+
+def test_every_opening_type_has_distinct_scene_seeds() -> None:
+    """유형마다 구체 장면 5개가 있고 서로 다르며 날씨·시각·냉장고를 쓰지 않는다."""
+    from carenote.generation.diversity import OPENING_SEEDS, SEEDS_PER_TYPE  # noqa: PLC0415
+
+    assert len(OPENING_SEEDS) == len(OPENING_TYPES)
+    all_seeds = [seed for group in OPENING_SEEDS for seed in group]
+    assert all(len(group) == SEEDS_PER_TYPE for group in OPENING_SEEDS)
+    assert len(set(all_seeds)) == len(all_seeds)
+    for seed in all_seeds:
+        assert not any(word in seed for word in ("날씨", "비가", "쌀쌀", "냉장고", "시쯤"))
+
+
+def test_phrasing_hints_describe_the_manner_without_example_sentences() -> None:
+    """표현 힌트에는 따옴표 예시·괄호 예시 문장이 없다 (g5 dev: 예시가 3건에 복사됐다)."""
+    from carenote.generation.diversity import PHRASING_POOLS  # noqa: PLC0415
+
+    for hints in PHRASING_POOLS.values():
+        for hint in hints:
+            assert "(" not in hint and "식으로" not in hint, hint
+            assert "하시네요" not in hint and "뭐 있냐" not in hint, hint
 
 
 def test_topics_are_non_clinical_and_numberless() -> None:
@@ -60,6 +102,7 @@ def test_prompt_and_message_carry_the_assignment(spec_by_id: dict[str, Spec]) ->
     payload = json.loads(build_user_message(spec, diversity=assignment["H3"]))
     div = payload["diversity"]
     assert div["opening_type"] in OPENING_TYPES and len(div["chatter_topics"]) == 2
+    assert div["opening_scene"]
     assert "keywords" not in json.dumps(payload, ensure_ascii=False)
     assert "diversity" not in json.loads(build_user_message(spec))
     assert "날씨로 첫 문장을 시작하지 않습니다" in SYSTEM_PROMPT
