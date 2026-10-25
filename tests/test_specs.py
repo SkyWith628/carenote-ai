@@ -57,9 +57,9 @@ def test_spec_metadata_is_valid(spec: dict[str, Any]) -> None:
 
 
 def test_stt_specs_carry_error_metadata_and_only_they_do() -> None:
-    """S 프로브는 오인식 메타데이터(대상 필드, 원문, 복원 가능 여부)를 가지고, 다른 프로브는 갖지 않는다."""
+    """S 프로브만 오인식 메타데이터(대상 필드, 원문, 복원 가능 여부)를 가진다."""
     for spec in _specs():
-        errors = spec.get("stt", {}).get("errors", []) if "stt" in spec else []
+        errors = cast(list[dict[str, Any]], spec["stt"]["errors"]) if "stt" in spec else []
         if spec["probe"] == "S":
             assert errors, spec["spec_id"]
             for e in errors:
