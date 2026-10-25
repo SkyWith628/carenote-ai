@@ -22,6 +22,8 @@ PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b1 --limit 3
 ```
 분할: `--split dev|test|all` (기본 **dev**: v1 20 + v2 10 = 30건). test(30건)는 최종 보고용이라 **LLM 실행은 `--final-report` 없이는 거부**한다(종료 코드 2). oracle·null은 제한 없음. test 실행 횟수는 `docs/decisions.md`에 기록한다.
 
+프롬프트: `--prompt v1|v2` (기본 **v1**: 기존 보고서 재현). v2는 라벨 정책(#1~#13)을 지시문으로 옮긴 판(`docs/extractor-prompt-v2-design.md`). 버전은 결과 캐시 키에 들어가 v1 캐시와 섞이지 않는다. v1 본문은 sha256으로 테스트가 고정한다.
+
 옵션: `--model`(기본 설정값 `claude-sonnet-5-5`), `--effort`(기본 `medium`), `--limit N`, `--cache-dir`, `--out`.
 
 안전장치

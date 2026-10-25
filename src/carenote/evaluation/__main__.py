@@ -38,7 +38,12 @@ from carenote.extraction.pricing import (
     CostGuard,
     price_for,
 )
-from carenote.extraction.prompts import Variant
+from carenote.extraction.prompts import (
+    DEFAULT_PROMPT_VERSION,
+    PROMPT_VERSIONS,
+    PromptVersion,
+    Variant,
+)
 
 DEFAULT_GOLDEN = Path("data/golden")
 EXIT_REFUSED = 2
@@ -129,6 +134,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="기본값은 설정(CARENOTE_EXTRACTOR_EFFORT)",
     )
+    parser.add_argument(
+        "--prompt",
+        choices=PROMPT_VERSIONS,
+        default=DEFAULT_PROMPT_VERSION,
+        help="추출 프롬프트 버전 (기본 v1: 기존 보고서 재현용). v2는 라벨 정책 반영판",
+    )
     parser.add_argument("--limit", type=int, default=None, help="앞에서 N건만 실행")
     parser.add_argument("--cache-dir", type=Path, default=None)
     parser.add_argument("--dry-run", action="store_true", help="API 호출 없이 예상 비용만 출력")
@@ -155,6 +166,7 @@ def _run_llm(
     model = args.model or settings.extractor_model
     effort = args.effort or settings.extractor_effort
     variant: Variant = "b1" if LLM_CHOICES[args.extractor] == "b1" else "b0"
+    prompt_version: PromptVersion = args.prompt
     price = price_for(model)
     if price is None:
         print(
@@ -180,9 +192,11 @@ def _run_llm(
         model=model,
         effort=effort,
         cache_dir=cache_dir,
+        prompt_version=prompt_version,
     )
     estimate = estimate_run(probe, cases, price)
     print(format_estimate(model, effort, estimate, PRICES_AS_OF))
+    print(f"  프롬프트 {prompt_version} · 변형 {variant}")
     if args.dry_run:
         print("  (dry-run: API를 호출하지 않았다)")
         return 0
@@ -214,6 +228,7 @@ def _run_llm(
         effort=effort,
         cache_dir=cache_dir,
         guard=guard,
+        prompt_version=prompt_version,
     )
     extractor: Extractor = FlaggingExtractor(llm)
     try:

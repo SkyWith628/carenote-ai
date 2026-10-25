@@ -20,7 +20,8 @@ from carenote.evaluation.extractor import PredictedField
 from carenote.evaluation.schema import Evidence, FieldKey, Source
 from carenote.extraction.pricing import CostGuard, cost_usd, price_for
 from carenote.extraction.prompts import (
-    PROMPT_VERSION,
+    DEFAULT_PROMPT_VERSION,
+    PromptVersion,
     Variant,
     build_system_prompt,
     build_user_message,
@@ -115,14 +116,16 @@ class LLMExtractor:
         effort: str,
         cache_dir: Path | None = None,
         guard: CostGuard | None = None,
+        prompt_version: PromptVersion = DEFAULT_PROMPT_VERSION,
     ) -> None:
         self._client = client
+        self._prompt_version: PromptVersion = prompt_version
         self._variant: Variant = variant
         self._model = model
         self._effort = effort
         self._cache_dir = cache_dir
         self._guard = guard
-        self._system = build_system_prompt(variant)
+        self._system = build_system_prompt(variant, prompt_version)
         self._schema: type[LLMExtractionB0] | type[LLMExtractionB1] = (
             LLMExtractionB1 if variant == "b1" else LLMExtractionB0
         )
@@ -150,7 +153,7 @@ class LLMExtractor:
             "variant": self._variant,
             "model": self._model,
             "effort": self._effort,
-            "prompt_version": PROMPT_VERSION,
+            "prompt_version": self._prompt_version,
             **asdict(self.stats),
         }
 
@@ -204,7 +207,7 @@ class LLMExtractor:
 
     def _cache_key(self, transcript: str) -> str:
         payload = json.dumps(
-            [self._model, self._effort, self._variant, PROMPT_VERSION, transcript],
+            [self._model, self._effort, self._variant, self._prompt_version, transcript],
             ensure_ascii=False,
         )
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
