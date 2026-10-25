@@ -272,6 +272,7 @@ class BlindReport:
     gray_total: int = 0
     gray_value_agree: int = 0
     disagreements: list[str] = field(default_factory=lambda: list[str]())
+    uncertain: list[str] = field(default_factory=lambda: list[str]())
 
     @property
     def value_rate(self) -> float | None:
@@ -310,6 +311,13 @@ def compare_blind(labels: dict[str, Any], key: dict[str, str], specs: list[Spec]
             report.value_agree += value_ok
             report.flag_agree += flag_ok
             report.gray_value_agree += value_ok and gray
+            if label.get("uncertain"):
+                gold_text = gold.value or ", ".join(gold.candidates) or "(없음)"
+                label_text = label.get("value") or "(없음)"
+                report.uncertain.append(
+                    f"{sid} {fld}: 정답 {gold_text} · 라벨 {label_text}"
+                    f" · {'불일치' if not value_ok else '일치'} · 이유: {label.get('memo') or '-'}"
+                )
             if not value_ok or not flag_ok:
                 cand_list = cast(list[object], label.get("candidates") or [])
                 shown_candidates = ", ".join(str(c) for c in cand_list)
@@ -319,6 +327,7 @@ def compare_blind(labels: dict[str, Any], key: dict[str, str], specs: list[Spec]
                     f"{sid} {fld}: 정답 {gold_shown}|{gold.flag.value}"
                     f" ↔ 라벨 {shown}|{label.get('flag') or '-'}"
                     + (" [gray]" if gray else "")
+                    + (" [모호]" if label.get("uncertain") else "")
                     + (f" 메모: {label['memo']}" if label.get("memo") else "")
                 )
     return report
@@ -339,4 +348,7 @@ def format_blind_report(report: BlindReport) -> str:
         f" · flag 일치율 {pct(report.flag_rate)}",
     ]
     lines += [f"- {d}" for d in report.disagreements]
+    if report.uncertain:
+        lines += [f"라벨러가 애매하다고 표시한 필드 {len(report.uncertain)}개:"]
+        lines += [f"  · {u}" for u in report.uncertain]
     return "\n".join(lines)

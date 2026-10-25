@@ -1,0 +1,877 @@
+{
+  "version": 1,
+  "labeler": "claude-opus-5-5 (블라인드, 새 맥락, 정답 미노출)",
+  "cases": {
+    "B01": {
+      "visit_start": {
+        "value": "11:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'오전 11시에 들어갔어라'"
+      },
+      "blood_pressure": {
+        "value": "132/84",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "어제 병원 측정(150/90)과 평소 값(120/80)은 방문 전·이전 시점 수치라 제외하고 오늘 측정값을 기록함(정책 #5, #6)"
+      },
+      "pulse": {
+        "value": "72",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "전량",
+        "source": "inferred",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'그릇에 남기신 게 하나도 없었어요'를 정책 #9에 따라 전량으로 매핑함"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'약은 드셨고요'"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'넘어지신 일은 없었고요', 최근 7일 내 낙상 보고 없음"
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "기분 언급 없음"
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "환기, 이불 널기, 배추값 대화는 관찰·호소·사건으로 보기 어려워 기록하지 않음"
+      },
+      "memo": "방문 전 측정값(어제 병원 혈압)과 평소 혈압을 특이사항에 남길지 정책이 명확하지 않음(#5는 '앞선 측정'을 방문 중 측정으로 한정하는 것으로 해석함). 일상 대화(배추값)나 환기 같은 활동이 특이사항 대상인지 기준이 없음. '남기신 게 하나도 없었다'처럼 정책 예시 표현과 비슷한 말을 매핑할 때 source를 stated와 inferred 중 무엇으로 할지 모호함."
+    },
+    "B02": {
+      "visit_start": {
+        "value": "13:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'1시에 들어갔는데'와 점심 맥락을 근거로 오후 1시(13:00)로 변환함"
+      },
+      "blood_pressure": {
+        "value": "118/76",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "pulse": {
+        "value": "66",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "미제공",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "점심을 못 챙겨 드렸고 물만 드심"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "점심 약은 복용함. 저녁 약은 아직 복용 시점이 아니어서 약통에 남겨 둠"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "오늘 넘어진 일 없음. 최근 7일 이내 낙상 언급 없음"
+      },
+      "mood": {
+        "value": "양호",
+        "source": "inferred",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": true,
+        "memo": "기분을 직접 말하지 않았고, 문 열자마자 노래 프로그램 얘기를 꺼내는 등 활발한 대화 모습에서 추론함"
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "잡담(쌀값, 이웃 이사) 외에 특이 관찰·호소는 없음"
+      },
+      "memo": "기분을 직접 언급하지 않고 대화 태도만 묘사한 경우 mood를 추론해 양호로 볼지 missing으로 둘지 정책에 기준이 없음. 다음 끼니 약을 남겨 둔 것을 미복용으로 볼지에 대한 기준도 명시되어 있지 않음(복용 시점 전이므로 복용으로 판단함). '1시'처럼 오전·오후를 말하지 않은 시각을 24시간제로 변환하는 기준도 없음."
+    },
+    "B03": {
+      "visit_start": {
+        "value": "10:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'어 제가 도착한 게 오전 10시'는 '어, 제가'(간투사)로 읽힘. '어제'로 띄어 읽을 여지는 문맥상 낮음"
+      },
+      "blood_pressure": {
+        "value": "130/80",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "pulse": {
+        "value": "72",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "전량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "다 드셨고 그릇이 깨끗이 비어 있음"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "아침 약 드셨다고 직접 보고"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "요새 넘어지신 적 없다고 보고"
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "기분에 대한 직접 언급 없음(신문 읽기·동창 모임 얘기만 있음)"
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "누룽지 간식 제공 외 특별한 관찰·호소 없음"
+      },
+      "memo": "신문 읽기·동창 모임 이야기처럼 활동적인 모습만 있고 기분 언급이 없을 때 mood를 '양호'로 추론할지 정책상 기준이 없음. 간식 제공 같은 일상 활동을 특이사항에 넣을지도 기준이 불분명함."
+    },
+    "B04": {
+      "visit_start": {
+        "value": "10:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": true,
+        "memo": "'오전 10시, 그쯤'이라는 근사 표현이다. 10:00으로 볼 수도 있고, 정확한 시각이 아니라고 볼 수도 있다."
+      },
+      "blood_pressure": {
+        "value": "138/88",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "pulse": {
+        "value": "84",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "전량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "밥 한 공기와 된장국을 남김없이 드심"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "어르신의 자기보고를 요양보호사가 '약은 아침에 드셨고요'로 기록함"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "직접 질문에 넘어진 적 없다고 답함. 최근 7일 이내 낙상 보고 없음"
+      },
+      "mood": {
+        "value": "양호",
+        "source": "inferred",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'밝은 표정으로 손주들 얘기'를 근거로 양호로 판단"
+      },
+      "special_notes": {
+        "value": "열쇠 위치를 몰라 문 앞에서 한참 허둥댐",
+        "source": "inferred",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": true,
+        "memo": "건망 관찰로 기록할 가치가 있는지, 일상적 일화로 보고 비울지 갈린다"
+      },
+      "memo": "방문 시각을 '그쯤'처럼 근사로 말한 경우, 정책 #1의 추측으로 볼지 근사 시각으로 기록할지 기준이 없다. 열쇠를 찾지 못한 것 같은 경미한 건망 관찰을 특이사항에 넣을지도 기준이 없다."
+    },
+    "B05": {
+      "visit_start": {
+        "value": "10:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'오전 열 시에 들어갔고요'"
+      },
+      "blood_pressure": {
+        "value": "124/80",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "pulse": {
+        "value": "74",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "전량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'그릇이 싹 비어' → 정책 #9에 따라 전량"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "보호사가 직접 물과 약을 드려 복용 확인"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "어르신 본인 발언 '요새 한 번도 안 자빠졌당께'에 근거"
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "기분 좋다가 갑자기 우심 → 혼재, 정책 #10에 따라 비우고 특이사항에 기록"
+      },
+      "special_notes": {
+        "value": "기분 좋다가 이유 없이 갑자기 울음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "기분 변화는 risk 목록 밖이므로 ok"
+      },
+      "memo": "낙상 '없음'이 보호사 관찰이 아닌 어르신 자기보고('요새 안 자빠졌다')에만 근거할 때 stated/ok로 둘지 needs_confirm으로 둘지 정책에 명시가 없음. '요새'가 7일 범위를 포괄하는지도 불명확."
+    },
+    "B06": {
+      "visit_start": {
+        "value": "10:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'열 시쯤'이라는 근사 표현이며, 아침 식사 언급으로 보아 오전 10시로 기록함"
+      },
+      "blood_pressure": {
+        "value": "130/80",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "pulse": {
+        "value": "65",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "전량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "아침 밥을 다 드셨다고 보고함"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "어르신이 '아까 약 먹었다'고 말씀하신 것을 근거로 보호사가 복용했다고 보고함"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "요새 한 번도 안 넘어지셨다고 보고함"
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "기분에 대한 직접 언급이 없음(신문 읽기와 대화 내용만 있음)"
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "신문 읽기, 동창 모임 대화, 호박죽 이야기 등 일상 대화만 있어 특이사항 없음"
+      },
+      "memo": "복약 여부가 어르신의 자기 보고('아까 약 먹었다')에 근거한 경우, 보호사가 직접 확인하지 않았더라도 stated로 볼지 정책에 명시되어 있지 않음. 또한 '열 시쯤' 같은 근사 시각을 추측(#1)으로 볼지도 불명확함."
+    },
+    "B07": {
+      "visit_start": {
+        "value": "15:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'오후 세 시에 들어가자마자'를 24시간제로 변환함"
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "기계를 가져오지 않아 측정하지 못함. 따님의 '정상' 언급은 제3자 진술이라 제외함(#6)"
+      },
+      "pulse": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "언급 없음"
+      },
+      "meal_intake": {
+        "value": "소량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'숟가락으로 서너 번'은 정책 #9에 따라 소량으로 매핑함"
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "따님이 아침저녁으로 챙긴다는 평소 관행만 언급됨. 오늘 실제로 복용했는지는 확인되지 않음"
+      },
+      "fall_event": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "언급 없음"
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "언급 없음"
+      },
+      "special_notes": {
+        "value": "혈압계 미지참으로 혈압 미측정",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": true,
+        "memo": "측정 누락 사정을 특이사항으로 볼지가 갈림. 빨래·고지서 정리는 가사 업무라 제외함"
+      },
+      "memo": "측정 장비를 가져오지 않아 수치를 못 잰 사정을 특이사항에 기록할지 정책에 규정이 없음. 보호자가 평소 약을 챙긴다는 관행 진술을 복약 필드에 반영하지 않고 missing으로 처리함."
+    },
+    "B08": {
+      "visit_start": {
+        "value": "14:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'들어간 게 오후 2시'를 24시간제로 변환"
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "오늘 혈압 미측정, 내일 병원에서 측정 예정"
+      },
+      "pulse": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "맥박 언급 없음"
+      },
+      "meal_intake": {
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'절반 정도 드셨어유'. 방문 전에 상이 치워져 있어 직접 확인한 양은 아닐 수 있음"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "아침 약 복용을 단정적으로 보고. 저녁 약은 약통에 준비만 함"
+      },
+      "fall_event": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "낙상 언급 없음"
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "산책·방송 이야기를 했으나 기분을 직접 언급하지 않음"
+      },
+      "special_notes": {
+        "value": "혈압 미측정(내일 병원 방문 예정), 다음 주 약 변경 예정",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "위험 신호 없음"
+      },
+      "memo": "식사량을 요양보호사가 직접 보지 못하고 전해 들은 경우를 stated로 둘지 정책에 명시가 없음. 산책·대화 내용으로 mood를 양호로 추론할 수 있는지(#11의 근거 있는 추론이 mood에도 적용되는지)가 모호함."
+    },
+    "B09": {
+      "visit_start": {
+        "value": "13:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'오후 1시에 들어갔어요'를 24시간제로 변환"
+      },
+      "blood_pressure": {
+        "value": "122/76",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "pulse": {
+        "value": "68",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "마지막에 덧붙여 말함"
+      },
+      "meal_intake": {
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "한 공기 중 '반 공기 정도' 드심 → 정책 #9의 절반"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "오늘 넘어지지 않았다고 함. 최근 7일 낙상 보고 없음. 멍은 '부딪혔다'고만 함"
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "기분 언급 없음"
+      },
+      "special_notes": {
+        "value": "팔 여러 군데 멍, 아드님 방문 시 위축(말수 감소)",
+        "source": "stated",
+        "flag": "risk",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "특이사항 risk 기준의 정황(학대 의심) 항목에 해당. 보고 기준은 현장 확인 필요(R3)"
+      },
+      "memo": "멍+보호자 방문 시 위축 정황은 특이사항 risk 기준표에 있으나 '보고 기준 현장 확인 필요(R3)'로 임시 상태임. 요양보호사 본인의 신발 불편, 보리차 준비, 교회 모임 이야기는 어르신 관찰·호소·사건으로 보기 어려워 특이사항에서 제외함."
+    },
+    "B10": {
+      "visit_start": {
+        "value": "13:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'오후 1시'를 24시간제로 변환"
+      },
+      "blood_pressure": {
+        "value": "130/80",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "1회 측정, 같은 값을 반복 진술"
+      },
+      "pulse": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "맥박 측정을 잊어 재지 않았다고 진술"
+      },
+      "meal_intake": {
+        "value": "소량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'조금만', '서너 숟가락'은 정책 #9에 따라 소량"
+      },
+      "medication_taken": {
+        "value": "미복용",
+        "source": "stated",
+        "flag": "risk",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "어르신 거부로 끝내 복용하지 않음, 약 봉지 그대로"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "오늘 낙상 없다고 진술, 최근 7일 이내 낙상 언급 없음"
+      },
+      "mood": {
+        "value": "저조",
+        "source": "inferred",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": true,
+        "memo": "'기운 없어 보임'이 기분 저조인지 신체 기력 저하인지 둘 다로 읽힘"
+      },
+      "special_notes": {
+        "value": "복용 거부 의사; 입맛 없음·기운 없음; 난방비 부담으로 보일러 저녁에만 가동; 미복용 건 보호자(따님) 연락 필요",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "risk 기준 목록 해당 항목 없음, 복약 거부는 정책 #13에 따라 별도 기록"
+      },
+      "memo": "'기운 없어 보인다'를 mood 저조로 볼지 정책에 기준이 없음. 오늘만 낙상 없다고 했을 때 최근 7일 확인 없이 '없음'으로 둘지 모호함. 난방비 부담 같은 생활환경 정보가 특이사항 범위에 들어가는지 불명확함."
+    },
+    "B11": {
+      "visit_start": {
+        "value": "09:30",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'아홉 시 반쯤'이라고 말했고, 아침 식사·아침 복약 맥락이라 오전으로 판단함"
+      },
+      "blood_pressure": {
+        "value": "128/80",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "pulse": {
+        "value": "74",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "전량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'남기신 거 하나 없이 다 드셨어요'를 전량으로 매핑함"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "아침에 물과 함께 챙겨 드려 드셨다고 함. 약 개수(하루 2알)는 필드에 넣지 않음"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "트로트 노래 이야기를 나눴다는 말만 있고 기분을 직접 말하지 않음"
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": true,
+        "memo": "청소원에게 들은 '비둘기 모이 주러 자주 외출'은 잡담에 가까워 비움. 다만 제3자가 전한 생활 관찰로 볼 여지도 있음"
+      },
+      "memo": "제3자(청소원)가 전한 어르신의 생활 정보(잦은 공원 외출)를 특이사항으로 기록할지에 대한 정책 기준이 없음. 정책 #6은 수치만 다룸. 또 '아홉 시 반쯤'처럼 대략적인 시각 표현은 추측(#1)과 구분하는 기준이 없음."
+    },
+    "B12": {
+      "visit_start": {
+        "value": "14:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'도착한 게 오후 2시'를 24시간제로 변환"
+      },
+      "blood_pressure": {
+        "value": "116/74",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "pulse": {
+        "value": "62",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'한 공기 중 반 공기 정도'는 정책 #9에 따라 절반"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "식후 약을 그 자리에서 드셨다고 직접 보고"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "오늘 안 넘어지셨다고 보고했고 최근 7일 내 낙상 언급 없음"
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": true,
+        "memo": "'평소랑 비슷, 별다른 변화 없음'은 기분 자체 언급이 아니라서 비움. 양호로 읽을 여지도 있음"
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": true,
+        "memo": "TV 위치 변경, 감나무, 추석 준비는 일상 대화·환경 언급으로 보아 비움. TV 위치 변경을 환경 변화 관찰로 기록할 여지도 있음"
+      },
+      "memo": "'평소랑 비슷하셨어요'를 mood 양호로 볼지 정책에 기준이 없음. 가구 위치 변경 같은 환경 관찰이나 일상 대화가 특이사항(#11 관찰·사건)에 해당하는지 경계가 모호함."
+    },
+    "B13": {
+      "visit_start": {
+        "value": "09:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'아홉 시에 들어갔다'고 말함. 아침 프로그램·아침 식사 맥락으로 오전으로 판단. 멈춘 벽시계는 방문 시각과 무관함"
+      },
+      "blood_pressure": {
+        "value": "118/74",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "pulse": {
+        "value": "64",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "'반쯤 드시고'를 절반으로 매핑함"
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "혈압약과 영양제를 식후에 다 드심"
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": "작년 낙상은 7일보다 오래되어 제외함. 오늘과 최근에는 낙상이 없다고 말함"
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": false,
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": [],
+        "uncertain": true,
+        "memo": "화분·라디오·멈춘 벽시계는 일상 잡담으로 봄. 작년 고관절 수술 이력을 특이사항으로 볼지는 판단이 갈림"
+      },
+      "memo": "7일을 넘긴 과거 낙상 이력(작년 고관절 수술)을 특이사항에 남길지 정책에 명시되어 있지 않음. 화분·벽시계 같은 환경 관찰을 특이사항으로 볼지 기준도 모호함."
+    }
+  }
+}
