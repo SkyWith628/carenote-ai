@@ -146,6 +146,10 @@ def test_label_policy_document_keeps_the_2026_10_26_clarifications() -> None:
         "앞선 측정을 특이사항에 기록",  # #5 (2026-10-26 후속)
         "필드가 이미 담는 내용은 특이사항에 중복 기록하지 않는다",  # #11
         "확인·질문을 못 한 항목",  # #11(b) 확장
+        "그 수치들을 후보로 적는다",  # #4 (라운드 4 보완)
+        "평소보다 높다",  # #6 (라운드 4 보완)
+        "기운이 없어 보인다",  # #10 예시
+        "비워 두면 오류다",  # #13 강조
         "특이사항 risk 기준",
         "측정을 못 했거나 빠뜨린 사유",  # #11 범위 (2026-10-26)
         "감정·표정·기색을 직접 말했을 때만",  # #10 기분 추론 기준
@@ -172,3 +176,16 @@ def test_gs002_special_notes_records_the_unasked_medication_check() -> None:
     notes = case.field(FieldKey.SPECIAL_NOTES)
     assert notes.value == "복약 여부 확인 못 함"
     assert [e.text for e in notes.evidence] == ["약 드셨는지는 제가 못 물어봤어요"]
+
+
+def test_blind_guide_carries_round4_clarifications() -> None:
+    from carenote.generation.candidates import BLIND_GUIDE
+
+    for fragment in (
+        "**후보 칸에 그 숫자들을 적는다**",
+        "기운이 없어 보인다",
+        "(비워 두면 오류다)",
+        "수치를 오늘 수치와 견주는 말",
+        "낙상과 복약 이야기가 있는지 transcript를",
+    ):
+        assert fragment in BLIND_GUIDE, fragment
