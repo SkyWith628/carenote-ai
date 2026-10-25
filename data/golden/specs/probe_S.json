@@ -109,7 +109,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "author": "llm"
     },
     {
       "spec_id": "S2",
@@ -203,7 +204,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "author": "llm"
     },
     {
       "spec_id": "S3",
@@ -297,7 +299,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "author": "llm"
     }
   ]
 }

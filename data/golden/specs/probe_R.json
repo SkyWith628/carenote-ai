@@ -86,7 +86,8 @@
           "flag": "risk",
           "candidates": []
         }
-      }
+      },
+      "author": "llm"
     },
     {
       "spec_id": "R2",
@@ -170,7 +171,8 @@
           "flag": "risk",
           "candidates": []
         }
-      }
+      },
+      "author": "human"
     },
     {
       "spec_id": "R3",
@@ -257,7 +259,9 @@
           "flag": "risk",
           "candidates": []
         }
-      }
+      },
+      "author": "llm",
+      "field_review_required": true
     }
   ]
 }

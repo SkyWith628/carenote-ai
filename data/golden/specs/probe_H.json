@@ -84,7 +84,8 @@
           "candidates": []
         }
       },
-      "gray_fields": []
+      "gray_fields": [],
+      "author": "human"
     },
     {
       "spec_id": "H2",
@@ -167,7 +168,8 @@
           "candidates": []
         }
       },
-      "gray_fields": []
+      "gray_fields": [],
+      "author": "human"
     },
     {
       "spec_id": "H3",
@@ -251,7 +253,8 @@
           "candidates": []
         }
       },
-      "gray_fields": []
+      "gray_fields": [],
+      "author": "llm"
     },
     {
       "spec_id": "H4",
@@ -331,7 +334,8 @@
           "candidates": []
         }
       },
-      "gray_fields": []
+      "gray_fields": [],
+      "author": "llm"
     },
     {
       "spec_id": "H5",
@@ -411,7 +415,8 @@
           "candidates": []
         }
       },
-      "gray_fields": []
+      "gray_fields": [],
+      "author": "llm"
     },
     {
       "spec_id": "H6",
@@ -495,7 +500,8 @@
           "candidates": []
         }
       },
-      "gray_fields": []
+      "gray_fields": [],
+      "author": "llm"
     }
   ]
 }

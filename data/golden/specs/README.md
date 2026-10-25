@@ -16,6 +16,8 @@
 | `label_risk` | 사람 라벨러가 갈릴 위험(low/medium/high). medium 이상은 독립 라벨링 표본에 우선 포함 |
 | `gray_fields` | 정책상 정답이 갈릴 수 있는 필드(주로 `special_notes`). 라벨러·모델이 달라도 오답으로 단정하지 않고 별도 집계하기 위한 표시. 러너 반영은 구현 단계에서 결정 |
 | `stt` | S 프로브 전용. `errors[]`에 대상 필드, 참고 발화 `reference`, 오인식 결과 `heard`, 종류, **텍스트만으로 복원 가능한지**(`recoverable_from_text`)를 기록. false인 필드는 텍스트 전용 모델에게 구조적 오답이므로 모델 오류와 분리해 집계한다. S 케이스의 정답은 reference 기준 |
+| `author` | `human`(사용자가 transcript를 직접 작성) 또는 `llm`(생성). human 10건: H1 H2 C1 D3 N4 V1 G2 I2 R2 L1 |
+| `field_review_required` | true이면 현장 전문가 확인 전에는 동결·test 포함을 보류 (R3 학대 의심 기준, G1 제주 방언 표기) |
 | `gold` | 8개 필드의 정답 `{value, source, flag, candidates}` (evidence는 생성 후 transcript에서 인용해 채움) |
 
 가설은 결과를 보기 전의 예측이다. 틀렸다고 지우지 않고 결과와 함께 비교한다.

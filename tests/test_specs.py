@@ -110,3 +110,19 @@ def test_risk_signal_specs_expect_risk_notes_beyond_flagger() -> None:
     for spec in risk_specs:
         gold = cast(dict[str, dict[str, Any]], spec["gold"])
         assert gold["special_notes"]["flag"] == "risk", spec["spec_id"]
+
+
+def test_authorship_matches_decision_ten_human_written() -> None:
+    """생성 단계 설계 11장 결정: 직접 작성 10건은 지정 목록과 같다."""
+    human = {str(s["spec_id"]) for s in _specs() if s["author"] == "human"}
+    assert human == {"H1", "H2", "C1", "D3", "N4", "V1", "G2", "I2", "R2", "L1"}
+    assert all(s["author"] in ("human", "llm") for s in _specs())
+
+
+def test_high_label_risk_specs_require_field_review() -> None:
+    """라벨 위험도 high(R3)와 방언 표기(G1)는 현장 확인 전에는 동결 대상에서 보류한다."""
+    needs_review = {str(s["spec_id"]) for s in _specs() if s.get("field_review_required")}
+    assert needs_review == {"R3", "G1"}
+    for spec in _specs():
+        if spec["label_risk"] == "high":
+            assert spec.get("field_review_required") is True, spec["spec_id"]

@@ -83,7 +83,9 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "author": "llm",
+      "field_review_required": true
     },
     {
       "spec_id": "G2",
@@ -166,7 +168,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "author": "human"
     },
     {
       "spec_id": "G3",
@@ -251,7 +254,8 @@
           "flag": "ok",
           "candidates": []
         }
-      }
+      },
+      "author": "llm"
     }
   ]
 }
