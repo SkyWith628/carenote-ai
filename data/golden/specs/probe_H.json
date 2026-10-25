@@ -15,7 +15,7 @@
         "말더듬": "약함"
       },
       "length_chars": [
-        150,
+        120,
         250
       ],
       "must_include": [
@@ -36,7 +36,7 @@
       "label_risk": "low",
       "gold": {
         "visit_start": {
-          "value": "10:00",
+          "value": "09:00",
           "source": "stated",
           "flag": "ok",
           "candidates": []

@@ -142,7 +142,7 @@ def test_e_warns_when_bp_like_number_leaks_into_missing_bp_spec(
     spec = spec_by_id["H1"]
     leaky = GeneratedCase(
         transcript=(
-            "열 시에 갔고 혈압은 정상이래요, 120에 80이라고 해요. 맥박도 괜찮고 점심 다 드셨어요."
+            "아홉 시에 갔고 혈압은 정상이래요, 120에 80이라고 해요. 맥박도 괜찮고 점심 다 드셨어요."
         ),
         reference_transcript=None,
         evidence=[],
