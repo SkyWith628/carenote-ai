@@ -17,6 +17,7 @@ from carenote.extraction.prompts import (
     PROMPT_VERSIONS,
     build_system_prompt,
 )
+from carenote.extraction.schema import LLMExtractionB1
 
 GOLDEN = Path(__file__).parent.parent / "data" / "golden"
 # v1 본문은 2026-10-23~26 실측의 기준선이다. 바뀌면 기존 보고서를 재현할 수 없다.
@@ -124,19 +125,21 @@ def test_v1_cache_key_is_unchanged_so_old_cache_still_hits() -> None:
     assert ex._cache_key("가") == expected  # pyright: ignore[reportPrivateUsage]
 
 
-def test_cli_prompt_option_changes_dry_run_cache_hits(
+def test_cli_prompt_option_is_reported_and_isolates_cache(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """v2는 v1 캐시를 쓰지 않으므로 dry-run에서 캐시 적중이 0이다."""
-    base = [
-        "--extractor", "llm-b1", "--split", "dev", "--dry-run",
-        "--cache-dir", str(tmp_path),
-    ]  # fmt: skip
-    cache = Path(".cache/extractions")
-    assert main([*base, "--prompt", "v1", "--cache-dir", str(cache)], settings=Settings()) == 0
+    """--prompt가 dry-run에 표시되고, v1 캐시는 v2에 적중하지 않는다 (임시 캐시, 실제 캐시 무관)."""
+    base = ["--extractor", "llm-b1", "--split", "dev", "--dry-run", "--cache-dir", str(tmp_path)]
+    case = load_golden(GOLDEN, "dev")[0]
+    seeded = _extractor("v1", tmp_path)
+    seeded._write_cache(  # pyright: ignore[reportPrivateUsage]
+        seeded._cache_key(case.transcript),  # pyright: ignore[reportPrivateUsage]
+        LLMExtractionB1(fields=[]),
+    )
+    assert main([*base, "--prompt", "v1"], settings=Settings()) == 0
     v1_out = capsys.readouterr().out
-    assert "프롬프트 v1" in v1_out
-    assert main([*base, "--prompt", "v2", "--cache-dir", str(cache)], settings=Settings()) == 0
+    assert "프롬프트 v1" in v1_out and "캐시 적중 1건" in v1_out
+    assert main([*base, "--prompt", "v2"], settings=Settings()) == 0
     v2_out = capsys.readouterr().out
     assert "프롬프트 v2" in v2_out and "캐시 적중 0건, API 호출 예정 30건" in v2_out
 
