@@ -22,7 +22,7 @@
         "방문 시각 오전 10시",
         "혈 압은 130에 80",
         "맥박 72(아라비아 숫자)",
-        "점심은 다 드 셨고",
+        "점심은 다 드 셨고(띄어쓰기 오인식)",
         "약도 드 셨어요",
         "넘어 지신 적은 없어요"
       ],
@@ -55,6 +55,13 @@
             "field": "fall_event",
             "reference": "넘어지신",
             "heard": "넘어 지신",
+            "kind": "spacing",
+            "recoverable_from_text": true
+          },
+          {
+            "field": "meal_intake",
+            "reference": "다 드셨고",
+            "heard": "다 드 셨고",
             "kind": "spacing",
             "recoverable_from_text": true
           }

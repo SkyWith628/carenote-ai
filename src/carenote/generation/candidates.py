@@ -8,7 +8,11 @@ from pathlib import Path
 from typing import Any
 
 from carenote.evaluation.loader import load_golden
-from carenote.generation.checks import check_h_duplicates, check_k_openings
+from carenote.generation.checks import (
+    check_h_duplicates,
+    check_k_closings,
+    check_k_openings,
+)
 from carenote.generation.generator import GenerationResult, Generator
 from carenote.generation.prompts import GENERATION_PROMPT_VERSION
 from carenote.generation.spec import Spec
@@ -68,10 +72,11 @@ def apply_batch_checks(out_dir: Path, golden_dir: Path | None) -> dict[str, list
     )
     h = check_h_duplicates(items, existing)
     k = check_k_openings(items)
+    k_end = check_k_closings(items)
     summary: dict[str, list[str]] = {}
     for doc in docs:
         sid = str(doc["spec_id"])
-        results = [h[sid], k[sid]]
+        results = [h[sid], k[sid], k_end[sid]]
         doc["batch_checks"] = [r.model_dump() for r in results]
         (out_dir / f"{sid}.json").write_text(
             json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8"

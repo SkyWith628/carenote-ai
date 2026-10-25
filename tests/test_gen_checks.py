@@ -20,7 +20,9 @@ from carenote.generation.checks import (
     check_h_duplicates,
     check_i_stt,
     check_j_injection,
+    check_k_closings,
     check_k_openings,
+    check_k_stock_closer,
     failures,
     jaccard,
     run_candidate_checks,
@@ -223,4 +225,54 @@ def test_k_warns_when_many_candidates_share_an_opening() -> None:
     ]
     results = check_k_openings(items)
     assert all(results[f"X{i}"].level == "warn" for i in range(4))
+    assert results["Y"].level == "pass"
+
+
+def test_i_fails_on_unspecified_stt_error(spec_by_id: dict[str, Spec]) -> None:
+    """지정되지 않은 오인식(g1 파일럿의 '드 셨고' 유형)은 실패, 지정된 것만 있으면 통과."""
+    s1 = spec_by_id["S1"]
+    assert check_i_stt(s1, GOOD_CASES["S1"]).level == "pass"
+    extra = GOOD_CASES["S1"].model_copy(
+        update={"transcript": GOOD_CASES["S1"].transcript.replace("방 청소랑", "방 청 소랑")}
+    )
+    result = check_i_stt(s1, extra)
+    assert result.level == "fail" and "지정되지 않은 오인식" in result.message
+
+
+def test_s2_negation_drop_spec_pair_restores_reference(spec_by_id: dict[str, Spec]) -> None:
+    """S2의 부정어 탈락 쌍을 되돌리면 참고 발화가 되고, 같은 문장이 다른 곳에 없으면 통과한다."""
+    s2 = spec_by_id["S2"]
+    reference = "오후 세 시에 갔어요. 혈압은 126에 80이고 맥박은 68이에요. 약은 안 드셨어요."
+    transcript = reference.replace("약은 안 드셨어요", "약은 드셨어요")
+    case = GeneratedCase(
+        transcript=transcript, reference_transcript=reference, evidence=[], notes=""
+    )
+    assert check_i_stt(s2, case).level == "pass"
+
+
+@pytest.mark.parametrize(
+    "ending",
+    ["이상입니다.", "네, 이상입니다", "어 이상이에요.", "보고 끝.", "여기까지입니다!"],
+)
+def test_k_fails_on_stock_closers(ending: str, spec_by_id: dict[str, Spec]) -> None:
+    """정형 마무리로 끝나면 실패한다."""
+    case = GOOD_D1.model_copy(update={"transcript": GOOD_D1.transcript + " " + ending})
+    assert check_k_stock_closer(spec_by_id["D1"], case).level == "fail"
+
+
+def test_k_accepts_content_endings(spec_by_id: dict[str, Spec]) -> None:
+    """내용 있는 마지막 문장은 통과하고, 문장 중간의 '이상'도 걸리지 않는다."""
+    case = GOOD_D1.model_copy(
+        update={"transcript": GOOD_D1.transcript + " 이상하게 오늘은 따님 전화를 기다리시더라고요."}
+    )
+    assert check_k_stock_closer(spec_by_id["D1"], case).level == "pass"
+    assert check_k_stock_closer(spec_by_id["D1"], GOOD_D1).level == "pass"
+
+
+def test_k_warns_when_last_word_repeats_across_candidates() -> None:
+    """마지막 어절이 같은 후보가 3건 이상이면 경고한다."""
+    items = [(f"X{i}", f"다른 이야기 {i}번째 내용 그리고 마무리했어요.") for i in range(3)]
+    items.append(("Y", "전혀 다르게 끝나는 문장이에요"))
+    results = check_k_closings(items)
+    assert all(results[f"X{i}"].level == "warn" for i in range(3))
     assert results["Y"].level == "pass"

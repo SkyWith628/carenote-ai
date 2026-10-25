@@ -1,11 +1,13 @@
 """생성된 transcript의 자동 점검 A~K (API 호출 없음, 설계 4장).
 
 A 스키마 · B 근거 · C 길이 · D 개인정보 · E 수치 존재 · F 모호 수사 · G 라벨 누설 ·
-H 중복(배치) · I STT 메타 · J 인젝션 · K 문두 다양성(배치)
+H 중복(배치) · I STT 메타(지정 외 오인식 포함) · J 인젝션 ·
+K 문두·종결 다양성(정형 종결 문구는 후보 단위 실패, 문두·종결 반복은 배치 경고)
 """
 
 from __future__ import annotations
 
+import difflib
 import re
 from collections import Counter
 
@@ -28,10 +30,15 @@ LENGTH_TOLERANCE = 0.10
 DUPLICATE_THRESHOLD = 0.5
 OPENING_WORDS = 6
 OPENING_MAX_SHARED = 3
+CLOSING_MAX_SHARED = 2
 
 _ENGLISH_LABELS = re.compile(r"\b(needs_confirm|missing|stated|inferred|candidates)\b")
 _KOREAN_LABEL_WARN = ("미복용", "미섭취", "미제공", "중복 복용 의심", "전량")
 _BP_LIKE = re.compile(r"\d{2,3}\s*(?:에|/)\s*\d{2,3}")
+_STOCK_CLOSER = re.compile(
+    r"(이상\s*(입니다|이에요|이고요|이요|이야|으로)|보고\s*끝|끝입니다|여기까지(입니다|예요|에요))"
+    r"[\s.!?…]*$"
+)
 _INJECTION_MARKERS = ("시스템", "지시", "무시", "적어", "출력", "JSON", "{")
 
 
@@ -193,7 +200,25 @@ def check_i_stt(spec: Spec, case: GeneratedCase) -> CheckResult:
     ]
     if problems:
         return _fail("I", "; ".join(problems))
+    restored = case.transcript
+    for error in spec.stt.errors:
+        restored = restored.replace(error.heard, error.reference)
+    if _squash(restored) != _squash(reference):
+        return _fail("I", "지정되지 않은 오인식이 있음: " + _first_difference(restored, reference))
     return _ok("I")
+
+
+def _squash(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _first_difference(a: str, b: str) -> str:
+    """두 문자열이 처음 달라지는 지점을 짧게 보여준다."""
+    a, b = _squash(a), _squash(b)
+    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b).get_opcodes():
+        if tag != "equal":
+            return f"{a[max(0, i1 - 6) : i2 + 6]!r} ↔ {b[max(0, j1 - 6) : j2 + 6]!r}"
+    return ""
 
 
 def check_j_injection(spec: Spec, case: GeneratedCase) -> CheckResult:
@@ -208,6 +233,14 @@ def check_j_injection(spec: Spec, case: GeneratedCase) -> CheckResult:
     return _ok("J")
 
 
+def check_k_stock_closer(spec: Spec, case: GeneratedCase) -> CheckResult:
+    """'이상입니다' 같은 정형 마무리로 끝나면 실패한다 (g1 파일럿 3건이 모두 그랬다)."""
+    tail = case.transcript.strip()[-30:]
+    if _STOCK_CLOSER.search(tail):
+        return _fail("K", "정형 마무리 문구로 끝남 (예: '이상입니다')")
+    return _ok("K")
+
+
 _CANDIDATE_CHECKS = (
     check_a_schema,
     check_b_evidence,
@@ -218,6 +251,7 @@ _CANDIDATE_CHECKS = (
     check_g_label_leak,
     check_i_stt,
     check_j_injection,
+    check_k_stock_closer,
 )
 
 
@@ -261,6 +295,24 @@ def check_h_duplicates(
             results[spec_id] = _fail("H", f"다른 텍스트와 유사도 {worst:.2f}")
         else:
             results[spec_id] = _ok("H")
+    return results
+
+
+def _last_word(text: str) -> str:
+    words = text.split()
+    return re.sub(r"[.,!?…~\s]+$", "", words[-1]) if words else ""
+
+
+def check_k_closings(items: list[tuple[str, str]]) -> dict[str, CheckResult]:
+    """배치 점검: 마지막 어절이 같은 후보가 3건 이상이면 해당 후보에 경고."""
+    closings = {sid: _last_word(text) for sid, text in items}
+    counts = Counter(closings.values())
+    results: dict[str, CheckResult] = {}
+    for sid, closing in closings.items():
+        if closing and counts[closing] > CLOSING_MAX_SHARED:
+            results[sid] = _warn("K", f"끝맺음 '{closing}'이(가) {counts[closing]}건에서 반복됨")
+        else:
+            results[sid] = _ok("K")
     return results
 
 
