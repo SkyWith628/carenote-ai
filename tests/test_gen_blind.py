@@ -147,7 +147,7 @@ def test_cli_renders_blind_sheet_and_compares(
     argv = ["--spec-dir", str(SPEC_DIR), "--out-dir", str(cand_dir)]
     assert main([*argv, "--render-review", str(sheet), "--blind"]) == 0
     template = sheet.with_suffix(".labels.json")
-    key_path = cand_dir.parent / "blind_key.json"
+    key_path = cand_dir.parent / "blind_key.blind.json"
     assert sheet.exists() and template.exists() and key_path.exists()
     key = json.loads(key_path.read_text(encoding="utf-8"))
     assert set(key) == {"D1", "H3"}
@@ -156,3 +156,34 @@ def test_cli_renders_blind_sheet_and_compares(
     assert main([*argv, "--compare-blind", str(template)]) == 0
     out = capsys.readouterr().out
     assert "미작성 16개" in out and "미달" in out  # 비어 있는 템플릿은 전부 미작성
+
+
+def test_cli_blind_sample_via_spec_limits_the_sheet_and_keeps_round_keys_separate(
+    cand_dir: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """--spec로 표본을 지정하면 그 후보만 시트에 들어가고, 라운드별 키가 서로 덮어쓰이지 않는다."""
+    argv = ["--spec-dir", str(SPEC_DIR), "--out-dir", str(cand_dir)]
+    first = cand_dir.parent / "v2-blind.md"  # 첫 라운드 이름: 기존 blind_key.json 사용
+    second = cand_dir.parent / "round2.md"
+    assert main([*argv, "--render-review", str(first), "--blind"]) == 0
+    assert main([*argv, "--render-review", str(second), "--blind", "--spec", "H3"]) == 0
+    key1 = json.loads((cand_dir.parent / "blind_key.json").read_text(encoding="utf-8"))
+    key2 = json.loads((cand_dir.parent / "blind_key.round2.json").read_text(encoding="utf-8"))
+    assert set(key1) == {"D1", "H3"} and set(key2) == {"H3"} and key2["H3"] == "B01"
+    sheet2 = second.read_text(encoding="utf-8")
+    assert GOOD_H3.transcript in sheet2 and GOOD_D1.transcript not in sheet2
+    # 비교는 라벨 파일 이름으로 라운드 키를 찾는다
+    capsys.readouterr()
+    assert main([*argv, "--compare-blind", str(second.with_suffix(".labels.json"))]) == 0
+    assert "필드 8개" in capsys.readouterr().out
+
+
+def test_cli_blind_sample_rejects_specs_without_candidates(
+    cand_dir: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """후보가 없는 spec_id를 지정하면 시트를 만들지 않고 거부한다."""
+    argv = ["--spec-dir", str(SPEC_DIR), "--out-dir", str(cand_dir)]
+    sheet = cand_dir.parent / "x.md"
+    code = main([*argv, "--render-review", str(sheet), "--blind", "--spec", "S1"])
+    assert code == 2 and not sheet.exists()
+    assert "후보가 없는" in capsys.readouterr().err

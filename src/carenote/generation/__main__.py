@@ -83,6 +83,22 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _blind_key_path(out_dir: Path, labels_or_template: Path, *, for_write: bool = False) -> Path:
+    """블라인드 키 파일 경로. 라벨 파일 이름(`v2-blind2.labels.json`)마다 키를 따로 둔다.
+
+    첫 라운드(`v2-blind`)는 호환을 위해 기존 `blind_key.json`을 쓴다. 키는 후보 폴더 밖에 두어
+    후보로 오인되지 않게 하고, 새 라운드가 이전 라운드의 키를 덮어쓰지 않게 한다.
+    """
+    stem = labels_or_template.name.removesuffix(".json").removesuffix(".labels")
+    legacy = out_dir.parent / "blind_key.json"
+    per_round = out_dir.parent / f"blind_key.{stem}.json"
+    if stem == "v2-blind":
+        return legacy
+    if for_write or per_round.exists():
+        return per_round
+    return legacy
+
+
 def select_specs(specs: list[Spec], args: argparse.Namespace) -> list[tuple[Spec, bool]]:
     """생성할 (스펙, 비교용 여부) 목록. 직접 작성 스펙은 명시한 경우에만 비교용으로 포함."""
     by_id = {s.spec_id: s for s in specs}
@@ -111,7 +127,7 @@ def main(
     specs = load_specs(args.spec_dir)
 
     if args.compare_blind is not None:
-        key_path = args.out_dir.parent / "blind_key.json"
+        key_path = _blind_key_path(args.out_dir, args.compare_blind)
         key = json.loads(key_path.read_text(encoding="utf-8"))
         labels = json.loads(args.compare_blind.read_text(encoding="utf-8"))
         print(format_blind_report(compare_blind(labels, key, specs)))
@@ -119,6 +135,12 @@ def main(
 
     if args.render_review is not None and args.blind:
         ids = [str(d["spec_id"]) for d in load_candidates(args.out_dir) if d.get("transcript")]
+        if args.spec:  # 표본 지정: --spec으로 고른 후보만 시트에 넣는다
+            missing = sorted(set(args.spec) - set(ids))
+            if missing:
+                print(f"후보가 없는 spec_id: {missing}", file=sys.stderr)
+                return EXIT_REFUSED
+            ids = [i for i in ids if i in set(args.spec)]
         key = blind_ids(ids)
         args.render_review.parent.mkdir(parents=True, exist_ok=True)
         args.render_review.write_text(render_blind_sheet(args.out_dir, key), encoding="utf-8")
@@ -126,10 +148,9 @@ def main(
         template.write_text(
             json.dumps(blind_label_template(key), ensure_ascii=False, indent=2), encoding="utf-8"
         )
-        (args.out_dir.parent / "blind_key.json").write_text(
-            json.dumps(key, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-        print(f"블라인드 시트 저장: {args.render_review}\n라벨 파일: {template}")
+        key_file = _blind_key_path(args.out_dir, template, for_write=True)
+        key_file.write_text(json.dumps(key, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"블라인드 시트 저장: {args.render_review} ({len(key)}건)\n라벨 파일: {template}")
         return 0
 
     if args.render_review is not None:
