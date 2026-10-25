@@ -130,6 +130,31 @@ class FieldEvidence(BaseModel):
 
 `GoldenCase` 스키마 변경(`split`, `tags`, `author`, `generator`, `recoverable`, 새 `Category`)은 5단계 전에 별도 작업으로 한다. 카테고리 대응: H→`hallucination`, C→`correction`, D→`distractor`, N→`temporal_negation`, L→`long_noisy`, S→`stt_error`, V→`vocab_boundary`, G→`dialect`, I→`injection`, R→`risk_signal`.
 
+### 구현 상태 (2026-10-25)
+
+1~3단계 구현 완료. API 호출은 한 번도 하지 않았다(가짜 클라이언트 테스트 247건 통과).
+
+| 모듈 (`src/carenote/generation/`) | 내용 |
+|---|---|
+| `spec.py` | 스펙 모델(extra 금지)과 로더, 중복 id 검사 |
+| `numerals.py` | 한글 수사 변환(백삼십, 일삼공 읽기), 고유어 시각, 모호 수사 탐지 |
+| `checks.py` | 점검 A~K. 후보 단위 A~G·I·J, 배치 H·K |
+| `prompts.py` | 시스템 프롬프트(`g1`)와 사용자 메시지. 사전 가설은 생성기에 보이지 않음 |
+| `generator.py` | 스펙당 독립 호출, 실패 사유 피드백 재시도(최대 3회), 캐시, `CostGuard` |
+| `estimate.py` | dry-run 비용 추정 |
+| `candidates.py` | 후보 JSON 저장(직접 작성 스펙의 비교용은 `pilot/`), 배치 점검, 독립 라벨링 표본, 검수 시트 |
+| `__main__.py` | CLI: `--dry-run`, `--approve-cost`, `--pilot`, `--spec`, `--split`, `--render-review` |
+
+dry-run 추정(Opus 5.5, effort medium, 캐시 없음): 파일럿 3건 $0.07~$0.28(상한 $0.50 안), LLM 생성 30건 $0.71~$2.73. 추론 토큰량이 미측정이라 파일럿 실측으로 보정한다.
+
+미구현: 블라인드 재라벨(6단계), `GoldenCase` 스키마 확장(`split`, `tags`, `author`, 새 `Category`), 후보 승격·동결(7단계).
+
+```bash
+PYTHONPATH=src uv run python -m carenote.generation --pilot --dry-run
+PYTHONPATH=src uv run python -m carenote.generation --pilot --approve-cost 0.50   # 승인 후에만
+PYTHONPATH=src uv run python -m carenote.generation --render-review docs/reports/v2-review.md
+```
+
 ## 10. 위험과 대응
 
 | 위험 | 대응 |

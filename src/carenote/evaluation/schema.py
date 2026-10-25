@@ -61,7 +61,7 @@ class Flag(StrEnum):
 
 
 # 개인정보처럼 보이는 패턴. 골든셋은 합성만 허용하므로 걸리면 거부한다.
-_PII_PATTERNS = (
+PII_PATTERNS = (
     re.compile(r"\d{6}-?[1-4]\d{6}"),  # 주민등록번호
     re.compile(r"01[016789]-?\d{3,4}-?\d{4}"),  # 휴대전화
 )
@@ -125,7 +125,7 @@ class GoldenCase(BaseModel):
 
     @model_validator(mode="after")
     def _check_case(self) -> GoldenCase:
-        for pattern in _PII_PATTERNS:
+        for pattern in PII_PATTERNS:
             if pattern.search(self.transcript):
                 raise ValueError(f"{self.id}: 개인정보 패턴이 transcript에 있다")
         keys = [f.key for f in self.fields]

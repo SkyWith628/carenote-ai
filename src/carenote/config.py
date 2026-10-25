@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     extractor_model: str = "claude-sonnet-5-5"
     extractor_effort: Literal["low", "medium", "high", "xhigh", "max"] = "medium"
     extraction_cache_dir: str = ".cache/extractions"
+    generator_model: str = "claude-opus-5-5"
+    generator_effort: Literal["low", "medium", "high", "xhigh", "max"] = "medium"
+    generation_cache_dir: str = ".cache/generation"
 
 
 def get_settings() -> Settings:
