@@ -390,3 +390,20 @@ def test_p_warns_on_repeated_report_sentences_across_candidates() -> None:
     results = check_p_repeated_phrases(items)
     assert results["A"].level == "pass" and results["B"].level == "warn"
     assert results["C"].level == "pass"
+
+
+def test_p_catches_copied_example_phrase_that_similarity_alone_misses() -> None:
+    """g5 dev의 실제 문장: 앞뒤가 달라 Jaccard는 낮지만 힌트 예시가 복사되어 3-gram을 공유한다."""
+    from carenote.generation.checks import (  # noqa: PLC0415
+        PHRASE_REPEAT_THRESHOLD,
+        check_p_repeated_phrases,
+        jaccard,
+    )
+
+    c2 = "넘어지신 일 있냐 여쭈니까 집에만 있는데 넘어질 일이 뭐 있냐고 하시네요"
+    h3 = "들어가자마자 넘어지신 적 없으시냐고 여쭸더니 내가 넘어질 일이 뭐 있냐고 하시네요"
+    assert jaccard(c2, h3) < PHRASE_REPEAT_THRESHOLD
+    results = check_p_repeated_phrases(
+        [("C2", {FieldKey.FALL_EVENT: c2}), ("H3", {FieldKey.FALL_EVENT: h3})]
+    )
+    assert results["C2"].level == "pass" and results["H3"].level == "warn"

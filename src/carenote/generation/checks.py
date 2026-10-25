@@ -460,12 +460,23 @@ _PHRASE_FIELDS = (FieldKey.FALL_EVENT, FieldKey.MEDICATION_TAKEN, FieldKey.MEAL_
 PHRASE_REPEAT_THRESHOLD = 0.6
 
 
+def _word_trigrams(text: str) -> set[str]:
+    words = re.sub(r"[.,…?!\"']", "", text).split()
+    return {" ".join(words[i : i + 3]) for i in range(len(words) - 2)}
+
+
+def _shares_word_trigram(a: str, b: str) -> bool:
+    return bool(_word_trigrams(a) & _word_trigrams(b))
+
+
 def check_p_repeated_phrases(
     items: list[tuple[str, dict[FieldKey, str]]],
 ) -> dict[str, CheckResult]:
     """배치 점검: 낙상·복약·식사를 보고하는 문장(evidence 첫 인용)이 다른 후보와 비슷하면 경고.
 
-    같은 항목끼리만 비교하며 뒤쪽 후보에 경고한다 (g4 dev: '넘어지신 일은 없었어요'가 4건).
+    같은 항목끼리만 비교하며 뒤쪽 후보에 경고한다. 문장 유사도(Jaccard)가 높거나 어절 3-gram을
+    하나라도 공유하면 반복으로 본다 (g4 dev: '넘어지신 일은 없었어요' 4건, g5 dev: 힌트 예시
+    '넘어질 일이 뭐 있냐고 하시네요'가 3건에 복사됨 — 유사도만으로는 두 번째를 놓쳤다).
     """
     results: dict[str, CheckResult] = {}
     for i, (sid, quotes) in enumerate(items):
@@ -476,7 +487,10 @@ def check_p_repeated_phrases(
                 continue
             for _, other_quotes in items[:i]:
                 other = other_quotes.get(key)
-                if other and jaccard(mine, other) >= PHRASE_REPEAT_THRESHOLD:
+                if other and (
+                    jaccard(mine, other) >= PHRASE_REPEAT_THRESHOLD
+                    or _shares_word_trigram(mine, other)
+                ):
                     repeated.append(key.value)
                     break
         if repeated:
