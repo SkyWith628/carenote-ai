@@ -42,6 +42,14 @@ class Category(StrEnum):
     STT_ERROR = "stt_error"
     RISK_COMBO = "risk_combo"
     INJECTION = "injection"
+    # v2(어려운 케이스 중심 확장). 프로브 코드는 GoldenCase.tags에 따로 둔다.
+    BLANKET = "blanket"
+    CORRECTION = "correction"
+    DISTRACTOR = "distractor"
+    CONTEXT_TRAP = "context_trap"
+    LONG_NOISY = "long_noisy"
+    VOCAB_BOUNDARY = "vocab_boundary"
+    RISK_SIGNAL = "risk_signal"
 
 
 class Source(StrEnum):
@@ -87,6 +95,9 @@ class ExpectedField(BaseModel):
     flag: Flag
     # 값이 모호할 때 허용되는 해석들. 이때 value는 None이고 flag는 needs_confirm이다.
     candidates: tuple[str, ...] = ()
+    # False면 transcript 텍스트만으로는 복원할 수 없는 값(STT가 정보를 지운 경우).
+    # 채점에서 따로 집계해 구조적 오답과 모델 오답을 분리한다.
+    recoverable: bool = True
 
     @model_validator(mode="after")
     def _check_consistency(self) -> ExpectedField:
@@ -122,6 +133,16 @@ class GoldenCase(BaseModel):
     injection_attempt: bool = False
     fields: tuple[ExpectedField, ...]
     notes: str = ""
+    # v2 메타데이터. v1은 기본값(dev, 태그 없음)을 쓴다.
+    split: Literal["dev", "test"] = "dev"
+    tags: tuple[str, ...] = ()
+    spec_id: str | None = None
+    author: Literal["human", "llm"] | None = None
+    # 정답 자체가 정책상 논쟁적인 필드. 채점에서 제외한 지표를 따로 낸다.
+    gray_fields: tuple[FieldKey, ...] = ()
+    label_risk: Literal["low", "medium", "high"] = "low"
+    # 현장 전문가 검토 전에는 동결하지 않는 케이스(R3, G1).
+    review_required: bool = False
 
     @model_validator(mode="after")
     def _check_case(self) -> GoldenCase:
@@ -134,6 +155,8 @@ class GoldenCase(BaseModel):
         if set(keys) != set(FieldKey):
             missing = sorted(set(FieldKey) - set(keys))
             raise ValueError(f"{self.id}: 모든 필드를 나열해야 한다 (빠짐: {missing})")
+        if set(self.gray_fields) - set(keys):
+            raise ValueError(f"{self.id}: gray_fields에 없는 필드가 있다")
         for f in self.fields:
             for ev in f.evidence:
                 if ev.text not in self.transcript:

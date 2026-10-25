@@ -9,11 +9,15 @@
 - 수치 오류율: 혈압·맥박 값을 냈는데 정답과 다른 비율.
 - 위험 recall: 정답 flag가 risk인 필드를 risk로 잡았는가.
 - 확인 필요 recall: 정답 flag가 needs_confirm인 필드를 needs_confirm 또는 risk로 잡았는가.
+- 기권율·오답률: 값이 있는 정답 필드 중 값을 아예 내지 않은 비율 / 틀린 값을 낸 비율. 둘을
+  나눠 보는 이유는 "이상한 값을 내지 않는 쪽이 F1에서 유리한" 문제를 가리기 위해서다.
+  틀린 값은 F1에서 FP+FN이라 기권보다 두 배 깎이지만, 사람에게는 기권(확인 요청)이 더 안전하다.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
 
 from carenote.evaluation.extractor import PredictedField
 from carenote.evaluation.schema import ExpectedField, FieldKey, Flag, GoldenCase
@@ -55,6 +59,8 @@ class Counts:
     numeric_error: Ratio = Ratio()
     risk_recall: Ratio = Ratio()
     confirm_recall: Ratio = Ratio()
+    abstained: Ratio = Ratio()
+    wrong_value: Ratio = Ratio()
 
     def __add__(self, other: Counts) -> Counts:
         return Counts(
@@ -66,6 +72,8 @@ class Counts:
             self.numeric_error + other.numeric_error,
             self.risk_recall + other.risk_recall,
             self.confirm_recall + other.confirm_recall,
+            self.abstained + other.abstained,
+            self.wrong_value + other.wrong_value,
         )
 
 
@@ -106,14 +114,42 @@ def _score_field(gold: ExpectedField, pred: PredictedField | None, transcript: s
     if gold.flag is Flag.NEEDS_CONFIRM:
         confirm_recall = Ratio(int(pred_flag in (Flag.NEEDS_CONFIRM, Flag.RISK)), 1)
 
-    return Counts(tp, fp, fn, ungrounded, hallucinated, numeric_error, risk_recall, confirm_recall)
+    abstained = Ratio()
+    wrong_value = Ratio()
+    if gold_value is not None and gold.key not in PRESENCE_ONLY_FIELDS:
+        abstained = Ratio(int(pred_value is None), 1)
+        wrong_value = Ratio(int(pred_value is not None and not tp), 1)
+
+    return Counts(
+        tp,
+        fp,
+        fn,
+        ungrounded,
+        hallucinated,
+        numeric_error,
+        risk_recall,
+        confirm_recall,
+        abstained,
+        wrong_value,
+    )
 
 
-def score_case(case: GoldenCase, predictions: list[PredictedField]) -> Counts:
+# all: 전체 필드 · recoverable: 텍스트로 복원 불가능한 필드 제외 ·
+# strict: 복원 불가 필드와 정책상 논쟁적인(gray) 필드 제외
+Subset = Literal["all", "recoverable", "strict"]
+
+
+def score_case(
+    case: GoldenCase, predictions: list[PredictedField], subset: Subset = "all"
+) -> Counts:
     """한 케이스를 채점한다. 예측이 빠진 키는 missing으로 본다."""
     by_key = {p.key: p for p in predictions}
     total = Counts()
     for gold in case.fields:
+        if subset != "all" and not gold.recoverable:
+            continue
+        if subset == "strict" and gold.key in case.gray_fields:
+            continue
         total = total + _score_field(gold, by_key.get(gold.key), case.transcript)
     return total
 
@@ -130,6 +166,8 @@ class Metrics:
     numeric_error: Ratio
     risk_recall: Ratio
     confirm_recall: Ratio
+    abstained: Ratio
+    wrong_value: Ratio
 
     @staticmethod
     def from_counts(c: Counts) -> Metrics:
@@ -149,4 +187,6 @@ class Metrics:
             c.numeric_error,
             c.risk_recall,
             c.confirm_recall,
+            c.abstained,
+            c.wrong_value,
         )

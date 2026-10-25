@@ -11,7 +11,8 @@ from carenote.evaluation.metrics import Counts, Metrics, Ratio, score_case
 from carenote.evaluation.runner import evaluate
 from carenote.evaluation.schema import Evidence, FieldKey, Flag, GoldenCase, Source
 
-GOLDEN_DIR = Path(__file__).parent.parent / "data" / "golden"
+# 20건 기준선(v1). 분할 파일(v2_*)은 tests/test_golden_v2.py에서 따로 검증한다.
+GOLDEN_DIR = Path(__file__).parent.parent / "data" / "golden" / "v1.jsonl"
 
 
 @pytest.fixture(scope="module")

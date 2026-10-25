@@ -19,7 +19,8 @@ from carenote.extraction.llm_extractor import LLMExtractor, ParseClient, ParseRe
 from carenote.extraction.pricing import PRICES, CostGuard, Price, cost_usd, price_for
 from carenote.extraction.schema import LLMExtractionB1, LLMFieldB1
 
-GOLDEN_DIR = Path(__file__).parent.parent / "data" / "golden"
+# 20건 기준선(v1). 분할 파일(v2_*)은 tests/test_golden_v2.py에서 따로 검증한다.
+GOLDEN_DIR = Path(__file__).parent.parent / "data" / "golden" / "v1.jsonl"
 
 
 @dataclass(frozen=True)

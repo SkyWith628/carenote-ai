@@ -20,6 +20,8 @@ PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b1 --approve
 # 처음에는 소수 케이스로
 PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b1 --limit 3 --approve-cost 0.30
 ```
+분할: `--split dev|test|all` (기본 **dev**: v1 20 + v2 10 = 30건). test(30건)는 최종 보고용이라 **LLM 실행은 `--final-report` 없이는 거부**한다(종료 코드 2). oracle·null은 제한 없음. test 실행 횟수는 `docs/decisions.md`에 기록한다.
+
 옵션: `--model`(기본 설정값 `claude-sonnet-5-5`), `--effort`(기본 `medium`), `--limit N`, `--cache-dir`, `--out`.
 
 안전장치
@@ -42,7 +44,23 @@ PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b1 --limit 3
 | 위험 recall | 정답 flag=risk를 risk로 잡음 / 정답 flag=risk |
 | 확인 recall | 정답 flag=needs_confirm을 needs_confirm 또는 risk로 잡음 / 정답 flag=needs_confirm |
 
-분모가 0이면 `n/a`다. 유형별(category) 분해를 함께 낸다.
+| 기권 | 값이 있는 정답 필드(special_notes 제외)에서 값을 아예 내지 않음 / 그 필드 수 |
+| 오답 | 같은 분모에서 틀린 값을 냄 |
+
+분모가 0이면 `n/a`다. 기권과 오답을 나눠 보는 이유: F1에서는 틀린 값이 FP+FN으로 기권보다 두 배 깎이지만, 사람에게는 기권(확인 요청)이 더 안전하다. 값을 내지 않는 쪽이 유리한 문제(gs-015)를 눈에 보이게 한다.
+
+## 보고서 구성 (v2)
+- 전체 · **복원가능 필드만**(`recoverable=false` 제외) · **복원가능·gray 제외**(`gray_fields`도 제외) 세 줄. 구조적 오답과 모델 오답을 분리한다.
+- 유형별(category)과 프로브별(tags[0]; v1은 `v1`) 분해.
+- **F1 95% 구간**: 케이스 단위 부트스트랩 1,000회, 시드 고정(필드가 아니라 케이스를 재표집: 한 케이스의 필드는 같은 transcript를 공유해 독립이 아니다).
+- `--out` JSON에 `per_case`(케이스별 TP/FP/FN)가 들어간다.
+
+## 구성 간 비교 (짝지은 차이)
+```bash
+PYTHONPATH=src uv run python -m carenote.evaluation.compare sonnet-b0.json sonnet-b1.json
+# → "sonnet-b1 - sonnet-b0: +1.2%p [95% -0.4 ~ +3.0] → 구분 불가(구간이 0 포함)"
+```
+같은 케이스 집합이어야 한다(다르면 거부). 구간이 0을 포함하면 이 골든셋으로는 두 구성을 구분할 수 없다고 읽는다. `per_case`가 없는 이전 보고서는 현재 러너로 캐시 재채점해 다시 저장한다.
 
 ## 알아둘 점
 - 환각 분모(49)에는 말하지 않은 mood·special_notes도 들어간다. 모델이 말투에서 기분을 추론해 채우면 환각으로 센다.

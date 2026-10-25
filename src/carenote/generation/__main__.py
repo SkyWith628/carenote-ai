@@ -46,6 +46,7 @@ from carenote.generation.candidates import (
 from carenote.generation.diversity import assign_diversity
 from carenote.generation.estimate import estimate_generation, format_estimate
 from carenote.generation.generator import DEFAULT_MAX_ATTEMPTS, ApiUnavailable, Generator
+from carenote.generation.promote import promote
 from carenote.generation.spec import Spec, load_specs
 
 DEFAULT_SPEC_DIR = Path("data/golden/specs")
@@ -94,6 +95,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="정답을 모르는 새 맥락의 모델이 --blind-sheet의 후보를 라벨한다 (비용이 든다)",
     )
     parser.add_argument("--blind-sheet", type=Path, default=None, metavar="SHEET_MD")
+    parser.add_argument(
+        "--promote",
+        action="store_true",
+        help="후보+직접 작성분을 data/golden/v2_dev.jsonl, v2_test.jsonl로 승격한다 (API 없음)",
+    )
+    parser.add_argument("--human-dir", type=Path, default=Path("data/golden/human"))
     return parser
 
 
@@ -225,6 +232,16 @@ def main(
 
     if args.model_label is not None:
         return _run_model_label(args, settings, client_factory)
+
+    if args.promote:
+        try:
+            done = promote(specs, args.out_dir, args.human_dir, args.golden)
+        except ValueError as exc:
+            print(f"승격 실패: {exc}", file=sys.stderr)
+            return EXIT_REFUSED
+        for split, ids in done.items():
+            print(f"{split}: {len(ids)}건 → {args.golden / f'v2_{split}.jsonl'}")
+        return 0
 
     if args.compare_blind is not None:
         key_path = _blind_key_path(args.out_dir, args.compare_blind)

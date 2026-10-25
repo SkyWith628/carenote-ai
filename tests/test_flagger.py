@@ -12,7 +12,8 @@ from carenote.evaluation.runner import evaluate
 from carenote.evaluation.schema import FieldKey, Flag, Source
 from carenote.extraction.flagger import FlaggingExtractor, flag_field
 
-GOLDEN_DIR = Path(__file__).parent.parent / "data" / "golden"
+# 20건 기준선(v1). 분할 파일(v2_*)은 tests/test_golden_v2.py에서 따로 검증한다.
+GOLDEN_DIR = Path(__file__).parent.parent / "data" / "golden" / "v1.jsonl"
 
 
 def _f(key: FieldKey, value: str | None, **kw: object) -> PredictedField:

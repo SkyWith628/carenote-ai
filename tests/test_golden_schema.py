@@ -88,10 +88,12 @@ def test_duplicate_ids_are_rejected(tmp_path: Path) -> None:
 
 
 def test_golden_set_has_twenty_cases_covering_all_categories() -> None:
-    """20건이고 모든 유형이 최소 2건씩이다 (injection 제외 유형 포함)."""
-    cases = load_golden(GOLDEN_DIR)
+    """v1은 20건이고 v1의 7개 유형이 최소 2건씩이다."""
+    cases = load_golden(GOLDEN_DIR / "v1.jsonl")
     assert len(cases) == 20
-    counts = {cat: sum(c.category is cat for c in cases) for cat in Category}
+    v1_categories = {c.category for c in cases}
+    assert len(v1_categories) == 7
+    counts = {cat: sum(c.category is cat for c in cases) for cat in v1_categories}
     assert all(n >= 2 for n in counts.values()), counts
 
 

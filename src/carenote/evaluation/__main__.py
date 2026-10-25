@@ -4,11 +4,14 @@
 LLM 실측: python -m carenote.evaluation --extractor llm-b0|llm-b1 --dry-run
           python -m carenote.evaluation --extractor llm-b1 --approve-cost 1.00
 
+분할: --split dev(기본)|test|all. test는 최종 보고용이라 LLM 실행에 --final-report가 필요하다.
+구성 간 비교: python -m carenote.evaluation.compare A.json B.json
+
 LLM 실행은 비용이 든다. --dry-run은 네트워크를 쓰지 않고 예상 비용만 보여준다.
 실제 실행은 API 키와 --approve-cost(승인할 최대 USD)가 모두 있어야 시작하고,
 추정 최대 비용이 승인액을 넘거나 실행 중 누적 비용이 승인액에 도달하면 멈춘다.
 
-종료 코드: 0 성공 · 2 실행 거부(키·승인·단가 문제) · 3 비용 한도로 중단
+종료 코드: 0 성공 · 2 실행 거부(키·승인·단가·test 누수 가드) · 3 비용 한도로 중단
 """
 
 from __future__ import annotations
@@ -21,7 +24,7 @@ from pathlib import Path
 
 from carenote.config import Settings, get_settings
 from carenote.evaluation.extractor import Extractor, NullExtractor, OracleExtractor
-from carenote.evaluation.loader import load_golden
+from carenote.evaluation.loader import SplitChoice, load_golden
 from carenote.evaluation.metrics import Metrics, Ratio
 from carenote.evaluation.runner import EvalReport, evaluate
 from carenote.evaluation.schema import GoldenCase
@@ -66,14 +69,31 @@ def _row(label: str, m: Metrics) -> str:
     )
 
 
+def _abstain_line(m: Metrics) -> str:
+    return f"기권 {_ratio(m.abstained)} · 오답 {_ratio(m.wrong_value)}"
+
+
 def format_report(report: EvalReport) -> str:
     """사람이 읽는 표."""
     header = (
         f"{'':<18}{'F1':>8}  {'근거없음':<16}{'환각':<16}{'수치오류':<16}"
         f"{'위험recall':<16}{'확인recall'}"
     )
-    lines = [f"cases: {report.case_count}", header, _row("overall", report.overall)]
+    lines = [f"cases: {report.case_count} (split={report.split})", header]
+    lines.append(_row("overall", report.overall))
+    if (ci := report.f1_ci) is not None and ci.low is not None and ci.high is not None:
+        span = f"{_pct(ci.low).strip()} ~ {_pct(ci.high).strip()}"
+        lines.append(f"  F1 95% 구간(케이스 부트스트랩): {span}")
+    lines.append("  " + _abstain_line(report.overall))
+    if report.recoverable is not None:
+        lines.append(_row("복원가능 필드만", report.recoverable))
+    if report.strict is not None:
+        lines.append(_row("복원가능·gray 제외", report.strict))
+    lines.append("-- 유형별")
     lines += [_row(name, m) for name, m in report.by_category.items()]
+    if len(report.by_probe) > 1:
+        lines.append("-- 프로브별")
+        lines += [_row(name, m) for name, m in report.by_probe.items()]
     if report.usage:
         u = report.usage
         lines.append(
@@ -88,10 +108,19 @@ def format_report(report: EvalReport) -> str:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="carenote.evaluation", description=__doc__)
-    parser.add_argument(
-        "--extractor", choices=["oracle", "null", *LLM_CHOICES], required=True
-    )
+    parser.add_argument("--extractor", choices=["oracle", "null", *LLM_CHOICES], required=True)
     parser.add_argument("--golden", type=Path, default=DEFAULT_GOLDEN)
+    parser.add_argument(
+        "--split",
+        choices=["dev", "test", "all"],
+        default="dev",
+        help="평가할 분할. 기본 dev. test·all은 최종 보고용이라 LLM 실행에 --final-report 필요",
+    )
+    parser.add_argument(
+        "--final-report",
+        action="store_true",
+        help="test 분할을 포함한 LLM 실행을 허용한다 (최종 ablation 보고 때만 쓴다)",
+    )
     parser.add_argument("--out", type=Path, default=None, help="JSON 보고서 저장 경로")
     parser.add_argument("--model", default=None, help="기본값은 설정(CARENOTE_EXTRACTOR_MODEL)")
     parser.add_argument(
@@ -113,8 +142,8 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _select_cases(golden: Path, limit: int | None) -> list[GoldenCase]:
-    cases = load_golden(golden)
+def _select_cases(golden: Path, limit: int | None, split: SplitChoice) -> list[GoldenCase]:
+    cases = load_golden(golden, split)
     return cases if limit is None else cases[:limit]
 
 
@@ -135,7 +164,15 @@ def _run_llm(
         )
         return EXIT_REFUSED
 
-    cases = _select_cases(args.golden, args.limit)
+    if args.split != "dev" and not args.final_report:
+        print(
+            f"실행 거부: --split {args.split}는 test 케이스를 포함한다. test는 프롬프트·규칙을 "
+            "고치는 데 쓰면 안 되므로 최종 보고 때만 --final-report와 함께 실행한다 "
+            "(실행 횟수를 docs/decisions.md에 기록).",
+            file=sys.stderr,
+        )
+        return EXIT_REFUSED
+    cases = _select_cases(args.golden, args.limit, args.split)
     cache_dir = args.cache_dir or Path(settings.extraction_cache_dir)
     probe = LLMExtractor(
         _NoClient(),  # type: ignore[arg-type]
@@ -180,7 +217,7 @@ def _run_llm(
     )
     extractor: Extractor = FlaggingExtractor(llm)
     try:
-        report = evaluate(extractor, cases)
+        report = evaluate(extractor, cases, args.split)
     except BudgetExceeded as exc:
         print(
             f"\n중단: {exc}. 끝낸 호출은 캐시에 저장됐으니 승인액을 올려 다시 실행하면 "
@@ -209,9 +246,9 @@ def main(
     if args.extractor in LLM_CHOICES:
         return _run_llm(args, settings or get_settings(), client_factory)
 
-    cases = _select_cases(args.golden, args.limit)
+    cases = _select_cases(args.golden, args.limit, args.split)
     extractor: Extractor = OracleExtractor(cases) if args.extractor == "oracle" else NullExtractor()
-    _emit(evaluate(extractor, cases), args.out)
+    _emit(evaluate(extractor, cases, args.split), args.out)
     return 0
 
 
