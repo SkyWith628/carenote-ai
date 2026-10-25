@@ -128,10 +128,11 @@ def test_high_label_risk_specs_require_field_review() -> None:
             assert spec.get("field_review_required") is True, spec["spec_id"]
 
 
-def test_c2_special_notes_is_a_gray_field() -> None:
-    """C2의 '첫 혈압 측정이 높았음'은 transcript에 '높다'는 표현이 없을 수 있어 회색 필드다."""
+def test_c2_special_notes_is_no_longer_gray_after_policy_5() -> None:
+    """정책 #5(2026-10-26): 재측정으로 값이 달라지면 앞선 측정을 특이사항에 기록한다."""
     c2 = next(s for s in _specs() if s["spec_id"] == "C2")
-    assert c2["gray_fields"] == ["special_notes"]
+    assert c2["gray_fields"] == []
+    assert c2["gold"]["special_notes"]["value"] == "첫 혈압 측정이 높았음"
 
 
 def test_label_policy_document_keeps_the_2026_10_26_clarifications() -> None:
@@ -142,6 +143,8 @@ def test_label_policy_document_keeps_the_2026_10_26_clarifications() -> None:
         "추측한 값(130)도 value에 넣지 않고",  # #1
         "숟가락 두세 번·서너 번",  # #9
         "복약을 거부했다는 보고는",  # #13
+        "앞선 측정을 특이사항에 기록",  # #5 (2026-10-26 후속)
+        "필드가 이미 담는 내용은 특이사항에 중복 기록하지 않는다",  # #11
         "특이사항 risk 기준",
         "측정을 못 했거나 빠뜨린 사유",  # #11 범위 (2026-10-26)
         "감정·표정·기색을 직접 말했을 때만",  # #10 기분 추론 기준

@@ -129,10 +129,10 @@ def test_compare_handles_candidates_and_special_notes_presence(all_specs: list[S
 
 
 def test_gray_fields_are_reported_separately(all_specs: list[Spec]) -> None:
-    """회색 필드(C2 special_notes)의 불일치는 따로 집계되고 제외 일치율에 영향이 없다."""
-    key = blind_ids(["C2"])
+    """회색 필드(V2 meal_intake)의 불일치는 따로 집계되고 제외 일치율에 영향이 없다."""
+    key = blind_ids(["V2"])
     labels = _perfect_labels(key, all_specs)
-    labels["cases"][key["C2"]]["special_notes"]["value"] = ""  # 라벨러는 특이사항을 안 적음
+    labels["cases"][key["V2"]]["meal_intake"]["value"] = "전량"  # 라벨러가 다르게 읽음
     report = compare_blind(labels, key, all_specs)
     assert report.value_rate == pytest.approx(7 / 8)
     assert report.value_rate_excluding_gray == 1.0
