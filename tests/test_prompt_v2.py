@@ -27,12 +27,47 @@ V1_SHA256 = {
 }
 
 
+# v2도 측정이 끝난 본문(2026-10-26 dev 실측)이라 고정한다. 바꾸려면 v4를 만든다.
+V2_SHA256 = {
+    "b0": "99a29a74dd88537b986e7bbc34ff71902b130f9faa3585f49781b774caf8ef4e",
+    "b1": "cb2bba04c1620ae3c74eddb4819ec384d6c1333ef45110a5da218b6ca7b1a88e",
+}
+
+
+@pytest.mark.parametrize("variant", ["b0", "b1"])
+def test_v2_prompt_is_byte_identical_to_the_measured_text(variant: str) -> None:
+    prompt = build_system_prompt(variant, "v2")  # type: ignore[arg-type]
+    assert hashlib.sha256(prompt.encode("utf-8")).hexdigest() == V2_SHA256[variant]
+
+
+@pytest.mark.parametrize("variant", ["b0", "b1"])
+def test_v3_adds_only_the_hedged_mood_rule(variant: str) -> None:
+    import difflib
+
+    v2 = build_system_prompt(variant, "v2").splitlines()  # type: ignore[arg-type]
+    v3 = build_system_prompt(variant, "v3").splitlines()  # type: ignore[arg-type]
+    added = [d[2:] for d in difflib.ndiff(v2, v3) if d.startswith("+ ")]
+    removed = [d[2:] for d in difflib.ndiff(v2, v3) if d.startswith("- ")]
+    assert any("추측 표현이 붙어도 화자가 직접 본 기분" in line for line in added)
+    assert any("단 기분(mood)은 아래 mood 규칙을 따릅니다" in line for line in added)
+    assert len(removed) == 1 and len(added) == 2  # 한 줄 수정 + mood 규칙 줄 추가
+    assert "마지막 값을 stated" in "\n".join(v3)  # 나머지 v2 규칙은 유지
+
+
+def test_policy_and_blind_guide_allow_hedged_mood() -> None:
+    from carenote.generation.candidates import BLIND_GUIDE
+
+    text = (GOLDEN.parent.parent / "docs" / "label-policy.md").read_text(encoding="utf-8")
+    assert "추측 표현이 붙어도 화자가 직접 관찰한 기분" in text
+    assert "추측 표현이 붙어도 화자가 직접 본 기분" in BLIND_GUIDE
+
+
 @pytest.mark.parametrize("variant", ["b0", "b1"])
 def test_v1_prompt_is_byte_identical_to_the_measured_baseline(variant: str) -> None:
     prompt = build_system_prompt(variant, "v1")  # type: ignore[arg-type]
     assert hashlib.sha256(prompt.encode("utf-8")).hexdigest() == V1_SHA256[variant]
     assert build_system_prompt(variant) == prompt  # type: ignore[arg-type]
-    assert DEFAULT_PROMPT_VERSION == "v1" and PROMPT_VERSIONS == ("v1", "v2")
+    assert DEFAULT_PROMPT_VERSION == "v1" and PROMPT_VERSIONS == ("v1", "v2", "v3")
 
 
 V2_POLICY_FRAGMENTS = (
@@ -146,4 +181,4 @@ def test_cli_prompt_option_is_reported_and_isolates_cache(
 
 def test_cli_rejects_unknown_prompt_version() -> None:
     with pytest.raises(SystemExit):
-        main(["--extractor", "llm-b1", "--prompt", "v3", "--dry-run"])
+        main(["--extractor", "llm-b1", "--prompt", "v9", "--dry-run"])

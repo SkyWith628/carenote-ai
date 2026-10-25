@@ -4,14 +4,15 @@
 만든다. 버전 문자열은 결과 캐시 키에 들어가므로 버전이 다르면 캐시가 섞이지 않는다.
 - v1: 정책 표를 거의 담지 않은 기준선 (2026-10-23 실측)
 - v2: `docs/label-policy.md`(#1~#13)를 지시문으로 옮긴 버전. 설계 `docs/extractor-prompt-v2-design.md`
+- v3: v2 + 추측 표현이 붙어도 화자가 직접 본 기분은 inferred로 인정 (2026-10-26 정책 #10 보완)
 """
 
 from __future__ import annotations
 
 from typing import Literal
 
-PromptVersion = Literal["v1", "v2"]
-PROMPT_VERSIONS: tuple[PromptVersion, ...] = ("v1", "v2")
+PromptVersion = Literal["v1", "v2", "v3"]
+PROMPT_VERSIONS: tuple[PromptVersion, ...] = ("v1", "v2", "v3")
 # 기본값은 기존 보고서의 재현성을 위해 v1을 유지한다.
 DEFAULT_PROMPT_VERSION: PromptVersion = "v1"
 PROMPT_VERSION = DEFAULT_PROMPT_VERSION  # 하위 호환
@@ -105,6 +106,19 @@ _COMMON_V2 = """\
   해당하는 내용이 없으면 missing.
 """
 
+_V2_GUESS_RULE = "추측한 숫자도 넣지 않습니다."
+_V2_MOOD_RULE = "좋고 나쁨이 섞여 있으면 missing 으로 두고 내용은 special_notes에 기록합니다."
+assert _V2_GUESS_RULE in _COMMON_V2 and _V2_MOOD_RULE in _COMMON_V2
+
+# v3: v2에서 기분에 한해 추측 표현을 허용한다. v2 본문은 그대로 두고 두 군데만 바꾼다.
+_COMMON_V3 = _COMMON_V2.replace(
+    _V2_GUESS_RULE, _V2_GUESS_RULE + " 단 기분(mood)은 아래 mood 규칙을 따릅니다."
+).replace(
+    _V2_MOOD_RULE,
+    '"~것 같아요"처럼 추측 표현이 붙어도 화자가 직접 본 기분·표정이면 inferred 로 기록합니다.\n  '
+    + _V2_MOOD_RULE,
+)
+
 _B0_TAIL = """
 각 필드는 key, value, source, candidates 를 가집니다.
 """
@@ -122,7 +136,7 @@ _B1_TAIL = """
 
 def build_system_prompt(variant: Variant, version: PromptVersion = DEFAULT_PROMPT_VERSION) -> str:
     """버전·변형에 맞는 시스템 프롬프트를 만든다. 요청마다 동일해야 캐시 프리픽스가 유지된다."""
-    common = _COMMON_V2 if version == "v2" else _COMMON
+    common = {"v1": _COMMON, "v2": _COMMON_V2, "v3": _COMMON_V3}[version]
     return common + (_B1_TAIL if variant == "b1" else _B0_TAIL)
 
 
