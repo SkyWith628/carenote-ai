@@ -143,5 +143,16 @@ def test_label_policy_document_keeps_the_2026_10_26_clarifications() -> None:
         "숟가락 두세 번·서너 번",  # #9
         "복약을 거부했다는 보고는",  # #13
         "특이사항 risk 기준",
+        "측정을 못 했거나 빠뜨린 사유",  # #11 범위 (2026-10-26)
+        "감정·표정·기색을 직접 말했을 때만",  # #10 기분 추론 기준
     ):
         assert fragment in text, fragment
+
+
+def test_measurement_omission_specs_record_it_in_special_notes() -> None:
+    """정책 #11(2026-10-26): 측정을 못 한 사유·계획 변경은 특이사항에 적는다 (H6, N3)."""
+    by_id = {s["spec_id"]: s for s in _specs()}
+    for sid in ("H6", "N3"):
+        notes = cast(dict[str, Any], by_id[sid]["gold"])["special_notes"]
+        assert notes["value"] and notes["source"] == "stated", sid
+    assert "special_notes" not in by_id["N3"]["gray_fields"]

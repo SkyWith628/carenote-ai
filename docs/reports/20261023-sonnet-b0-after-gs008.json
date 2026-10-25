@@ -1,0 +1,260 @@
+{
+  "case_count": 20,
+  "overall": {
+    "precision": 0.9732142857142857,
+    "recall": 0.9646017699115044,
+    "f1": 0.9688888888888889,
+    "ungrounded": {
+      "num": 112,
+      "den": 112,
+      "value": 1.0
+    },
+    "hallucinated": {
+      "num": 1,
+      "den": 47,
+      "value": 0.02127659574468085
+    },
+    "numeric_error": {
+      "num": 1,
+      "den": 28,
+      "value": 0.03571428571428571
+    },
+    "risk_recall": {
+      "num": 6,
+      "den": 10,
+      "value": 0.6
+    },
+    "confirm_recall": {
+      "num": 19,
+      "den": 20,
+      "value": 0.95
+    }
+  },
+  "by_category": {
+    "ambiguous_number": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 15,
+        "den": 15,
+        "value": 1.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 9,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 3,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 3,
+        "den": 3,
+        "value": 1.0
+      }
+    },
+    "dialect": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 20,
+        "den": 20,
+        "value": 1.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 4,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 2,
+        "den": 2,
+        "value": 1.0
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      }
+    },
+    "injection": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 8,
+        "den": 8,
+        "value": 1.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 8,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 4,
+        "den": 4,
+        "value": 1.0
+      }
+    },
+    "missing": {
+      "precision": 1.0,
+      "recall": 0.8888888888888888,
+      "f1": 0.9411764705882353,
+      "ungrounded": {
+        "num": 8,
+        "den": 8,
+        "value": 1.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 15,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 10,
+        "den": 10,
+        "value": 1.0
+      }
+    },
+    "normal": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 21,
+        "den": 21,
+        "value": 1.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 3,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      }
+    },
+    "risk_combo": {
+      "precision": 0.9047619047619048,
+      "recall": 0.95,
+      "f1": 0.9268292682926829,
+      "ungrounded": {
+        "num": 21,
+        "den": 21,
+        "value": 1.0
+      },
+      "hallucinated": {
+        "num": 1,
+        "den": 4,
+        "value": 0.25
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      }
+    },
+    "stt_error": {
+      "precision": 0.9473684210526315,
+      "recall": 0.9,
+      "f1": 0.9230769230769231,
+      "ungrounded": {
+        "num": 19,
+        "den": 19,
+        "value": 1.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 4,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 1,
+        "den": 5,
+        "value": 0.2
+      },
+      "risk_recall": {
+        "num": 1,
+        "den": 1,
+        "value": 1.0
+      },
+      "confirm_recall": {
+        "num": 2,
+        "den": 2,
+        "value": 1.0
+      }
+    }
+  },
+  "usage": {
+    "estimated_cost_usd": 0.0,
+    "variant": "b0",
+    "model": "claude-sonnet-5-5",
+    "effort": "medium",
+    "prompt_version": "v1",
+    "calls": 0,
+    "cache_hits": 20,
+    "failures": 0,
+    "demoted_fields": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_read_tokens": 0,
+    "latency_s": 0.0
+  }
+}

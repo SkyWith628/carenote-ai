@@ -494,8 +494,8 @@
           "candidates": []
         },
         "special_notes": {
-          "value": null,
-          "source": "missing",
+          "value": "혈압계 미지참으로 혈압 미측정",
+          "source": "stated",
           "flag": "ok",
           "candidates": []
         }

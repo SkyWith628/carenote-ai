@@ -205,9 +205,7 @@
       "hypothesis": "미래·계획 문장을 사실로 읽는지.",
       "policy": "정책 #1·#2",
       "label_risk": "medium",
-      "gray_fields": [
-        "special_notes"
-      ],
+      "gray_fields": [],
       "gold": {
         "visit_start": {
           "value": "14:00",
@@ -252,8 +250,8 @@
           "candidates": []
         },
         "special_notes": {
-          "value": null,
-          "source": "missing",
+          "value": "혈압 미측정(내일 병원에서 재측정 예정), 다음 주 약 변경 예정",
+          "source": "stated",
           "flag": "ok",
           "candidates": []
         }
