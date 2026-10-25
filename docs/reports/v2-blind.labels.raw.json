@@ -1,0 +1,363 @@
+{
+  "version": 1,
+  "labeler": "user",
+  "note": "폼 제출 원본(수정 없음)",
+  "cases": {
+    "B01": {
+      "visit_start": {
+        "value": "14:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "blood_pressure": {
+        "value": "130/84",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "pulse": {
+        "value": "80",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "meal_intake": {
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      },
+      "memo": "오늘은 낙상이 없었는데 사흘 전에 낙상 있었음"
+    },
+    "B02": {
+      "visit_start": {
+        "value": "09:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "blood_pressure": {
+        "value": "130",
+        "source": "stated",
+        "flag": "needs_confirm",
+        "candidates": [
+          "불확실"
+        ]
+      },
+      "pulse": {
+        "value": "76",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "meal_intake": {
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": []
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      },
+      "memo": "약은 드셨겠죠라고 해서 드셨는지 안 드셨는지 확인이 필요함"
+    },
+    "B03": {
+      "visit_start": {
+        "value": "09:30",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "blood_pressure": {
+        "value": "128/80",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "pulse": {
+        "value": "74",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "meal_intake": {
+        "value": "전량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "mood": {
+        "value": "양호",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      }
+    },
+    "B04": {
+      "visit_start": {
+        "value": "14:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "blood_pressure": {
+        "value": "135/85",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": [
+          "중복으로 혈압이 입력된 150/95에서 135/85로 이후에 쉬고나서 잰 값으로 채움"
+        ]
+      },
+      "pulse": {
+        "value": "82",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "meal_intake": {
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "fall_event": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": []
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      }
+    },
+    "B05": {
+      "visit_start": {
+        "value": "11:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "blood_pressure": {
+        "value": "128/80",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "pulse": {
+        "value": "82",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      },
+      "medication_taken": {
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      },
+      "special_notes": {
+        "value": "가슴이 답답하다고 숨이 차서 말을 끝까지 못 하심",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      }
+    },
+    "B06": {
+      "visit_start": {
+        "value": "10:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "blood_pressure": {
+        "value": "130/82",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "pulse": {
+        "value": "72",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "meal_intake": {
+        "value": "소량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "medication_taken": {
+        "value": "미복용",
+        "source": "stated",
+        "flag": "risk",
+        "candidates": []
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "mood": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      }
+    },
+    "B07": {
+      "visit_start": {
+        "value": "10:00",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "blood_pressure": {
+        "value": "130/80",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "pulse": {
+        "value": "72",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "meal_intake": {
+        "value": "전량",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "missing",
+        "flag": "needs_confirm",
+        "candidates": []
+      },
+      "fall_event": {
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "mood": {
+        "value": "양호",
+        "source": "stated",
+        "flag": "ok",
+        "candidates": []
+      },
+      "special_notes": {
+        "value": "",
+        "source": "missing",
+        "flag": "ok",
+        "candidates": []
+      }
+    }
+  }
+}

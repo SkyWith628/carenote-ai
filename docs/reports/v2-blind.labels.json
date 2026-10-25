@@ -1,409 +1,411 @@
 {
   "version": 1,
-  "labeler": "",
+  "labeler": "user",
   "cases": {
     "B01": {
       "visit_start": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "14:00",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "blood_pressure": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "130/84",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "pulse": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "80",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "meal_intake": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "medication_taken": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "fall_event": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "mood": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "special_notes": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
-      }
+      },
+      "memo": "오늘은 낙상이 없었는데 사흘 전에 낙상 있었음"
     },
     "B02": {
       "visit_start": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "09:00",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "blood_pressure": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "130",
+        "source": "stated",
+        "flag": "needs_confirm",
         "candidates": [],
-        "memo": ""
+        "memo": "불확실"
       },
       "pulse": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "76",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "meal_intake": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "medication_taken": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "needs_confirm",
         "candidates": [],
         "memo": ""
       },
       "fall_event": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "mood": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "special_notes": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
-      }
+      },
+      "memo": "약은 드셨겠죠라고 해서 드셨는지 안 드셨는지 확인이 필요함"
     },
     "B03": {
       "visit_start": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "09:30",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "blood_pressure": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "128/80",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "pulse": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "74",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "meal_intake": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "전량",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "medication_taken": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "fall_event": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "mood": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "양호",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "special_notes": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       }
     },
     "B04": {
       "visit_start": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "14:00",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "blood_pressure": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "135/85",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
-        "memo": ""
+        "memo": "중복으로 혈압이 입력된 150/95에서 135/85로 이후에 쉬고나서 잰 값으로 채움"
       },
       "pulse": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "82",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "meal_intake": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "절반",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "medication_taken": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "fall_event": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "needs_confirm",
         "candidates": [],
         "memo": ""
       },
       "mood": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "special_notes": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       }
     },
     "B05": {
       "visit_start": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "11:00",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "blood_pressure": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "128/80",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "pulse": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "82",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "meal_intake": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "medication_taken": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "복용",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "fall_event": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "mood": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "special_notes": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "가슴이 답답하다고 숨이 차서 말을 끝까지 못 하심",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       }
     },
     "B06": {
       "visit_start": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "10:00",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "blood_pressure": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "130/82",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "pulse": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "72",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "meal_intake": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "소량",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "medication_taken": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "미복용",
+        "source": "stated",
+        "flag": "risk",
         "candidates": [],
         "memo": ""
       },
       "fall_event": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "mood": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "special_notes": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       }
     },
     "B07": {
       "visit_start": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "10:00",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "blood_pressure": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "130/80",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "pulse": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "72",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "meal_intake": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "전량",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "medication_taken": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "needs_confirm",
         "candidates": [],
         "memo": ""
       },
       "fall_event": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "없음",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "mood": {
-        "value": "",
-        "source": "",
-        "flag": "",
+        "value": "양호",
+        "source": "stated",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       },
       "special_notes": {
         "value": "",
-        "source": "",
-        "flag": "",
+        "source": "missing",
+        "flag": "ok",
         "candidates": [],
         "memo": ""
       }
