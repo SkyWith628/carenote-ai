@@ -288,6 +288,22 @@ class BlindReport:
     gray_value_agree: int = 0
     disagreements: list[str] = field(default_factory=lambda: list[str]())
     uncertain: list[str] = field(default_factory=lambda: list[str]())
+    # 비교에서 뺀 필드: STT가 정보를 지워 글만 보는 사람은 정답을 알 수 없는 필드(recoverable=false)
+    excluded: list[str] = field(default_factory=lambda: list[str]())
+
+    def __add__(self, other: BlindReport) -> BlindReport:
+        """여러 라운드를 합산한다."""
+        return BlindReport(
+            self.total + other.total,
+            self.value_agree + other.value_agree,
+            self.flag_agree + other.flag_agree,
+            self.unlabeled + other.unlabeled,
+            self.gray_total + other.gray_total,
+            self.gray_value_agree + other.gray_value_agree,
+            self.disagreements + other.disagreements,
+            self.uncertain + other.uncertain,
+            self.excluded + other.excluded,
+        )
 
     @property
     def value_rate(self) -> float | None:
@@ -306,14 +322,37 @@ class BlindReport:
         return None if rest == 0 else (self.value_agree - self.gray_value_agree) / rest
 
 
-def compare_blind(labels: dict[str, Any], key: dict[str, str], specs: list[Spec]) -> BlindReport:
-    """사람 라벨을 스펙 정답과 비교한다. 값 일치와 flag 일치를 따로 센다."""
+def compare_blind(
+    labels: dict[str, Any],
+    key: dict[str, str],
+    specs: list[Spec],
+    *,
+    exclude_specs: frozenset[str] = frozenset(),
+    exclude_unrecoverable: bool = True,
+) -> BlindReport:
+    """사람 라벨을 스펙 정답과 비교한다. 값 일치와 flag 일치를 따로 센다.
+
+    - `exclude_specs`: 통째로 뺄 스펙(교체된 케이스의 옛 라벨 등).
+    - `exclude_unrecoverable`: 정답이 참고 발화 기준이라 글만으로는 알 수 없는 필드
+      (`stt.errors[].recoverable_from_text=false`)를 분모에서 뺀다. 이런 필드는 사람이 정답과
+      다르게 라벨하는 것이 설계상 옳으므로 일치율에 넣으면 불공정하다.
+    """
     by_id = {s.spec_id: s for s in specs}
     report = BlindReport()
     for sid, blind in sorted(key.items(), key=lambda kv: kv[1]):
+        if sid in exclude_specs:
+            continue
         spec = by_id[sid]
         case = labels.get("cases", {}).get(blind, {})
+        unrecoverable: set[str] = (
+            {e.field.value for e in spec.stt.errors if not e.recoverable_from_text}
+            if spec.stt is not None and exclude_unrecoverable
+            else set()
+        )
         for fld in _FIELD_ORDER:
+            if fld in unrecoverable:
+                report.excluded.append(f"{sid} {fld} (복원 불가: 정답은 참고 발화 기준)")
+                continue
             gold = spec.gold[FieldKey(fld)]
             label = case.get(fld, {})
             gray = FieldKey(fld) in spec.gray_fields
@@ -362,6 +401,9 @@ def format_blind_report(report: BlindReport) -> str:
         f"  회색 필드 제외 {pct(report.value_rate_excluding_gray)}"
         f" · flag 일치율 {pct(report.flag_rate)}",
     ]
+    if report.excluded:
+        listed = ", ".join(report.excluded)
+        lines += [f"비교에서 뺀 복원 불가 필드 {len(report.excluded)}개: {listed}"]
     lines += [f"- {d}" for d in report.disagreements]
     if report.uncertain:
         lines += [f"라벨러가 애매하다고 표시한 필드 {len(report.uncertain)}개:"]

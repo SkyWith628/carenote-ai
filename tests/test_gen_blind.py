@@ -187,3 +187,48 @@ def test_cli_blind_sample_rejects_specs_without_candidates(
     code = main([*argv, "--render-review", str(sheet), "--blind", "--spec", "S1"])
     assert code == 2 and not sheet.exists()
     assert "후보가 없는" in capsys.readouterr().err
+
+
+def test_unrecoverable_fields_are_excluded_from_agreement(all_specs: list[Spec]) -> None:
+    """S2의 복약(정답은 참고 발화 기준, 글만 보면 복용)은 사람이 다르게 라벨해도 분모에서 뺀다."""
+    key = blind_ids(["S2"])
+    labels = _perfect_labels(key, all_specs)
+    labels["cases"][key["S2"]]["medication_taken"] = {
+        "value": "복용", "source": "stated", "flag": "ok", "candidates": [], "memo": "",
+    }  # fmt: skip
+    report = compare_blind(labels, key, all_specs)
+    assert report.total == 7 and report.value_rate == 1.0
+    assert report.excluded == ["S2 medication_taken (복원 불가: 정답은 참고 발화 기준)"]
+    assert "복원 불가 필드 1개" in format_blind_report(report)
+    strict = compare_blind(labels, key, all_specs, exclude_unrecoverable=False)
+    assert strict.total == 8 and strict.value_agree == 7
+
+
+def test_exclude_specs_and_pooling(all_specs: list[Spec]) -> None:
+    key = blind_ids(["H3", "S1"])
+    labels = _perfect_labels(key, all_specs)
+    only_h3 = compare_blind(labels, key, all_specs, exclude_specs=frozenset({"S1"}))
+    assert only_h3.total == 8
+    both = compare_blind(labels, key, all_specs)
+    assert (only_h3 + both).total == 8 + 16
+    assert (only_h3 + both).value_agree == 8 + 16
+
+
+def test_cli_compares_several_label_files_and_pools(
+    cand_dir: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import json
+
+    from carenote.generation.__main__ import main
+
+    out = tmp_path / "sheet.md"
+    args = ["--out-dir", str(cand_dir), "--golden", str(tmp_path)]
+    assert main([*args, "--render-review", str(out), "--blind", "--spec", "D1"]) == 0
+    capsys.readouterr()
+    labels = out.with_suffix(".labels.json")
+    assert main([*args, "--compare-blind", str(labels), str(labels)]) == 0
+    text = capsys.readouterr().out
+    assert text.count("== sheet.labels.json") == 2 and "== 합산" in text
+    assert json.loads(labels.read_text(encoding="utf-8"))["cases"]
+    assert main([*args, "--compare-blind", str(labels), "--exclude-spec", "D1"]) == 0
+    assert "필드 0개" in capsys.readouterr().out

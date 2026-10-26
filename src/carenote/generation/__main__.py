@@ -33,6 +33,7 @@ from carenote.generation.blind_labeler import (
     to_label_file,
 )
 from carenote.generation.candidates import (
+    BlindReport,
     apply_batch_checks,
     blind_ids,
     blind_label_template,
@@ -86,7 +87,26 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="--render-review와 함께: 정답을 숨긴 라벨링 시트와 빈 라벨 파일을 만든다",
     )
-    parser.add_argument("--compare-blind", type=Path, default=None, metavar="LABELS_JSON")
+    parser.add_argument(
+        "--compare-blind",
+        type=Path,
+        nargs="+",
+        default=None,
+        metavar="LABELS_JSON",
+        help="라벨 파일(들)을 정답과 비교한다. 여러 개를 주면 라운드별 결과와 합산을 낸다",
+    )
+    parser.add_argument(
+        "--exclude-spec",
+        action="append",
+        default=[],
+        metavar="SPEC_ID",
+        help="--compare-blind에서 뺄 스펙(교체된 케이스의 옛 라벨). 여러 번 지정 가능",
+    )
+    parser.add_argument(
+        "--include-unrecoverable",
+        action="store_true",
+        help="--compare-blind에 복원 불가 필드(recoverable=false)도 포함한다 (기본은 제외)",
+    )
     parser.add_argument(
         "--model-label",
         type=Path,
@@ -244,10 +264,27 @@ def main(
         return 0
 
     if args.compare_blind is not None:
-        key_path = _blind_key_path(args.out_dir, args.compare_blind)
-        key = json.loads(key_path.read_text(encoding="utf-8"))
-        labels = json.loads(args.compare_blind.read_text(encoding="utf-8"))
-        print(format_blind_report(compare_blind(labels, key, specs)))
+        reports: list[BlindReport] = []
+        for path in args.compare_blind:
+            key = json.loads(_blind_key_path(args.out_dir, path).read_text(encoding="utf-8"))
+            labels = json.loads(path.read_text(encoding="utf-8"))
+            report = compare_blind(
+                labels,
+                key,
+                specs,
+                exclude_specs=frozenset(args.exclude_spec),
+                exclude_unrecoverable=not args.include_unrecoverable,
+            )
+            reports.append(report)
+            if len(args.compare_blind) > 1:
+                print(f"== {path.name}")
+            print(format_blind_report(report))
+        if len(reports) > 1:
+            pooled = reports[0]
+            for extra in reports[1:]:
+                pooled = pooled + extra
+            print("== 합산 (참고: 통과 판정은 동결 절차의 F2 정의를 따른다)")
+            print(format_blind_report(pooled))
         return 0
 
     if args.render_review is not None and args.blind:
