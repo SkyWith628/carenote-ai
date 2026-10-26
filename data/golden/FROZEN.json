@@ -1,14 +1,14 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "frozen_at": "2026-10-26",
   "updated_at": "2026-10-26",
-  "git_parent_commit": "ca7689eedcfaa1ada17bd797d90158ae7701044c",
+  "git_parent_commit": "05a15e80b969eb68f5963d18473035e967c47ad2",
   "counts": {
     "all": 60,
     "dev": 30,
     "test": 30
   },
-  "test_runs": 0,
+  "test_runs": 8,
   "status": {
     "F2_human_labeling": "unmet",
     "expert_review_R3_G1": "pending"
@@ -72,5 +72,14 @@
     "data/golden/candidates/v2/V4.json": "8937365e02396fc01552fcbc22e1854cf7c31e4510d75fa3616297e0af7db931",
     "docs/label-policy.md": "c2bafdefa454c8e2dacab4518d3d61ccae44faaafbd3c6014c80cd985222aa88"
   },
-  "revisions": []
+  "revisions": [
+    {
+      "from": "2.0",
+      "date": "2026-10-26",
+      "reason": "test 최종 보고 실행(8구성 1회씩, 2026-10-26): 골든셋 파일은 변경 없음, test_runs 0 -> 8 기록",
+      "changed": [],
+      "added": [],
+      "removed": []
+    }
+  ]
 }
