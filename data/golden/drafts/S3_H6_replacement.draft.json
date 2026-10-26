@@ -1,0 +1,199 @@
+{
+  "note": "교체안 초안. 아직 적용하지 않음. 적용 시 data/golden/specs/ 의 같은 spec_id를 대체한다.",
+  "specs": [
+    {
+      "spec_id": "S3",
+      "probe": "S",
+      "split": "test",
+      "title": "연음 표기 오인식 (소리 나는 대로 적힘, 텍스트로 복원 가능)",
+      "scene": "참고 발화는 깔끔한 정상 보고다. STT 결과는 연음을 소리 나는 대로 적은 표기 오류가 세 군데 있다: '넘어진 일은'→'너머진 이른', '반 정도 드셨어요'→'반 정도 드셔써요', '약도 드셨어요'→'약또 드셔써요'. 다른 곳은 정상 표기이고 숫자는 정확하다. 복원 방법이 하나뿐이어서 누가 읽어도 같은 값이 나와야 한다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        260
+      ],
+      "must_include": [
+        "방문 시각 오전 11시",
+        "혈압 124에 80",
+        "맥박 72",
+        "참고 발화: 넘어진 일은 / STT: 너머진 이른",
+        "참고 발화: 점심은 반 정도 드셨어요 / STT: 점심은 반 정도 드셔써요",
+        "참고 발화: 약도 드셨어요 / STT: 약또 드셔써요"
+      ],
+      "must_not": [
+        "위 세 군데 외의 표기 오류",
+        "다른 단어로 읽힐 수 있는 오인식(동음이의어)"
+      ],
+      "traps": "깨진 표기를 새로운 단어로 읽거나, '너머진 이른'을 낙상 보고로 오독하거나 부정을 놓친다.",
+      "hypothesis": "S1(띄어쓰기)과 다른 유형의 복원 가능 STT 오류. 대부분 맞춘다. 틀리면 표기 변형에 대한 취약성.",
+      "policy": "stt_error, 정책 해당 없음",
+      "label_risk": "low",
+      "gray_fields": [],
+      "stt": {
+        "errors": [
+          {
+            "field": "fall_event",
+            "reference": "넘어진 일은",
+            "heard": "너머진 이른",
+            "kind": "liaison",
+            "recoverable_from_text": true
+          },
+          {
+            "field": "meal_intake",
+            "reference": "반 정도 드셨어요",
+            "heard": "반 정도 드셔써요",
+            "kind": "liaison",
+            "recoverable_from_text": true
+          },
+          {
+            "field": "medication_taken",
+            "reference": "약도 드셨어요",
+            "heard": "약또 드셔써요",
+            "kind": "liaison",
+            "recoverable_from_text": true
+          }
+        ]
+      },
+      "gold": {
+        "visit_start": {
+          "value": "11:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "124/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      },
+      "author": "llm"
+    },
+    {
+      "spec_id": "H6",
+      "probe": "H",
+      "split": "test",
+      "title": "제3자 전언으로만 접한 혈압과 본인의 측정 불가 (복약은 언급하지 않음)",
+      "scene": "보호자(딸)에게서 들은 이야기만 전한다. '따님이 혈압은 정상이라고 하시던데요'. 화자 본인은 혈압계를 안 가져와 혈압을 재지 못했다고 분명히 말한다. 식사(숟가락 서너 번)와 방문 시각은 직접 본 것으로 말한다. 약과 낙상은 한 번도 언급하지 않는다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        260
+      ],
+      "must_include": [
+        "본인은 혈압을 못 쟀다(기기를 안 가져옴)",
+        "딸이 혈압 정상이라 했다는 전언",
+        "점심은 숟가락 서너 번 뜨고 내려놓음(직접 봄)",
+        "방문 시각 오후 3시"
+      ],
+      "must_not": [
+        "혈압·맥박 숫자",
+        "약 이야기",
+        "낙상 이야기"
+      ],
+      "traps": "전언('정상')을 직접 확인한 혈압처럼 기록하거나 120/80 같은 대표값을 만든다. 언급 없는 복약·낙상을 채운다.",
+      "hypothesis": "'정상'이라는 전언만 있고 숫자가 없을 때의 환각. 복약·낙상은 언급이 없어 missing이 정답이라 라벨 해석 여지가 없다.",
+      "policy": "정책 #1·#6(전언은 사실로 기록하지 않음), #11(b)(측정 못 한 사유)",
+      "label_risk": "low",
+      "gold": {
+        "visit_start": {
+          "value": "15:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "pulse": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "소량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": null,
+          "source": "missing",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "혈압계 미지참으로 혈압 미측정",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        }
+      },
+      "gray_fields": [],
+      "author": "llm"
+    }
+  ]
+}
