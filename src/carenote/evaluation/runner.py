@@ -31,6 +31,15 @@ class EvalReport:
     recoverable: Metrics | None = None
     strict: Metrics | None = None
     f1_ci: Interval | None = None
+    # 헤드라인(사전 등록 docs/test-final-report-plan.md): 현장 검토 대기 케이스(review_required,
+    # R3·G1)를 뺀 집계. 주 지표는 복원가능 필드만의 지표(headline)이고 복원 불가 포함과
+    # gray 제외 지표도 함께 낸다.
+    review_required_ids: tuple[str, ...] = ()
+    headline: Metrics | None = None
+    headline_all_fields: Metrics | None = None
+    headline_strict: Metrics | None = None
+    headline_ci: Interval | None = None
+    per_case_recoverable: dict[str, Counts] = field(default_factory=lambda: dict[str, Counts]())
     # 케이스별 집계. 구성 간 짝지은 비교(compare)에 쓴다.
     per_case: dict[str, Counts] = field(default_factory=lambda: dict[str, Counts]())
     # 케이스·필드별 채점 결과(tp/fn/fpfn/fp/tn). 실행 간 변동 분석(variance)에 쓴다.
@@ -71,6 +80,25 @@ class EvalReport:
                 if self.f1_ci
                 else None
             ),
+            "review_required_ids": list(self.review_required_ids),
+            "headline": metrics(self.headline) if self.headline else None,
+            "headline_all_fields": (
+                metrics(self.headline_all_fields) if self.headline_all_fields else None
+            ),
+            "headline_strict": metrics(self.headline_strict) if self.headline_strict else None,
+            "headline_ci": (
+                {
+                    "point": self.headline_ci.point,
+                    "low": self.headline_ci.low,
+                    "high": self.headline_ci.high,
+                }
+                if self.headline_ci
+                else None
+            ),
+            "per_case_recoverable": {
+                k: {"tp": c.tp, "fp": c.fp, "fn": c.fn}
+                for k, c in sorted(self.per_case_recoverable.items())
+            },
             "by_category": {k: metrics(v) for k, v in self.by_category.items()},
             "by_probe": {k: metrics(v) for k, v in self.by_probe.items()},
             "per_case": {
@@ -96,6 +124,8 @@ def evaluate(extractor: Extractor, cases: list[GoldenCase], split: str = "all") 
         return {c.id: score_case(c, predictions[c.id], subset) for c in cases}
 
     full, recoverable, strict = score("all"), score("recoverable"), score("strict")
+    excluded = {c.id for c in cases if c.review_required}
+    kept = [c.id for c in cases if c.id not in excluded]
     per_category: dict[str, list[Counts]] = {}
     per_probe: dict[str, list[Counts]] = {}
     for case in cases:
@@ -112,5 +142,11 @@ def evaluate(extractor: Extractor, cases: list[GoldenCase], split: str = "all") 
         strict=Metrics.from_counts(_total(list(strict.values()))),
         f1_ci=bootstrap_f1(list(full.values())),
         per_case=full,
+        review_required_ids=tuple(sorted(excluded)),
+        headline=Metrics.from_counts(_total([recoverable[i] for i in kept])),
+        headline_all_fields=Metrics.from_counts(_total([full[i] for i in kept])),
+        headline_strict=Metrics.from_counts(_total([strict[i] for i in kept])),
+        headline_ci=bootstrap_f1([recoverable[i] for i in kept]),
+        per_case_recoverable=recoverable,
         per_field={c.id: field_outcomes(c, predictions[c.id]) for c in cases},
     )

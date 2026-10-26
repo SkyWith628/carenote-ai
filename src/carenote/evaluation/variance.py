@@ -27,7 +27,8 @@ from itertools import combinations
 from pathlib import Path
 from typing import Any
 
-from carenote.evaluation.metrics import CORRECT_OUTCOMES
+from carenote.evaluation.compare import select_per_case
+from carenote.evaluation.metrics import CORRECT_OUTCOMES, Counts, Metrics
 
 DEFAULT_RESAMPLES = 1000
 DEFAULT_SEED = 0
@@ -144,18 +145,29 @@ def analyze(reports: list[Report]) -> VarianceSummary:
     )
 
 
-def _averaged_counts(reports: list[Report]) -> dict[str, tuple[float, float, float]]:
-    """케이스마다 실행들의 TP/FP/FN 평균."""
-    _require(reports, "per_case")
-    ids = sorted(reports[0]["per_case"])
-    if any(sorted(r["per_case"]) != ids for r in reports[1:]):
+def _selected(
+    reports: list[Report], exclude_review_required: bool, recoverable: bool
+) -> list[dict[str, Counts]]:
+    return [
+        select_per_case(r, exclude_review_required=exclude_review_required, recoverable=recoverable)
+        for r in reports
+    ]
+
+
+def _averaged_counts(
+    reports: list[Report], exclude_review_required: bool = False, recoverable: bool = False
+) -> dict[str, tuple[float, float, float]]:
+    """케이스마다 실행들의 TP/FP/FN 평균 (선택 옵션은 compare.select_per_case와 같다)."""
+    groups = _selected(reports, exclude_review_required, recoverable)
+    ids = sorted(groups[0])
+    if any(sorted(g) != ids for g in groups[1:]):
         raise ValueError("보고서들의 케이스 집합이 다르다")
-    k = len(reports)
+    k = len(groups)
     return {
         i: (
-            sum(r["per_case"][i]["tp"] for r in reports) / k,
-            sum(r["per_case"][i]["fp"] for r in reports) / k,
-            sum(r["per_case"][i]["fn"] for r in reports) / k,
+            sum(g[i].tp for g in groups) / k,
+            sum(g[i].fp for g in groups) / k,
+            sum(g[i].fn for g in groups) / k,
         )
         for i in ids
     }
@@ -179,19 +191,43 @@ class Verdict:
         return self.passes_sigma_rule and self.passes_interval_rule
 
 
+def _run_f1s(
+    reports: list[Report], exclude_review_required: bool, recoverable: bool
+) -> list[float]:
+    f1s: list[float] = []
+    for counts in _selected(reports, exclude_review_required, recoverable):
+        total = Counts()
+        for c in counts.values():
+            total = total + c
+        f1 = Metrics.from_counts(total).f1
+        if f1 is None:
+            raise ValueError("F1이 없는 보고서(분모 0)는 분석할 수 없다")
+        f1s.append(f1)
+    return f1s
+
+
 def compare_runs(
     xs: list[Report],
     ys: list[Report],
     resamples: int = DEFAULT_RESAMPLES,
     seed: int = DEFAULT_SEED,
+    *,
+    exclude_review_required: bool = False,
+    recoverable: bool = False,
 ) -> Verdict:
-    """X 묶음 대비 Y 묶음 F1 차이를 사전 규칙으로 판정한다. 각 묶음은 2회 이상이어야 한다."""
-    sx, sy = analyze(xs), analyze(ys)
-    mean_diff = sy.mean_f1 - sx.mean_f1
-    assert sx.sd_f1 is not None and sy.sd_f1 is not None
-    sigma = math.sqrt(sx.sd_f1**2 + sy.sd_f1**2)
+    """X 묶음 대비 Y 묶음 F1 차이를 사전 규칙으로 판정한다. 각 묶음은 2회 이상이어야 한다.
+
+    옵션을 주면 F1·σ·구간을 모두 그 선택(헤드라인: 현장 검토 대기 제외, 복원가능 필드)으로 계산한다.
+    """
+    analyze(xs)  # 2회 이상, per_field 존재 검증
+    analyze(ys)
+    fx = _run_f1s(xs, exclude_review_required, recoverable)
+    fy = _run_f1s(ys, exclude_review_required, recoverable)
+    mean_diff = statistics.fmean(fy) - statistics.fmean(fx)
+    sigma = math.sqrt(statistics.stdev(fx) ** 2 + statistics.stdev(fy) ** 2)
     threshold = SIGMA_MULTIPLE * sigma
-    ax, ay = _averaged_counts(xs), _averaged_counts(ys)
+    ax = _averaged_counts(xs, exclude_review_required, recoverable)
+    ay = _averaged_counts(ys, exclude_review_required, recoverable)
     if set(ax) != set(ay):
         raise ValueError("두 묶음의 케이스 집합이 다르다")
     ids = sorted(ax)
@@ -356,6 +392,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("runs", type=Path, nargs="+", help="같은 설정의 반복 실행 보고서(2개 이상)")
     parser.add_argument("--vs", type=Path, nargs="+", default=None, help="비교할 다른 묶음")
     parser.add_argument(
+        "--exclude-review-required",
+        action="store_true",
+        help="--vs 비교를 현장 검토 대기 케이스(R3·G1)를 뺀 헤드라인으로",
+    )
+    parser.add_argument(
+        "--recoverable", action="store_true", help="--vs 비교를 복원 불가 필드를 뺀 집계로"
+    )
+    parser.add_argument(
         "--targets",
         nargs="+",
         default=None,
@@ -369,7 +413,13 @@ def main(argv: list[str] | None = None) -> int:
         if args.vs is not None:
             ys = load_reports(args.vs)
             print(format_summary(analyze(ys), "Y"))
-            print(format_verdict(compare_runs(xs, ys)))
+            verdict = compare_runs(
+                xs,
+                ys,
+                exclude_review_required=args.exclude_review_required,
+                recoverable=args.recoverable,
+            )
+            print(format_verdict(verdict))
             if args.targets:
                 print(format_field_checks(field_check(xs, ys, args.targets)))
     except (ValueError, OSError) as exc:

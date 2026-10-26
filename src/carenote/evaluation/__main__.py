@@ -17,9 +17,12 @@ LLM 실행은 비용이 든다. --dry-run은 네트워크를 쓰지 않고 예�
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import subprocess
 import sys
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 
 from carenote.config import Settings, get_settings
@@ -57,6 +60,43 @@ class _NoClient:
     @property
     def messages(self) -> object:
         raise RuntimeError("dry-run에서 API 클라이언트를 쓰면 안 된다")
+
+
+def final_run_banner(
+    *,
+    split: str,
+    model: str,
+    effort: str,
+    variant: str,
+    prompt_version: str,
+    system_prompt: str,
+    run_tag: str | None,
+    case_count: int,
+    commit: str | None,
+    now: datetime | None = None,
+) -> str:
+    """test를 포함한 LLM 실행의 시작 기록 한 줄. 결정 로그의 test 실행 횟수에 그대로 옮긴다."""
+    stamp = (now or datetime.now().astimezone()).isoformat(timespec="seconds")
+    digest = hashlib.sha256(system_prompt.encode("utf-8")).hexdigest()[:16]
+    tag = f" 태그={run_tag}" if run_tag else ""
+    return (
+        f"[test-run] {stamp} split={split} 프롬프트={prompt_version}({digest}) 모델={model} "
+        f"effort={effort} 변형={variant}{tag} 케이스={case_count} 커밋={commit or '알 수 없음'}"
+    )
+
+
+def _git_head() -> str | None:
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=15,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return out.stdout.strip() or None
 
 
 def _pct(value: float | None) -> str:
@@ -97,6 +137,20 @@ def format_report(report: EvalReport) -> str:
         lines.append(_row("복원가능 필드만", report.recoverable))
     if report.strict is not None:
         lines.append(_row("복원가능·gray 제외", report.strict))
+    if report.review_required_ids and report.headline is not None:
+        n = report.case_count - len(report.review_required_ids)
+        lines.append(
+            f"-- 헤드라인: 현장 검토 대기 {', '.join(report.review_required_ids)} 제외 {n}건"
+        )
+        lines.append(_row("헤드라인(복원가능)", report.headline))
+        if (ci := report.headline_ci) is not None and ci.low is not None and ci.high is not None:
+            lines.append(
+                f"  헤드라인 F1 95% 구간: {_pct(ci.low).strip()} ~ {_pct(ci.high).strip()}"
+            )
+        if report.headline_all_fields is not None:
+            lines.append(_row("헤드라인(전체 필드)", report.headline_all_fields))
+        if report.headline_strict is not None:
+            lines.append(_row("헤드라인(복원·gray 제외)", report.headline_strict))
     lines.append("-- 유형별")
     lines += [_row(name, m) for name, m in report.by_category.items()]
     if len(report.by_probe) > 1:
@@ -270,6 +324,20 @@ def _run_llm(
         return EXIT_REFUSED
 
     guard = CostGuard(approved, price)
+    if args.split != "dev":
+        print(
+            final_run_banner(
+                split=args.split,
+                model=model,
+                effort=effort,
+                variant=variant,
+                prompt_version=prompt_version,
+                system_prompt=probe.system_prompt,
+                run_tag=args.run_tag,
+                case_count=len(cases),
+                commit=_git_head(),
+            )
+        )
     llm = LLMExtractor(
         client_factory(settings),
         variant=variant,

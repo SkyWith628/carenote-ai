@@ -13,18 +13,47 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from carenote.evaluation.metrics import Counts
 from carenote.evaluation.stats import Interval, paired_f1_difference
 
 
-def load_per_case(path: Path) -> dict[str, Counts]:
-    """보고서 JSON에서 케이스별 TP/FP/FN을 읽는다."""
-    doc = json.loads(path.read_text(encoding="utf-8"))
-    raw = doc.get("per_case")
+def select_per_case(
+    doc: dict[str, Any],
+    *,
+    exclude_review_required: bool = False,
+    recoverable: bool = False,
+    name: str = "보고서",
+) -> dict[str, Counts]:
+    """보고서 dict에서 케이스별 TP/FP/FN을 고른다.
+
+    - `recoverable`: 복원 불가 필드를 뺀 집계(`per_case_recoverable`)를 쓴다.
+    - `exclude_review_required`: 현장 검토 대기 케이스(R3·G1)를 뺀다(헤드라인 비교용).
+    """
+    key = "per_case_recoverable" if recoverable else "per_case"
+    raw = doc.get(key)
     if not raw:
-        raise ValueError(f"{path}: per_case가 없다. 현재 러너로 다시 채점한 보고서가 필요하다")
-    return {k: Counts(tp=v["tp"], fp=v["fp"], fn=v["fn"]) for k, v in raw.items()}
+        raise ValueError(f"{name}: {key}가 없다. 현재 러너로 다시 채점한 보고서가 필요하다")
+    skip: set[str] = set()
+    if exclude_review_required:
+        if "review_required_ids" not in doc:
+            raise ValueError(f"{name}: review_required_ids가 없다. 현재 러너로 다시 채점해야 한다")
+        skip = set(doc["review_required_ids"])
+    return {k: Counts(tp=v["tp"], fp=v["fp"], fn=v["fn"]) for k, v in raw.items() if k not in skip}
+
+
+def load_per_case(
+    path: Path, *, exclude_review_required: bool = False, recoverable: bool = False
+) -> dict[str, Counts]:
+    """보고서 JSON 파일에서 케이스별 TP/FP/FN을 읽는다."""
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    return select_per_case(
+        doc,
+        exclude_review_required=exclude_review_required,
+        recoverable=recoverable,
+        name=str(path),
+    )
 
 
 def format_difference(label_a: str, label_b: str, diff: Interval) -> str:
@@ -45,9 +74,21 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="carenote.evaluation.compare", description=__doc__)
     parser.add_argument("a", type=Path)
     parser.add_argument("b", type=Path)
+    parser.add_argument(
+        "--exclude-review-required",
+        action="store_true",
+        help="현장 검토 대기 케이스(R3·G1)를 뺀 헤드라인 비교",
+    )
+    parser.add_argument(
+        "--recoverable", action="store_true", help="복원 불가 필드를 뺀 집계로 비교"
+    )
     args = parser.parse_args(argv)
+    opts = {
+        "exclude_review_required": args.exclude_review_required,
+        "recoverable": args.recoverable,
+    }
     try:
-        diff = paired_f1_difference(load_per_case(args.a), load_per_case(args.b))
+        diff = paired_f1_difference(load_per_case(args.a, **opts), load_per_case(args.b, **opts))
     except ValueError as exc:
         print(f"비교 불가: {exc}", file=sys.stderr)
         return 2

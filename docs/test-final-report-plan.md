@@ -34,6 +34,12 @@
 - 점추정이 어느 쪽이든 결과를 그대로 보고한다. 결과가 나쁘다고 프롬프트·정답·규칙을 test에 맞춰 고치지 않는다.
 
 ## 4. 구현이 필요한 것 (실행 전, API 없이 테스트)
+
+> **구현 상태(2026-10-26): 1~4 완료**(`tests/test_final_report.py` 20건, 전체 470건 통과). 5(사전 등록 커밋·태그 `golden-v2-final-plan`)는 사전 점검(가격 재확인, Sonnet v4 dev 점검)을 끝내고 test를 실행하기 직전에 한다(계획이 바뀌면 태그가 낡기 때문).
+> 사용법: 보고서는 `--split test --final-report --out docs/reports/test-final-{prompt}-{model}-{variant}.json`으로 저장하고(예: `test-final-v4-haiku-b1.json`), 표는 `python -m carenote.evaluation.final_table --dir docs/reports [--kr1]`, 두 보고서 비교는 `python -m carenote.evaluation.compare A B --exclude-review-required --recoverable`, 반복 실행 묶음 비교는 `variance ... --vs ... --exclude-review-required --recoverable`.
+> 구현 중 정한 것: 헤드라인 집계는 러너가 모든 보고서에 넣는다(`review_required_ids`, `headline`(복원가능), `headline_all_fields`, `headline_strict`, `headline_ci`, `per_case_recoverable`). `final_table`은 있는 구성만 표로 만들고 12개 사전 등록 비교(B1−B0, Sonnet−Haiku, v4−v1 각 4쌍)에 판정을 붙인다: Haiku만 낀 비교는 구간이 0 밖이고 |Δ| > 1.4%p여야 "차이 있음", Sonnet이 낀 비교는 구간만 0 밖이면 "방향만(Sonnet 변동 미측정)". `--kr1`은 캐시만 읽어 KR-1 규칙 전·후 안전 지표를 낸다. `test-run` 배너는 test 포함 LLM 실행 시작 때 출력된다(구성, 프롬프트 해시, 커밋 포함).
+
+원래 계획:
 | 순서 | 작업 | 완료 기준 |
 |---|---|---|
 | 1 | 러너에 **헤드라인 집계**: `review_required` 케이스를 뺀 지표와 복원가능 필드만의 지표, 부트스트랩 구간을 보고서(JSON·표)에 `headline`으로 추가. 30건 전체 값도 그대로 유지 | oracle 만점, null 하한, 제외 케이스가 정확히 gs-052·060, 기존 보고서 필드 불변 |
