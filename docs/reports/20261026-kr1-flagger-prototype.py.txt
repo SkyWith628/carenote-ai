@@ -1,0 +1,131 @@
+import re, json
+from collections import Counter, defaultdict
+from pathlib import Path
+from carenote.evaluation.loader import load_golden
+from carenote.evaluation.schema import FieldKey, Flag
+from carenote.extraction.flagger import FlaggingExtractor, flag_field
+from carenote.extraction.llm_extractor import LLMExtractor
+from carenote.generation.numerals import extract_numbers, find_ambiguous_numerals
+
+class NoClient:
+    @property
+    def messages(self): raise RuntimeError("API 금지")
+
+NUM = r"(?:\d+|[영공일이삼사오육칠팔구십백천]+)"
+HEDGE = re.compile(NUM + r"\s?이?(?:었나|였나|인가|던가|일까|인지)")
+KEY = {"blood_pressure": "혈압", "pulse": "맥박"}
+
+def hedge_fields(text):
+    """번복·불확실 의문형 표지가 붙은 수치의 필드(혈압/맥박)."""
+    out = set()
+    for m in HEDGE.finditer(text):
+        before = text[max(0, m.start()-40):m.start()]
+        # 같은 문장 안의 가장 가까운 키워드
+        before = re.split(r"[.!?]", before)[-1]
+        pos = {f: before.rfind(k) for f, k in KEY.items()}
+        near = [f for f, p in pos.items() if p >= 0]
+        out |= {max(near, key=lambda f: pos[f])} if near else set(KEY)
+    return out
+
+def bp_parts(v):
+    m = re.match(r"^(\d{2,3})/(\d{2,3})$", v.strip()); return [int(m.group(1)), int(m.group(2))] if m else None
+
+def fabricated(field, value, text):
+    nums = extract_numbers(text)
+    parts = bp_parts(value) if field == "blood_pressure" else ([int(value)] if value.strip().isdigit() else None)
+    return parts is not None and any(p not in nums for p in parts)
+
+cases = {c.id: c for c in load_golden(Path("data/golden"), "dev")}
+configs = []
+for model in ("claude-haiku-5-5", "claude-sonnet-5-5"):
+    for var in ("b0", "b1"):
+        for ver in ("v1", "v2", "v3", "v4"):
+            for tag in [None, "r1", "r2", "r3", "r4"] + [f"ab{i}" for i in range(1, 21)]:
+                configs.append((model, var, ver, tag))
+rows = []
+for model, var, ver, tag in configs:
+    ex = LLMExtractor(NoClient(), variant=var, model=model, effort="medium", prompt_version=ver, run_tag=tag, cache_dir=Path(".cache/extractions"))
+    for cid, c in cases.items():
+        if not ex.is_cached(c.transcript): continue
+        preds = {p.key.value: p for p in FlaggingExtractor(ex).extract(c.transcript)}
+        for f in ("blood_pressure", "pulse"):
+            p = preds[f]; g = c.field(FieldKey(f))
+            rows.append(dict(cfg=(model[7:13], var, ver, tag or "run0"), case=cid, field=f, pred=p, gold=g, text=c.transcript))
+print("예측 행(케이스×필드×실행):", len(rows), "· 서로 다른 실행 설정:", len({r['cfg'] for r in rows}))
+
+def state(r):
+    p = r["pred"]
+    if p.value is not None: return "single"
+    return "cand" if len(p.candidates) >= 2 else "missing"
+
+R = defaultdict(Counter)
+detail = defaultdict(list)
+for r in rows:
+    p, g, f = r["pred"], r["gold"], r["field"]
+    hedge = f in hedge_fields(r["text"])
+    gold_unres = g.value is None and len(g.candidates) >= 2
+    st = state(r)
+    R["rows"]["all"] += 1
+    if gold_unres:
+        R["gold-unresolved rows"][st] += 1          # 정답이 '해소 안 됨'인 행의 모델 상태
+        if st == "single": R["gold-unresolved single flag"][p.flag.value] += 1
+    # R1 발동: 의문형 표지, 모델이 단일 값을 냄
+    if hedge and st == "single":
+        R["R1 fires"]["total"] += 1
+        R["R1 fires"]["on gold-unresolved" if gold_unres else "on gold-resolved(false alarm)"] += 1
+        if not gold_unres: detail["R1 false alarm"].append((r["cfg"], r["case"], f, p.value))
+    if hedge and not st == "single": R["R1 hedge but already cand/missing"][st] += 1
+    # R2 발동: 값의 숫자가 transcript의 어떤 수에도 없음
+    if st == "single" and fabricated(f, p.value, r["text"]):
+        R["R2 fires"]["total"] += 1
+        R["R2 fires"]["on wrong value" if (g.value is None or g.value != p.value) else "on correct value"] += 1
+        detail["R2"].append((r["cfg"], r["case"], f, p.value, g.value))
+    # R2' 모호한 '이' 읽기(칠십이 등)에만 기대는 값
+    if st == "single" and find_ambiguous_numerals(r["text"]) and g.value is not None:
+        R["amb-numeral rows(single value)"]["total"] += 1
+        R["amb-numeral rows(single value)"]["correct" if g.value == p.value else "wrong"] += 1
+    # 현재 flag 현황: 정답 flag가 ok인 단일 값 중 모델이 needs_confirm을 내는 행(과다 확인)
+    if g.flag is Flag.OK and p.flag is Flag.NEEDS_CONFIRM: R["over-confirm now (gold ok -> pred needs_confirm)"]["rows"] += 1
+    if g.flag is Flag.NEEDS_CONFIRM:
+        R["confirm-needed rows (gold needs_confirm)"]["total"] += 1
+        R["confirm-needed rows (gold needs_confirm)"]["flagged now"] += int(p.flag in (Flag.NEEDS_CONFIRM, Flag.RISK))
+        # R1 적용 후
+        after = p.flag in (Flag.NEEDS_CONFIRM, Flag.RISK) or (hedge and st == "single")
+        R["confirm-needed rows (gold needs_confirm)"]["flagged after R1"] += int(after)
+for k, v in R.items(): print(k, dict(v))
+for k, v in detail.items():
+    print(k, len(v), Counter((x[1], x[2]) for x in v).most_common(8))
+# 설정별 gs-003 / gs-009 / gs-010 단일 확정 비율
+print("-- 해소 안 된 3케이스에서 단일 값 확정(flag ok) 비율, 설정군별")
+agg = defaultdict(lambda: Counter())
+for r in rows:
+    g = r["gold"]
+    if g.value is None and len(g.candidates) >= 2 and r["case"] in ("gs-003", "gs-009", "gs-010"):
+        agg[(r["cfg"][0], r["cfg"][1], r["cfg"][2])]["n"] += 1
+        agg[(r["cfg"][0], r["cfg"][1], r["cfg"][2])][state(r)] += 1
+for k, v in sorted(agg.items()): print(k, dict(v))
+
+print("== 추가 집계")
+from carenote.evaluation.ablate import fisher_one_sided
+v3 = sum(1 for r in rows if r["gold"].value is None and len(r["gold"].candidates)>=2 and state(r)=="single" and r["cfg"][0]=="haiku-" and r["cfg"][2]=="v3")
+n3 = sum(1 for r in rows if r["gold"].value is None and len(r["gold"].candidates)>=2 and r["cfg"][0]=="haiku-" and r["cfg"][2]=="v3")
+v4 = sum(1 for r in rows if r["gold"].value is None and len(r["gold"].candidates)>=2 and state(r)=="single" and r["cfg"][0]=="haiku-" and r["cfg"][2]=="v4")
+n4 = sum(1 for r in rows if r["gold"].value is None and len(r["gold"].candidates)>=2 and r["cfg"][0]=="haiku-" and r["cfg"][2]=="v4")
+print(f"Haiku 해소 안 된 3케이스 단일 확정: v3 {v3}/{n3}, v4 {v4}/{n4}, v4가 더 많을 p={fisher_one_sided(n3-v3, n3, n4-v4, n4, b_higher=False):.3f}")
+# 조용한 오답: 단일 값 + flag ok + 값이 정답과 다름(정답이 값 없음 포함), BP/맥박
+def silent_wrong(r):
+    p, g = r["pred"], r["gold"]
+    return p.value is not None and p.flag is Flag.OK and (g.value is None or p.value.replace(" ","") != g.value.replace(" ",""))
+tot_single_ok = sum(1 for r in rows if r["pred"].value is not None and r["pred"].flag is Flag.OK)
+sw = [r for r in rows if silent_wrong(r)]
+r1 = [r for r in sw if r["field"] in hedge_fields(r["text"])]
+r2 = [r for r in sw if fabricated(r["field"], r["pred"].value, r["text"])]
+both = {id(r) for r in r1} | {id(r) for r in r2}
+print(f"BP·맥박 예측 중 '단일 값 + flag ok' {tot_single_ok}행, 그중 조용한 오답(값이 정답과 다름) {len(sw)}행")
+print(f"  R1이 잡는 행 {len(r1)}, R2가 잡는 행 {len(r2)}, 합집합 {len(both)}, 남는 조용한 오답 {len(sw)-len(both)}")
+left = [r for r in sw if id(r) not in both]
+print("  남는 조용한 오답의 케이스·필드:", Counter((r['case'], r['field']) for r in left).most_common(8))
+g15 = [r for r in rows if r["case"]=="gs-015" and r["field"]=="pulse" and r["pred"].value is not None]
+print("gs-015 맥박 단일 값:", len(g15), "정답(72)", sum(1 for r in g15 if r["pred"].value==r["gold"].value), "오답", sum(1 for r in g15 if r["pred"].value!=r["gold"].value))
+R2rows=[r for r in rows if state(r)=="single" and fabricated(r["field"], r["pred"].value, r["text"])]
+print("R2 발동 행의 값:", Counter((r["case"], r["pred"].value, r["gold"].value) for r in R2rows))
