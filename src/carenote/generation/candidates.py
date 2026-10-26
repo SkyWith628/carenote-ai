@@ -73,8 +73,11 @@ def apply_batch_checks(out_dir: Path, golden_dir: Path | None) -> dict[str, list
     """저장된 후보 전체에 H(중복)와 K(문두)를 적용해 파일에 기록하고 요약을 돌려준다."""
     docs = [d for d in load_candidates(out_dir) if d.get("transcript")]
     items = [(str(d["spec_id"]), str(d["transcript"])) for d in docs]
+    # 승격된 골든셋에는 후보 자신의 사본이 들어 있다. 후보끼리는 items에서 비교하므로
+    # 같은 spec_id의 승격본은 기존 텍스트에서 뺀다(자기 자신과의 유사도 1.00 방지).
+    candidate_ids = {sid for sid, _ in items}
     existing = (
-        [c.transcript for c in load_golden(golden_dir)]
+        [c.transcript for c in load_golden(golden_dir) if c.spec_id not in candidate_ids]
         if golden_dir is not None and golden_dir.exists()
         else []
     )
@@ -206,6 +209,7 @@ transcript만 보고 8개 필드를 라벨한다. 정답은 보이지 않는다.
   해석이 갈리면 `inferred`로 표시하고 메모를 남겨도 된다
 - 낙상: 오늘은 없었어도 최근 7일 안에 낙상 보고가 있으면 `있음`이다
 - 복약 거부 보고는 `미복용`과 별개로 특이사항에도 적는다 (비워 두면 오류다)
+- 오늘 복약을 직접 보거나 직접 들은 경우만 적는다. 평소 관행이나 제3자의 일반적 전언은 비운다
 - 특이사항에는 건강·안전 이상 징후 외에 측정을 못 한 사유, 확인·질문을 못 한 항목,
   약 변경·재측정 예정도 적는다.
   가사·환경 변화·일상 잡담·사소한 일화는 적지 않는다

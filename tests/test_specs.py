@@ -150,6 +150,7 @@ def test_label_policy_document_keeps_the_2026_10_26_clarifications() -> None:
         "평소보다 높다",  # #6 (라운드 4 보완)
         "기운이 없어 보인다",  # #10 예시
         "비워 두면 오류다",  # #13 강조
+        "오늘 복약을 화자가 직접 보거나 직접 들은 경우만 기록한다",  # #14
         "특이사항 risk 기준",
         "측정을 못 했거나 빠뜨린 사유",  # #11 범위 (2026-10-26)
         "감정·표정·기색을 직접 말했을 때만",  # #10 기분 추론 기준
@@ -187,5 +188,6 @@ def test_blind_guide_carries_round4_clarifications() -> None:
         "(비워 두면 오류다)",
         "수치를 오늘 수치와 견주는 말",
         "낙상과 복약 이야기가 있는지 transcript를",
+        "평소 관행이나 제3자의 일반적 전언은 비운다",
     ):
         assert fragment in BLIND_GUIDE, fragment

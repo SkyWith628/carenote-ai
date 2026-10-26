@@ -127,3 +127,30 @@ def test_human_transcripts_pass_length_after_h1_change() -> None:
     for sid in HUMAN_IDS:
         low, high = specs[sid].length_chars
         assert low <= len(cases[sid].transcript) <= high, sid
+
+
+def test_batch_checks_ignore_the_promoted_copy_of_each_candidate(tmp_path: Path) -> None:
+    """승격본이 있어도 후보가 자기 자신과 중복(유사도 1.00)으로 실패하지 않는다."""
+    from carenote.generation.candidates import apply_batch_checks
+
+    cand = tmp_path / "cand"
+    cand.mkdir()
+    for p in (GOLDEN_DIR / "candidates" / "v2").glob("*.json"):
+        (cand / p.name).write_text(p.read_text(encoding="utf-8"), encoding="utf-8")
+    summary = apply_batch_checks(cand, GOLDEN_DIR)
+    assert not [m for msgs in summary.values() for m in msgs if "[H] fail" in m]
+
+
+def test_replaced_s3_and_h6_follow_the_replacement_design(v2: list[GoldenCase]) -> None:
+    by = {c.spec_id: c for c in v2}
+    s3, h6 = by["S3"], by["H6"]
+    assert s3.reference_transcript is not None and s3.reference_transcript != s3.transcript
+    for text in ("너머진 이른", "드셔써요", "약또"):
+        assert text in s3.transcript and text not in s3.reference_transcript
+    assert all(f.recoverable for f in s3.fields)
+    assert s3.field(FieldKey.MEDICATION_TAKEN).value == "복용"
+    assert h6.field(FieldKey.MEDICATION_TAKEN).value is None
+    assert h6.field(FieldKey.FALL_EVENT).value is None
+    assert "약" not in h6.transcript and "넘어" not in h6.transcript
+    retired = GOLDEN_DIR / "retired" / "specs" / "S3_H6_retired_2026-10-26.json"
+    assert retired.exists()

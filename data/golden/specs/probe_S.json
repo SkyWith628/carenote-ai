@@ -218,8 +218,8 @@
       "spec_id": "S3",
       "probe": "S",
       "split": "test",
-      "title": "동음 오인식 (양 → 약), 문맥으로 부분 복원 가능",
-      "scene": "참고 발화는 '점심 양은 반 정도 드셨어요'다. STT 결과는 '점심 약은 반 정도 드셨어요'다. 복약은 따로 언급하지 않는다. 나머지는 정상이다.",
+      "title": "연음 표기 오인식 (소리 나는 대로 적힘, 텍스트로 복원 가능)",
+      "scene": "참고 발화는 깔끔한 정상 보고다. STT 결과는 연음을 소리 나는 대로 적은 표기 오류가 세 군데 있다: '넘어진 일은'→'너머진 이른', '반 정도 드셨어요'→'반 정도 드셔써요', '약도 드셨어요'→'약또 드셔써요'. 다른 곳은 정상 표기이고 숫자는 정확하다. 복원 방법이 하나뿐이어서 누가 읽어도 같은 값이 나와야 한다.",
       "style": {
         "화자": "40대 여성",
         "지역": "경상",
@@ -231,47 +231,62 @@
         260
       ],
       "must_include": [
-        "방문 시각 낮 열두 시",
-        "혈압 122에 78",
-        "맥박 70",
-        "참고 발화: 점심 양은 반 정도 / STT: 점심 약은 반 정도",
-        "넘어진 일 없음",
-        "복약은 언급하지 않음"
+        "방문 시각 오후 1시",
+        "혈압 124에 80",
+        "맥박 72",
+        "참고 발화: 넘어진 일은 / STT: 너머진 이른",
+        "참고 발화: 점심은 반 정도 드셨어요 / STT: 점심은 반 정도 드셔써요",
+        "참고 발화: 약도 드셨어요 / STT: 약또 드셔써요"
       ],
       "must_not": [
-        "복약을 직접 언급하는 문장"
+        "위 세 군데 외의 표기 오류",
+        "다른 단어로 읽힐 수 있는 오인식(동음이의어)"
       ],
-      "traps": "'약은 반 정도 드셨어요'를 복약 필드(부분 복용)로 옮기거나 식사량을 놓친다.",
-      "hypothesis": "문맥('점심')으로 복원하는 모델과 못 하는 모델이 갈린다.",
-      "policy": "stt_error, 정책 #1(복약 미언급은 missing)",
+      "traps": "깨진 표기를 새로운 단어로 읽거나, '너머진 이른'을 낙상 보고로 오독하거나 부정을 놓친다.",
+      "hypothesis": "S1(띄어쓰기)과 다른 유형의 복원 가능 STT 오류. 대부분 맞춘다. 틀리면 표기 변형에 대한 취약성.",
+      "policy": "stt_error, 정책 해당 없음",
       "label_risk": "low",
       "gray_fields": [],
       "stt": {
         "errors": [
           {
+            "field": "fall_event",
+            "reference": "넘어진 일은",
+            "heard": "너머진 이른",
+            "kind": "liaison",
+            "recoverable_from_text": true
+          },
+          {
             "field": "meal_intake",
-            "reference": "점심 양은",
-            "heard": "점심 약은",
-            "kind": "homophone",
+            "reference": "반 정도 드셨어요",
+            "heard": "반 정도 드셔써요",
+            "kind": "liaison",
+            "recoverable_from_text": true
+          },
+          {
+            "field": "medication_taken",
+            "reference": "약도 드셨어요",
+            "heard": "약또 드셔써요",
+            "kind": "liaison",
             "recoverable_from_text": true
           }
         ]
       },
       "gold": {
         "visit_start": {
-          "value": "12:00",
+          "value": "13:00",
           "source": "stated",
           "flag": "ok",
           "candidates": []
         },
         "blood_pressure": {
-          "value": "122/78",
+          "value": "124/80",
           "source": "stated",
           "flag": "ok",
           "candidates": []
         },
         "pulse": {
-          "value": "70",
+          "value": "72",
           "source": "stated",
           "flag": "ok",
           "candidates": []
@@ -283,9 +298,9 @@
           "candidates": []
         },
         "medication_taken": {
-          "value": null,
-          "source": "missing",
-          "flag": "needs_confirm",
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
           "candidates": []
         },
         "fall_event": {
