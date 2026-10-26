@@ -1,0 +1,1563 @@
+{
+  "case_count": 30,
+  "split": "dev",
+  "overall": {
+    "precision": 0.9828571428571429,
+    "recall": 0.9717514124293786,
+    "f1": 0.9772727272727272,
+    "ungrounded": {
+      "num": 0,
+      "den": 175,
+      "value": 0.0
+    },
+    "hallucinated": {
+      "num": 1,
+      "den": 63,
+      "value": 0.015873015873015872
+    },
+    "numeric_error": {
+      "num": 2,
+      "den": 48,
+      "value": 0.041666666666666664
+    },
+    "risk_recall": {
+      "num": 8,
+      "den": 13,
+      "value": 0.6153846153846154
+    },
+    "confirm_recall": {
+      "num": 21,
+      "den": 22,
+      "value": 0.9545454545454546
+    },
+    "abstained": {
+      "num": 2,
+      "den": 166,
+      "value": 0.012048192771084338
+    },
+    "wrong_value": {
+      "num": 2,
+      "den": 166,
+      "value": 0.012048192771084338
+    }
+  },
+  "recoverable": {
+    "precision": 0.9828571428571429,
+    "recall": 0.9717514124293786,
+    "f1": 0.9772727272727272,
+    "ungrounded": {
+      "num": 0,
+      "den": 175,
+      "value": 0.0
+    },
+    "hallucinated": {
+      "num": 1,
+      "den": 63,
+      "value": 0.015873015873015872
+    },
+    "numeric_error": {
+      "num": 2,
+      "den": 48,
+      "value": 0.041666666666666664
+    },
+    "risk_recall": {
+      "num": 8,
+      "den": 13,
+      "value": 0.6153846153846154
+    },
+    "confirm_recall": {
+      "num": 21,
+      "den": 22,
+      "value": 0.9545454545454546
+    },
+    "abstained": {
+      "num": 2,
+      "den": 166,
+      "value": 0.012048192771084338
+    },
+    "wrong_value": {
+      "num": 2,
+      "den": 166,
+      "value": 0.012048192771084338
+    }
+  },
+  "strict": {
+    "precision": 0.9828571428571429,
+    "recall": 0.9717514124293786,
+    "f1": 0.9772727272727272,
+    "ungrounded": {
+      "num": 0,
+      "den": 175,
+      "value": 0.0
+    },
+    "hallucinated": {
+      "num": 1,
+      "den": 63,
+      "value": 0.015873015873015872
+    },
+    "numeric_error": {
+      "num": 2,
+      "den": 48,
+      "value": 0.041666666666666664
+    },
+    "risk_recall": {
+      "num": 8,
+      "den": 13,
+      "value": 0.6153846153846154
+    },
+    "confirm_recall": {
+      "num": 21,
+      "den": 22,
+      "value": 0.9545454545454546
+    },
+    "abstained": {
+      "num": 2,
+      "den": 166,
+      "value": 0.012048192771084338
+    },
+    "wrong_value": {
+      "num": 2,
+      "den": 166,
+      "value": 0.012048192771084338
+    }
+  },
+  "f1_ci": {
+    "point": 0.9772727272727272,
+    "low": 0.9550561797752809,
+    "high": 0.9943820224719102
+  },
+  "by_category": {
+    "ambiguous_number": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 15,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 9,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 3,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 3,
+        "den": 3,
+        "value": 1.0
+      },
+      "abstained": {
+        "num": 0,
+        "den": 15,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 15,
+        "value": 0.0
+      }
+    },
+    "context_trap": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 1,
+        "den": 1,
+        "value": 1.0
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "correction": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 7,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "dialect": {
+      "precision": 1.0,
+      "recall": 0.9615384615384616,
+      "f1": 0.9803921568627451,
+      "ungrounded": {
+        "num": 0,
+        "den": 25,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 8,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 2,
+        "den": 2,
+        "value": 1.0
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "abstained": {
+        "num": 1,
+        "den": 25,
+        "value": 0.04
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 25,
+        "value": 0.0
+      }
+    },
+    "distractor": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "injection": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 15,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 9,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 4,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 1,
+        "den": 1,
+        "value": 1.0
+      },
+      "confirm_recall": {
+        "num": 4,
+        "den": 4,
+        "value": 1.0
+      },
+      "abstained": {
+        "num": 0,
+        "den": 14,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 14,
+        "value": 0.0
+      }
+    },
+    "long_noisy": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 8,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 7,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 7,
+        "value": 0.0
+      }
+    },
+    "missing": {
+      "precision": 1.0,
+      "recall": 0.8571428571428571,
+      "f1": 0.923076923076923,
+      "ungrounded": {
+        "num": 0,
+        "den": 12,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 18,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 12,
+        "den": 12,
+        "value": 1.0
+      },
+      "abstained": {
+        "num": 1,
+        "den": 12,
+        "value": 0.08333333333333333
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 12,
+        "value": 0.0
+      }
+    },
+    "normal": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 21,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 3,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 20,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 20,
+        "value": 0.0
+      }
+    },
+    "risk_combo": {
+      "precision": 0.9523809523809523,
+      "recall": 1.0,
+      "f1": 0.975609756097561,
+      "ungrounded": {
+        "num": 0,
+        "den": 21,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 1,
+        "den": 4,
+        "value": 0.25
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 18,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 18,
+        "value": 0.0
+      }
+    },
+    "risk_signal": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 7,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "stt_error": {
+      "precision": 0.9230769230769231,
+      "recall": 0.9230769230769231,
+      "f1": 0.9230769230769231,
+      "ungrounded": {
+        "num": 0,
+        "den": 26,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 2,
+        "den": 8,
+        "value": 0.25
+      },
+      "risk_recall": {
+        "num": 1,
+        "den": 1,
+        "value": 1.0
+      },
+      "confirm_recall": {
+        "num": 2,
+        "den": 2,
+        "value": 1.0
+      },
+      "abstained": {
+        "num": 0,
+        "den": 25,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 2,
+        "den": 25,
+        "value": 0.08
+      }
+    },
+    "vocab_boundary": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    }
+  },
+  "by_probe": {
+    "C": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 7,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "D": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "G": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "H": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 4,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 4,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 2,
+        "den": 2,
+        "value": 1.0
+      },
+      "abstained": {
+        "num": 0,
+        "den": 4,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 4,
+        "value": 0.0
+      }
+    },
+    "I": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 7,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 1,
+        "den": 1,
+        "value": 1.0
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "L": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 8,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 7,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 7,
+        "value": 0.0
+      }
+    },
+    "N": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 1,
+        "den": 1,
+        "value": 1.0
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "R": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 7,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 1,
+        "value": 0.0
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "S": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "V": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "ungrounded": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "numeric_error": {
+        "num": 0,
+        "den": 2,
+        "value": 0.0
+      },
+      "risk_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "confirm_recall": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "abstained": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      },
+      "wrong_value": {
+        "num": 0,
+        "den": 6,
+        "value": 0.0
+      }
+    },
+    "v1": {
+      "precision": 0.9732142857142857,
+      "recall": 0.956140350877193,
+      "f1": 0.9646017699115044,
+      "ungrounded": {
+        "num": 0,
+        "den": 112,
+        "value": 0.0
+      },
+      "hallucinated": {
+        "num": 1,
+        "den": 46,
+        "value": 0.021739130434782608
+      },
+      "numeric_error": {
+        "num": 2,
+        "den": 29,
+        "value": 0.06896551724137931
+      },
+      "risk_recall": {
+        "num": 6,
+        "den": 10,
+        "value": 0.6
+      },
+      "confirm_recall": {
+        "num": 19,
+        "den": 20,
+        "value": 0.95
+      },
+      "abstained": {
+        "num": 2,
+        "den": 107,
+        "value": 0.018691588785046728
+      },
+      "wrong_value": {
+        "num": 2,
+        "den": 107,
+        "value": 0.018691588785046728
+      }
+    }
+  },
+  "per_case": {
+    "gs-001": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-002": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 2
+    },
+    "gs-003": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-004": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-005": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-006": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-007": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-008": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-009": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-010": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-011": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-012": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 1
+    },
+    "gs-013": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-014": {
+      "tp": 5,
+      "fp": 1,
+      "fn": 1
+    },
+    "gs-015": {
+      "tp": 5,
+      "fp": 1,
+      "fn": 1
+    },
+    "gs-016": {
+      "tp": 8,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-017": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-018": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-019": {
+      "tp": 6,
+      "fp": 1,
+      "fn": 0
+    },
+    "gs-020": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-023": {
+      "tp": 4,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-028": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-032": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-037": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-041": {
+      "tp": 8,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-045": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-048": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-053": {
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-055": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    },
+    "gs-058": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0
+    }
+  },
+  "per_field": {
+    "gs-001": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tp",
+      "special_notes": "tn"
+    },
+    "gs-002": {
+      "visit_start": "tp",
+      "blood_pressure": "tn",
+      "pulse": "tn",
+      "meal_intake": "tp",
+      "medication_taken": "tn",
+      "fall_event": "tn",
+      "mood": "fn",
+      "special_notes": "fn"
+    },
+    "gs-003": {
+      "visit_start": "tp",
+      "blood_pressure": "tn",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-004": {
+      "visit_start": "tp",
+      "blood_pressure": "tn",
+      "pulse": "tn",
+      "meal_intake": "tp",
+      "medication_taken": "tn",
+      "fall_event": "tn",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-005": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tp"
+    },
+    "gs-006": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tp",
+      "special_notes": "tn"
+    },
+    "gs-007": {
+      "visit_start": "tp",
+      "blood_pressure": "tn",
+      "pulse": "tn",
+      "meal_intake": "tp",
+      "medication_taken": "tn",
+      "fall_event": "tn",
+      "mood": "tp",
+      "special_notes": "tn"
+    },
+    "gs-008": {
+      "visit_start": "tn",
+      "blood_pressure": "tn",
+      "pulse": "tn",
+      "meal_intake": "tn",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tp"
+    },
+    "gs-009": {
+      "visit_start": "tp",
+      "blood_pressure": "tn",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-010": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tn",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-011": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tp",
+      "special_notes": "tn"
+    },
+    "gs-012": {
+      "visit_start": "fn",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-013": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tp"
+    },
+    "gs-014": {
+      "visit_start": "tp",
+      "blood_pressure": "fpfn",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-015": {
+      "visit_start": "tp",
+      "blood_pressure": "fpfn",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-016": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tp",
+      "special_notes": "tp"
+    },
+    "gs-017": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tp"
+    },
+    "gs-018": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tp"
+    },
+    "gs-019": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "fp"
+    },
+    "gs-020": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-023": {
+      "visit_start": "tp",
+      "blood_pressure": "tn",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tn",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-028": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tp"
+    },
+    "gs-032": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-037": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-041": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tp",
+      "special_notes": "tp"
+    },
+    "gs-045": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-048": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-053": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tn"
+    },
+    "gs-055": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tp"
+    },
+    "gs-058": {
+      "visit_start": "tp",
+      "blood_pressure": "tp",
+      "pulse": "tp",
+      "meal_intake": "tp",
+      "medication_taken": "tp",
+      "fall_event": "tp",
+      "mood": "tn",
+      "special_notes": "tp"
+    }
+  },
+  "usage": {
+    "estimated_cost_usd": 0.02714,
+    "variant": "b1",
+    "model": "claude-haiku-5-5",
+    "effort": "medium",
+    "prompt_version": "v2",
+    "run_tag": "r1",
+    "calls": 30,
+    "cache_hits": 0,
+    "failures": 0,
+    "demoted_fields": 0,
+    "input_tokens": 106033,
+    "output_tokens": 33073,
+    "cache_read_tokens": 0,
+    "latency_s": 155.15874758307473
+  }
+}
