@@ -1,0 +1,74 @@
+{
+  "model": "claude-haiku-5-5",
+  "extractor": "llm-b1",
+  "runs": 20,
+  "cost_usd": 0.036904,
+  "variants": {
+    "v3": {
+      "version": "v3",
+      "edits": null,
+      "targets": {
+        "gs-003:blood_pressure": {
+          "correct": 9,
+          "n": 20,
+          "failures": 0,
+          "outcomes": [
+            "tn",
+            "tn",
+            "fp",
+            "fp",
+            "tn",
+            "fp",
+            "fp",
+            "fp",
+            "tn",
+            "tn",
+            "tn",
+            "fp",
+            "tn",
+            "fp",
+            "tn",
+            "tn",
+            "fp",
+            "fp",
+            "fp",
+            "fp"
+          ]
+        }
+      }
+    },
+    "v4": {
+      "version": "v4",
+      "edits": null,
+      "targets": {
+        "gs-003:blood_pressure": {
+          "correct": 7,
+          "n": 20,
+          "failures": 0,
+          "outcomes": [
+            "fp",
+            "tn",
+            "fp",
+            "tn",
+            "fp",
+            "fp",
+            "fp",
+            "fp",
+            "fp",
+            "tn",
+            "fp",
+            "fp",
+            "tn",
+            "fp",
+            "tn",
+            "fp",
+            "tn",
+            "fp",
+            "tn",
+            "fp"
+          ]
+        }
+      }
+    }
+  }
+}
