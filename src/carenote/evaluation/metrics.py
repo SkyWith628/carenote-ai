@@ -139,6 +139,32 @@ def _score_field(gold: ExpectedField, pred: PredictedField | None, transcript: s
 Subset = Literal["all", "recoverable", "strict"]
 
 
+# 필드 하나의 채점 결과: tp 맞힘 · fn 값을 못 냄 · fpfn 틀린 값을 냄 ·
+# fp 정답이 없는데 값을 냄 · tn 맞게 비움
+FIELD_OUTCOMES: tuple[str, ...] = ("tp", "fn", "fpfn", "fp", "tn")
+CORRECT_OUTCOMES: frozenset[str] = frozenset({"tp", "tn"})
+
+
+def field_outcomes(case: GoldenCase, predictions: list[PredictedField]) -> dict[str, str]:
+    """케이스의 필드별 채점 결과. `_score_field`의 TP/FP/FN 정의와 같은 기준이다."""
+    by_key = {p.key: p for p in predictions}
+    result: dict[str, str] = {}
+    for gold in case.fields:
+        pred = by_key.get(gold.key)
+        pred_value = _norm(pred.value) if pred else None
+        gold_value = _norm(gold.value)
+        if gold.key in PRESENCE_ONLY_FIELDS:
+            matched = pred_value is not None
+        else:
+            matched = pred_value == gold_value
+        if gold_value is not None:
+            outcome = "tp" if matched else ("fn" if pred_value is None else "fpfn")
+        else:
+            outcome = "tn" if pred_value is None else "fp"
+        result[gold.key.value] = outcome
+    return result
+
+
 def score_case(
     case: GoldenCase, predictions: list[PredictedField], subset: Subset = "all"
 ) -> Counts:

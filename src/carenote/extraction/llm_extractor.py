@@ -117,8 +117,10 @@ class LLMExtractor:
         cache_dir: Path | None = None,
         guard: CostGuard | None = None,
         prompt_version: PromptVersion = DEFAULT_PROMPT_VERSION,
+        run_tag: str | None = None,
     ) -> None:
         self._client = client
+        self._run_tag = run_tag
         self._prompt_version: PromptVersion = prompt_version
         self._variant: Variant = variant
         self._model = model
@@ -154,6 +156,7 @@ class LLMExtractor:
             "model": self._model,
             "effort": self._effort,
             "prompt_version": self._prompt_version,
+            "run_tag": self._run_tag,
             **asdict(self.stats),
         }
 
@@ -206,10 +209,18 @@ class LLMExtractor:
     # -- 캐시 -----------------------------------------------------------------
 
     def _cache_key(self, transcript: str) -> str:
-        payload = json.dumps(
-            [self._model, self._effort, self._variant, self._prompt_version, transcript],
-            ensure_ascii=False,
-        )
+        parts: list[str] = [
+            self._model,
+            self._effort,
+            self._variant,
+            self._prompt_version,
+            transcript,
+        ]
+        if self._run_tag is not None:
+            # 같은 입력의 반복 실행(실행 간 변동 측정)을 위해서만 키에 넣는다. 태그가 없으면
+            # 키 공식이 이전과 같아 기존 캐시가 그대로 적중한다.
+            parts.append(self._run_tag)
+        payload = json.dumps(parts, ensure_ascii=False)
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def _read_cache(self, key: str) -> LLMExtractionB0 | LLMExtractionB1 | None:

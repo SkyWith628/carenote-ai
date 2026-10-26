@@ -24,6 +24,15 @@ PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b1 --limit 3
 
 프롬프트: `--prompt v1|v2` (기본 **v1**: 기존 보고서 재현). v2는 라벨 정책(#1~#13)을 지시문으로 옮긴 판(`docs/extractor-prompt-v2-design.md`). 버전은 결과 캐시 키에 들어가 v1 캐시와 섞이지 않는다. v1 본문은 sha256으로 테스트가 고정한다.
 
+반복 실행: `--run-tag T`는 같은 설정을 캐시 없이 다시 실행하는 표식이다(실행 간 변동 측정용). 태그가 없으면 캐시 키가 이전과 같아 기존 캐시가 적중한다. 보고서 JSON에는 케이스·필드별 결과 `per_field`(tp/fn/fpfn/fp/tn)가 들어가고 `usage.run_tag`가 기록된다.
+
+변동 분석(`docs/run-variance-design.md`):
+```bash
+PYTHONPATH=src uv run python -m carenote.evaluation.variance r0.json r1.json r2.json r3.json r4.json
+PYTHONPATH=src uv run python -m carenote.evaluation.variance X0.json X1.json ... --vs Y0.json Y1.json ...
+```
+σ_run, 쌍별 평균 |ΔF1|, 불안정 필드, 안정 오류, 다수결 F1을 낸다. `--vs`는 사전 규칙으로 판정한다: 평균 F1 차이가 σ_run 합성값의 2배보다 크고 케이스를 재표집한 실행 평균 결과의 95% 구간이 0을 포함하지 않을 때만 "차이 있음".
+
 옵션: `--model`(기본 설정값 `claude-sonnet-5-5`), `--effort`(기본 `medium`), `--limit N`, `--cache-dir`, `--out`.
 
 안전장치

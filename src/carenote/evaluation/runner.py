@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from carenote.evaluation.extractor import Extractor, SupportsUsage
-from carenote.evaluation.metrics import Counts, Metrics, Ratio, Subset, score_case
+from carenote.evaluation.metrics import Counts, Metrics, Ratio, Subset, field_outcomes, score_case
 from carenote.evaluation.schema import GoldenCase
 from carenote.evaluation.stats import Interval, bootstrap_f1
 
@@ -33,6 +33,10 @@ class EvalReport:
     f1_ci: Interval | None = None
     # 케이스별 집계. 구성 간 짝지은 비교(compare)에 쓴다.
     per_case: dict[str, Counts] = field(default_factory=lambda: dict[str, Counts]())
+    # 케이스·필드별 채점 결과(tp/fn/fpfn/fp/tn). 실행 간 변동 분석(variance)에 쓴다.
+    per_field: dict[str, dict[str, str]] = field(
+        default_factory=lambda: dict[str, dict[str, str]]()
+    )
 
     def to_dict(self) -> dict[str, object]:
         """JSON 직렬화용 dict."""
@@ -70,6 +74,7 @@ class EvalReport:
             "per_case": {
                 k: {"tp": c.tp, "fp": c.fp, "fn": c.fn} for k, c in sorted(self.per_case.items())
             },
+            "per_field": {k: dict(v) for k, v in sorted(self.per_field.items())},
             "usage": self.usage,
         }
 
@@ -105,4 +110,5 @@ def evaluate(extractor: Extractor, cases: list[GoldenCase], split: str = "all") 
         strict=Metrics.from_counts(_total(list(strict.values()))),
         f1_ci=bootstrap_f1(list(full.values())),
         per_case=full,
+        per_field={c.id: field_outcomes(c, predictions[c.id]) for c in cases},
     )

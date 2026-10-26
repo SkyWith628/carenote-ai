@@ -140,6 +140,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_PROMPT_VERSION,
         help="추출 프롬프트 버전 (기본 v1: 기존 보고서 재현용). v2는 라벨 정책 반영판",
     )
+    parser.add_argument(
+        "--run-tag",
+        default=None,
+        help="같은 설정을 캐시 없이 다시 실행하는 반복 실행 표식(실행 간 변동 측정용). 기본 없음",
+    )
     parser.add_argument("--limit", type=int, default=None, help="앞에서 N건만 실행")
     parser.add_argument("--cache-dir", type=Path, default=None)
     parser.add_argument("--dry-run", action="store_true", help="API 호출 없이 예상 비용만 출력")
@@ -193,10 +198,12 @@ def _run_llm(
         effort=effort,
         cache_dir=cache_dir,
         prompt_version=prompt_version,
+        run_tag=args.run_tag,
     )
     estimate = estimate_run(probe, cases, price)
     print(format_estimate(model, effort, estimate, PRICES_AS_OF))
-    print(f"  프롬프트 {prompt_version} · 변형 {variant}")
+    tag = f" · 실행 태그 {args.run_tag}" if args.run_tag else ""
+    print(f"  프롬프트 {prompt_version} · 변형 {variant}{tag}")
     if args.dry_run:
         print("  (dry-run: API를 호출하지 않았다)")
         return 0
@@ -229,6 +236,7 @@ def _run_llm(
         cache_dir=cache_dir,
         guard=guard,
         prompt_version=prompt_version,
+        run_tag=args.run_tag,
     )
     extractor: Extractor = FlaggingExtractor(llm)
     try:
