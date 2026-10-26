@@ -57,6 +57,8 @@ Ablation 옵션: `--prompt-edits 1,3,4,5`(`--prompt v4` 전용, v3에 v4의 해�
 | 위험 recall | 정답 flag=risk를 risk로 잡음 / 정답 flag=risk |
 | 확인 recall | 정답 flag=needs_confirm을 needs_confirm 또는 risk로 잡음 / 정답 flag=needs_confirm |
 
+| 조용한 오답 | 위험 필드(혈압·맥박·복약·낙상)에서 값을 냈고 flag가 ok인데 정답과 다름 / 위험 필드에서 값을 내고 flag가 ok인 예측. 낮을수록 안전 |
+| 과다 확인 | 정답 flag가 ok이고 값이 맞은 필드를 needs_confirm으로 올림 / 정답 flag가 ok이고 값이 맞은 필드. 틀린 값을 올린 것은 세지 않음 |
 | 기권 | 값이 있는 정답 필드(special_notes 제외)에서 값을 아예 내지 않음 / 그 필드 수 |
 | 오답 | 같은 분모에서 틀린 값을 냄 |
 

@@ -75,7 +75,10 @@ def _row(label: str, m: Metrics) -> str:
 
 
 def _abstain_line(m: Metrics) -> str:
-    return f"기권 {_ratio(m.abstained)} · 오답 {_ratio(m.wrong_value)}"
+    return (
+        f"기권 {_ratio(m.abstained)} · 오답 {_ratio(m.wrong_value)}"
+        f" · 조용한 오답 {_ratio(m.silent_wrong)} · 과다 확인 {_ratio(m.over_confirm)}"
+    )
 
 
 def format_report(report: EvalReport) -> str:

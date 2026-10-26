@@ -1,0 +1,42 @@
+from collections import defaultdict
+from pathlib import Path
+from carenote.evaluation.loader import load_golden
+from carenote.evaluation.runner import evaluate
+from carenote.extraction.flagger import FlaggingExtractor, flag_field
+from carenote.extraction.llm_extractor import LLMExtractor
+from carenote.evaluation.extractor import PredictedField
+from carenote.evaluation.schema import FieldKey
+
+class NoClient:
+    @property
+    def messages(self): raise RuntimeError("API 금지")
+
+class OldFlagging:
+    """KR-1 규칙 없이(transcript 미전달) 예전 방식으로 flag를 붙인다."""
+    def __init__(self, inner): self.inner = inner
+    def extract(self, t):
+        by = {f.key: f for f in self.inner.extract(t)}
+        return [by.get(k, PredictedField(key=k)).model_copy(update={"flag": flag_field(by.get(k, PredictedField(key=k)))}) for k in FieldKey]
+
+cases = load_golden(Path("data/golden"), "dev")
+agg = defaultdict(lambda: defaultdict(float))
+n_runs = defaultdict(int)
+for model in ("claude-haiku-5-5", "claude-sonnet-5-5"):
+    for var in ("b0", "b1"):
+        for ver in ("v1", "v2", "v3", "v4"):
+            for tag in [None, "r1", "r2", "r3", "r4"]:
+                ex = LLMExtractor(NoClient(), variant=var, model=model, effort="medium", prompt_version=ver, run_tag=tag, cache_dir=Path(".cache/extractions"))
+                if not all(ex.is_cached(c.transcript) for c in cases): continue
+                key = (model[7:13], ver)
+                for label, wrap in (("before", OldFlagging), ("after", FlaggingExtractor)):
+                    rep = evaluate(wrap(LLMExtractor(NoClient(), variant=var, model=model, effort="medium", prompt_version=ver, run_tag=tag, cache_dir=Path(".cache/extractions"))), cases, "dev")
+                    m = rep.overall
+                    a = agg[(key, label)]
+                    a["f1"] += m.f1; a["sw_n"] += m.silent_wrong.num; a["sw_d"] += m.silent_wrong.den
+                    a["oc_n"] += m.over_confirm.num; a["oc_d"] += m.over_confirm.den
+                    a["cr_n"] += m.confirm_recall.num; a["cr_d"] += m.confirm_recall.den
+                    a["n"] += 1
+for key in sorted({k for k, _ in agg}):
+    for label in ("before", "after"):
+        a = agg[(key, label)]
+        print(key, label, f"runs={int(a['n'])} F1={a['f1']/a['n']*100:.2f}% 조용한오답={int(a['sw_n'])}/{int(a['sw_d'])}({a['sw_n']/a['sw_d']*100:.2f}%) 과다확인={int(a['oc_n'])}/{int(a['oc_d'])}({a['oc_n']/a['oc_d']*100:.2f}%) 확인recall={int(a['cr_n'])}/{int(a['cr_d'])}({a['cr_n']/a['cr_d']*100:.1f}%)")

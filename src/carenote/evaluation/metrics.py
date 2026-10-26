@@ -9,6 +9,11 @@
 - 수치 오류율: 혈압·맥박 값을 냈는데 정답과 다른 비율.
 - 위험 recall: 정답 flag가 risk인 필드를 risk로 잡았는가.
 - 확인 필요 recall: 정답 flag가 needs_confirm인 필드를 needs_confirm 또는 risk로 잡았는가.
+- 조용한 오답률(위험 필드): 값을 냈고 flag가 ok인데(사람 검수 없이 통과하는 값) 정답과 다른 비율.
+  분모는 위험 필드에서 값을 내고 flag가 ok인 예측이다. 낮을수록 안전하다.
+- 과다 확인률: **값이 맞은** 필드(정답 flag가 ok)를 needs_confirm으로 올린 비율(불필요한 사람의
+  확인 부담). 분모는 정답 flag가 ok이고 예측이 정답과 일치한 필드(값 일치 또는 둘 다 비움)다.
+  틀린 값을 확인 필요로 올린 것은 좋은 동작이라 세지 않는다. 안전 규칙을 늘릴 때 같이 오르는지 본다.
 - 기권율·오답률: 값이 있는 정답 필드 중 값을 아예 내지 않은 비율 / 틀린 값을 낸 비율. 둘을
   나눠 보는 이유는 "이상한 값을 내지 않는 쪽이 F1에서 유리한" 문제를 가리기 위해서다.
   틀린 값은 F1에서 FP+FN이라 기권보다 두 배 깎이지만, 사람에게는 기권(확인 요청)이 더 안전하다.
@@ -20,7 +25,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from carenote.evaluation.extractor import PredictedField
-from carenote.evaluation.schema import ExpectedField, FieldKey, Flag, GoldenCase
+from carenote.evaluation.schema import RISK_FIELDS, ExpectedField, FieldKey, Flag, GoldenCase
 
 NUMERIC_FIELDS: frozenset[FieldKey] = frozenset({FieldKey.BLOOD_PRESSURE, FieldKey.PULSE})
 # 자유 문장이라 정확 일치가 불가능한 필드. 값 유무로만 채점한다.
@@ -61,6 +66,8 @@ class Counts:
     confirm_recall: Ratio = Ratio()
     abstained: Ratio = Ratio()
     wrong_value: Ratio = Ratio()
+    silent_wrong: Ratio = Ratio()
+    over_confirm: Ratio = Ratio()
 
     def __add__(self, other: Counts) -> Counts:
         return Counts(
@@ -74,6 +81,8 @@ class Counts:
             self.confirm_recall + other.confirm_recall,
             self.abstained + other.abstained,
             self.wrong_value + other.wrong_value,
+            self.silent_wrong + other.silent_wrong,
+            self.over_confirm + other.over_confirm,
         )
 
 
@@ -120,6 +129,15 @@ def _score_field(gold: ExpectedField, pred: PredictedField | None, transcript: s
         abstained = Ratio(int(pred_value is None), 1)
         wrong_value = Ratio(int(pred_value is not None and not tp), 1)
 
+    silent_wrong = Ratio()
+    if gold.key in RISK_FIELDS and pred_value is not None and pred_flag is Flag.OK:
+        silent_wrong = Ratio(int(not tp), 1)
+
+    over_confirm = Ratio()
+    value_matches = bool(tp) or (gold_value is None and pred_value is None)
+    if gold.flag is Flag.OK and value_matches:
+        over_confirm = Ratio(int(pred_flag is Flag.NEEDS_CONFIRM), 1)
+
     return Counts(
         tp,
         fp,
@@ -131,6 +149,8 @@ def _score_field(gold: ExpectedField, pred: PredictedField | None, transcript: s
         confirm_recall,
         abstained,
         wrong_value,
+        silent_wrong,
+        over_confirm,
     )
 
 
@@ -194,6 +214,8 @@ class Metrics:
     confirm_recall: Ratio
     abstained: Ratio
     wrong_value: Ratio
+    silent_wrong: Ratio
+    over_confirm: Ratio
 
     @staticmethod
     def from_counts(c: Counts) -> Metrics:
@@ -215,4 +237,6 @@ class Metrics:
             c.confirm_recall,
             c.abstained,
             c.wrong_value,
+            c.silent_wrong,
+            c.over_confirm,
         )

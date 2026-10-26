@@ -56,6 +56,8 @@ class EvalReport:
                 "confirm_recall": ratio(m.confirm_recall),
                 "abstained": ratio(m.abstained),
                 "wrong_value": ratio(m.wrong_value),
+                "silent_wrong": ratio(m.silent_wrong),
+                "over_confirm": ratio(m.over_confirm),
             }
 
         return {
