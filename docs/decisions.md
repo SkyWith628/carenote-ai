@@ -405,3 +405,12 @@
 - 사용자 결정: F2(사람 독립 라벨링 95%) 미충족과 정답-사람 불일치 하한 약 7%를 한계에 명시하고 동결 절차로 넘어간다. 기준 95%는 낮추지 않았고 "미충족"으로 기록한다(통과로 바꾸지 않음).
 - 구현: `src/carenote/evaluation/freeze.py`(`--check`, `--write`, `--write --revise`)와 `tests/test_frozen.py`(도구 9건 + 동결 후 무결성 1건, 동결 전에는 skip). 매니페스트는 `data/golden/FROZEN.json`(파일별 sha256, 건수, test 실행 횟수, 상태, 한계 목록, 개정 이력). 문서 `docs/golden-freeze-procedure.md` 5장·8장 갱신.
 - **동결은 아직 실행하지 않았다.** 이유: F1(R3·G1 전문가 검토)이 남아 있다. 검토를 못 받고 가는 경우 잠정 동결(`--expert-review pending`)이며 동결 절차 3장의 규칙(R3·G1 제외 지표를 헤드라인)을 따른다.
+
+## 2026-10-26 — 골든셋 v2 **잠정 동결** (`golden-v2-frozen`, 매니페스트 v2.0)
+- 사용자 결정으로 현장 전문가 검토(R3·G1) 없이 동결했다. `python -m carenote.evaluation.freeze --write --expert-review pending --test-runs 0`. 매니페스트 `data/golden/FROZEN.json`(파일 49개, 부모 커밋 `ca7689e`). 이후 라벨 수정은 `--write --revise "사유"`(v2.1)로만 하며 `tests/test_frozen.py`가 조용한 변경을 막는다.
+- 구성: 전체 60건(dev 30 = v1 20 + v2 10, test 30), 직접 작성 10건, 교체된 S3·H6 반영, `review_required` R3·G1.
+- sha256: `v1.jsonl` `ff140ee2586922fc751c801781c4654ee431f95e5b33fc60781430352425e7e3` · `v2_dev.jsonl` `3790643664fcaadd7a51480000fc52d8ff05651ec704d60984b522ef3e9fcf49` · `v2_test.jsonl` `dbf6e57a4b29097258ae84bd66d3c9bee5c86d63fcee3cdaaeca34b5a995f6c1` · `docs/label-policy.md` `c2bafdefa454c8e2dacab4518d3d61ccae44faaafbd3c6014c80cd985222aa88` (나머지 45개는 매니페스트 참조).
+- 전제 조건 확인(`docs/golden-freeze-procedure.md` 2장): F1 전문가 검토 **미실시(잠정)**, F2 사람 독립 라벨링 **미충족(한계로 수용)**, F3 알려진 정책 모순 없음, F4 승격 재현성 통과, F5 로더·oracle 통과, F6 게이트 통과·작업 트리 깨끗, F7 test 모델 실행 **0회**(null·oracle 기준선은 모델이 아니므로 제외).
+- **잠정 동결의 규칙**: R3·G1은 `review_required=true`로 남는다. 최종 보고의 헤드라인 지표는 R3·G1을 제외한 값이고 포함 값은 따로 낸다(절차 3장). 전문가 회신이 와서 정답이 바뀌면 개정 절차(v2.1, 사유·영향 기록)를 따른다. 회신 기한 제안은 11/9.
+- 한계(매니페스트 `limitations`에도 기록): F2 미충족(사람 라운드 83.9/93.8/90.0/87.5%, 교체 후 합산 93.2%, 정답-사람 불일치 하한 약 7%), 라벨러 1인, 생성기와 평가 대상 모두 Claude 계열, dev 라벨이 모델 출력을 본 뒤 여러 번 수정됨(test는 모델을 본 적 없음), 낙상 7일·특이사항 risk 기준은 임시 관례, test 30건의 넓은 구간.
+- 동결 후 규칙: test는 `--final-report`와 함께 최종 ablation 1회만(횟수·구성·비용을 여기에 기록), 프롬프트·룰은 dev 오류만 보고 고친다.
