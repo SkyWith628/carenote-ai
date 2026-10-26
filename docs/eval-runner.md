@@ -33,6 +33,8 @@ PYTHONPATH=src uv run python -m carenote.evaluation.variance X0.json X1.json ...
 ```
 σ_run, 쌍별 평균 |ΔF1|, 불안정 필드, 안정 오류, 다수결 F1을 낸다. `--vs --targets CASE:FIELD ...`를 더하면 목표 필드(예: `gs-018:meal_intake`)의 정답 횟수를 기준 묶음 대 새 묶음으로 세어 사전 기준(재현·개선 경향·회귀·유지·구분 불가, 피셔 단측 p)으로 판정한다. 프롬프트 v4부터 판정은 이 목표 필드 기준을 쓴다. `--vs`는 사전 규칙으로 판정한다: 평균 F1 차이가 σ_run 합성값의 2배보다 크고 케이스를 재표집한 실행 평균 결과의 95% 구간이 0을 포함하지 않을 때만 "차이 있음".
 
+Ablation 옵션: `--prompt-edits 1,3,4,5`(`--prompt v4` 전용, v3에 v4의 해당 편집만 적용; 전부면 v4와 같고 캐시 키도 같다), `--case-ids gs-003,gs-012`(선택한 분할 안의 케이스만; test 케이스는 dev 분할에서 지정할 수 없다). 변형 × 케이스 × 반복을 한 비용 한도로 돌리는 도구는 `python -m carenote.evaluation.ablate`(`docs/v4-ablation-design.md`).
+
 옵션: `--model`(기본 설정값 `claude-sonnet-5-5`), `--effort`(기본 `medium`), `--limit N`, `--cache-dir`, `--out`.
 
 안전장치
