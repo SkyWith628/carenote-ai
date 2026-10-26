@@ -184,7 +184,14 @@ def test_evaluation_cli_prompt_edits_and_case_ids(
                      settings=settings, client_factory=_boom) == 0  # fmt: skip
     out = capsys.readouterr().out
     assert "API 호출 예정 1건" in out and "편집 2,4" in out
-    assert eval_main([*base, "--prompt-edits", "2"], settings=settings, client_factory=_boom) == 2
+    assert (
+        eval_main(
+            [*base, "--prompt", "v3", "--prompt-edits", "2"],
+            settings=settings,
+            client_factory=_boom,
+        )
+        == 2
+    )
     assert "v4에서만" in capsys.readouterr().err
     assert eval_main([*base, "--case-ids", "gs-999"], settings=settings, client_factory=_boom) == 2
     # test 케이스는 기본(dev) 분할에서 지정할 수 없다

@@ -111,6 +111,7 @@ def _extractor(cache: Path, tag: str | None) -> LLMExtractor:
         effort="medium",
         cache_dir=cache,
         run_tag=tag,
+        prompt_version="v1",  # 기본 버전이 v4로 바뀌었으므로 옛 키 공식은 v1로 검증한다
     )
 
 

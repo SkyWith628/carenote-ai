@@ -41,7 +41,11 @@ uv run uvicorn carenote.main:app --app-dir src --reload   # 개발 서버, GET /
 - iCloud 경로에서는 `.venv`의 editable `.pth`에 hidden 플래그가 붙어 `import carenote`가 실패할 수 있다. pytest·pyright는 `src`를 직접 경로로 잡아 우회하고, 스크립트·uvicorn은 `--app-dir src` 또는 `PYTHONPATH=src`를 쓴다
 - 대회 공고 미공개: 제출 형태·배점 확정 시 blueprint 5·9장 조정
 
+## 알려진 위험
+- `docs/known-risks.md` KR-1: 번복이 풀리지 않은 혈압을 확정 값으로 내는 오류(gs-003). 프롬프트로 안 풀리며 Flagger 규칙·Verifier로 넘김
+
 ## 현재 단계
+- 추출 프롬프트 **기본값 v4**(2026-10-26 기본 후보로 채택, test 미실행). 이전 버전은 `--prompt v1|v2|v3`, 변동 측정은 `--run-tag`와 `evaluation.variance`, 판정은 목표 필드 재현
 - 지금: 1주차 완료분. 스캐폴딩, 골든셋 v1 20건, Eval Runner 뼈대 (`docs/eval-runner.md`)
 - 지금 2주차: LLM Extractor B0/B1과 Flagger 구현 완료(가짜 클라이언트 테스트만, API 미호출), 설계 `docs/extractor-design.md`
 - 1차 ablation 완료(`docs/ablation.md`): 20건은 포화돼 구성 간 차이가 노이즈. 다음: 골든셋 확장(설계 `docs/golden-expansion-design.md`, 열린 결정 5개 확인 필요)

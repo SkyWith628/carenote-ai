@@ -114,8 +114,15 @@ def test_policy_and_blind_guide_allow_hedged_mood() -> None:
 def test_v1_prompt_is_byte_identical_to_the_measured_baseline(variant: str) -> None:
     prompt = build_system_prompt(variant, "v1")  # type: ignore[arg-type]
     assert hashlib.sha256(prompt.encode("utf-8")).hexdigest() == V1_SHA256[variant]
-    assert build_system_prompt(variant) == prompt  # type: ignore[arg-type]
-    assert DEFAULT_PROMPT_VERSION == "v1" and PROMPT_VERSIONS == ("v1", "v2", "v3", "v4")
+    assert PROMPT_VERSIONS == ("v1", "v2", "v3", "v4")
+
+
+@pytest.mark.parametrize("variant", ["b0", "b1"])
+def test_default_prompt_is_v4_and_older_versions_stay_selectable(variant: str) -> None:
+    """2026-10-26 v4를 기본 프롬프트 후보로 채택했다. 이전 보고서는 --prompt v1~v3로 재현한다."""
+    assert DEFAULT_PROMPT_VERSION == "v4"
+    assert build_system_prompt(variant) == build_system_prompt(variant, "v4")  # type: ignore[arg-type]
+    assert build_system_prompt(variant) != build_system_prompt(variant, "v1")  # type: ignore[arg-type]
 
 
 V2_POLICY_FRAGMENTS = (

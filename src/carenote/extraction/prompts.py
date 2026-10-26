@@ -15,8 +15,9 @@ from typing import Literal
 
 PromptVersion = Literal["v1", "v2", "v3", "v4"]
 PROMPT_VERSIONS: tuple[PromptVersion, ...] = ("v1", "v2", "v3", "v4")
-# 기본값은 기존 보고서의 재현성을 위해 v1을 유지한다.
-DEFAULT_PROMPT_VERSION: PromptVersion = "v1"
+# 기본값: 2026-10-26 v4를 기본 프롬프트 후보로 채택했다(dev 목표 필드 재현 통과, test는 최종 보고 1회로
+# 확정). 이전 보고서는 --prompt v1~v3로 재현한다. 버전별 본문과 캐시 키는 그대로다.
+DEFAULT_PROMPT_VERSION: PromptVersion = "v4"
 PROMPT_VERSION = DEFAULT_PROMPT_VERSION  # 하위 호환
 
 Variant = Literal["b0", "b1"]

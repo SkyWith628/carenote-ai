@@ -138,7 +138,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--prompt",
         choices=PROMPT_VERSIONS,
         default=DEFAULT_PROMPT_VERSION,
-        help="추출 프롬프트 버전 (기본 v1: 기존 보고서 재현용). v2는 라벨 정책 반영판",
+        help="추출 프롬프트 버전 (기본 v4 = 기본 후보). v1~v3는 이전 보고서 재현용",
     )
     parser.add_argument(
         "--prompt-edits",

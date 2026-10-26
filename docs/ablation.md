@@ -78,3 +78,18 @@ blueprint 7장 ablation 표의 첫 두 행("단일 LLM", "+ 근거 강제")을 �
 PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b0 --model claude-haiku-5-5 --dry-run
 PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b0 --model claude-haiku-5-5 --approve-cost 0.10 --out out.json
 ```
+
+
+## 부록: 프롬프트 버전별 dev 30건 요약 (2026-10-26)
+Haiku는 v2 이후 5회 반복(run 0 + r1~r4)의 평균 F1, 나머지는 단일 실행이다(모두 현재 정답 기준 재채점, 전체 30건, 프롬프트만 다름). Haiku 반복 실행의 σ_run은 0.4~0.6%p이므로 1%p 안팎의 차이는 노이즈와 구분되지 않는다.
+
+| 프롬프트 | Haiku B0 | Haiku B1 | Sonnet B0 (1회) | Sonnet B1 (1회) | 비고 |
+|---|---|---|---|---|---|
+| v1 | 96.0% (1회) | 94.9% (1회) | 95.5% | 95.8% | 정책을 거의 담지 않은 기준선 |
+| v2 | 97.6% (5회) | 97.6% (5회) | 97.4% | 96.9% | 라벨 정책 #1~#13 반영 |
+| v3 | 97.6% (5회) | 98.3% (5회) | 96.9% | 97.2% | +추측 표현이 붙은 직접 관찰 기분 허용 |
+| v4 | 98.1% (5회) | 98.3% (5회) | 미측정 | 미측정 | +식사 매핑, 특이사항 (b)·중복, 숫자 예시, 정책 #14. **기본 프롬프트 후보** |
+
+- 판정은 전체 F1이 아니라 **목표 필드의 반복 실행 재현**이다. v3의 gs-002 기분은 기준 0/5 → 5/5(재현), v4의 gs-019 특이사항은 B0 0/5 → 5/5(재현), gs-008 특이사항은 B0 2/5 → 5/5(개선 경향)이며 회귀 방지 필드는 유지됐다(`docs/decisions.md`).
+- 알려진 위험: `docs/known-risks.md` KR-1(gs-003 번복 수치 확정).
+- 이 표는 dev 결과다. 일반화는 test 최종 보고 1회로만 확인한다(test 실행 0회).
