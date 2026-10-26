@@ -10,7 +10,7 @@ blueprint 7장 ablation 표의 첫 두 행("단일 LLM", "+ 근거 강제")을 �
 | 후처리 | 모든 구성에 최소 Flagger 적용 (`docs/extractor-design.md` 4장) |
 | 변형 | B0 = 근거를 요구하지 않음 · B1 = 원문 인용 근거 요구 + 코드 검증(실패 시 missing 강등) |
 | 모델 | `claude-sonnet-5-5` · `claude-haiku-5-5` |
-| 단가 | 2026-10-06 기준 캐시 (Sonnet $2/$10, Haiku $0.10/$0.50 per MTok). 공식 가격 문서로 재확인 전 |
+| 단가 | Sonnet $2/$10, Haiku $0.10/$0.50 per MTok. 2026-10-06 캐시를 2026-10-26에 공식 가격 문서로 재확인(변동 없음) |
 | 원본 보고서 | `docs/reports/20261023-{sonnet,haiku}-{b0,b1}.json` |
 
 ## 결과

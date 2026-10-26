@@ -1,7 +1,8 @@
 """모델 단가와 비용 가드.
 
-단가는 Claude API 공식 가이드의 캐시(2026-10-06 기준, 1M 토큰당 USD)다. 단가가 바뀌었을 수 있으니
-실측 전에 공식 가격 문서로 다시 확인한다. 등록되지 않은 모델은 비용을 추정하지 않고 실행을 거부한다.
+단가는 공식 가격 문서(platform.claude.com/docs/en/about-claude/pricing)로 2026-10-26에
+재확인했다(1M 토큰당 USD). 단가가 바뀌었을 수 있으니 실측 전에 공식 가격 문서로 다시 확인한다.
+등록되지 않은 모델은 비용을 추정하지 않고 실행을 거부한다.
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ class Price:
     output_per_mtok: float
 
 
-PRICES_AS_OF = "2026-10-06"
+PRICES_AS_OF = "2026-10-26"
 PRICES: dict[str, Price] = {
     "claude-sonnet-5-5": Price(2.00, 10.00),
     "claude-opus-5-5": Price(4.00, 20.00),
