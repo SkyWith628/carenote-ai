@@ -50,7 +50,7 @@
 
 ## 5. 실행 순서
 1. **사전 점검** (가격 재확인은 2026-10-26에 끝났다: 공식 가격 문서 대비 변동 없음, 코드 기준일 갱신): `freeze --check` 일치, 작업 트리 깨끗, 게이트 3종, 프롬프트 해시, **공식 가격 문서로 단가 재확인**(현재 코드의 단가 기준일은 2026-10-06이라 3주 지났다. 달라졌으면 `pricing.py`를 먼저 고친다).
-2. **(권장) Sonnet v4를 dev에서 먼저 한 번**: Sonnet은 v4를 한 번도 측정하지 않았다(`docs/ablation.md`). test에서 처음 만나는 일을 피하려고 dev 30건 Sonnet B0·B1을 먼저 돌려 프롬프트 호환 문제(예: 구조화 출력 실패)가 없는지 본다. 이 결과로 v4를 고치지 않는다(고장 확인용). 추정 약 $0.66.
+2. **(완료 2026-10-26: 이상 없음, 아래 결정 로그) Sonnet v4를 dev에서 먼저 한 번**: Sonnet은 v4를 한 번도 측정하지 않았다(`docs/ablation.md`). test에서 처음 만나는 일을 피하려고 dev 30건 Sonnet B0·B1을 먼저 돌려 프롬프트 호환 문제(예: 구조화 출력 실패)가 없는지 본다. 이 결과로 v4를 고치지 않는다(고장 확인용). 추정 약 $0.66.
 3. 구현 완료와 사전 등록 커밋·태그.
 4. 8구성 **dry-run**으로 test 호출 수(구성당 30건, 캐시 적중 0건)와 추정 확인(아래 표).
 5. **test 실행** 순서(싼 것부터, 한 번에 하나씩, 실패하면 중단): Haiku v4 B0 → Haiku v4 B1 → Sonnet v4 B0 → Sonnet v4 B1 → (권장) Haiku v1 B0 → Haiku v1 B1 → Sonnet v1 B0 → Sonnet v1 B1. 보고서는 `docs/reports/test-final-{prompt}-{model}-{variant}.json`, 모두 `--split test --final-report --out`.
