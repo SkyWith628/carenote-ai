@@ -6,6 +6,8 @@
     python -m carenote.evaluation.variance run0.json run1.json run2.json ...
     python -m carenote.evaluation.variance X0.json X1.json ... --vs Y0.json Y1.json ...
 
+`--vs --targets CASE:FIELD ...`는 목표 필드의 정답 횟수를 기준 대 새 묶음으로 세어 사전 기준으로
+판정한다(재현·개선 경향·회귀·유지·구분 불가). 전체 F1이 아니라 이 판정이 프롬프트 효과의 근거다.
 `--vs`는 두 프롬프트(또는 구성)의 반복 실행 묶음을 사전에 정한 규칙으로 비교한다:
 평균 F1 차이가 σ_run 합성값의 2배보다 크고, 케이스를 재표집한 실행 평균 결과의 95% 구간이
 0을 포함하지 않아야 "차이가 있다"고 쓴다. API를 쓰지 않는다.
@@ -215,6 +217,102 @@ def compare_runs(
     )
 
 
+@dataclass(frozen=True)
+class FieldVerdict:
+    """목표 필드 하나의 반복 실행 재현 판정 (새 프롬프트 Y vs 기준 X)."""
+
+    target: str
+    base_correct: int
+    base_runs: int
+    new_correct: int
+    new_runs: int
+    p_value: float | None
+    label: str
+
+
+# 사전 등록한 판정 기준 (결과를 보기 전에 정함):
+#  재현(개선): 새 프롬프트가 모든 실행에서 맞고 기준은 많아야 1번 맞음
+#              (5회 대 5회일 때 피셔 정확검정 단측 p ≤ 0.024)
+#  개선 경향: 새 프롬프트가 80% 이상 맞고 기준은 40% 이하
+#  회귀:     기준이 80% 이상 맞았는데 새 프롬프트가 40% 이하
+#  유지:     둘 다 80% 이상 (회귀 방지 확인)
+#  그 밖은 구분 불가
+STRICT_BASE_MAX = 1
+TREND_NEW_MIN, TREND_BASE_MAX = 0.8, 0.4
+
+
+def _fisher_one_sided(base_c: int, base_n: int, new_c: int, new_n: int) -> float:
+    """새 쪽이 맞은 횟수가 우연히 이만큼 많을 확률(초기하분포 단측)."""
+    total_c, total_n = base_c + new_c, base_n + new_n
+    denom = math.comb(total_n, new_n)
+    top = min(new_n, total_c)
+    return (
+        sum(
+            math.comb(total_c, k) * math.comb(total_n - total_c, new_n - k)
+            for k in range(new_c, top + 1)
+        )
+        / denom
+    )
+
+
+def _classify(base_c: int, base_n: int, new_c: int, new_n: int) -> str:
+    br, nr = base_c / base_n, new_c / new_n
+    if new_c == new_n and base_c <= STRICT_BASE_MAX:
+        return "재현(개선)"
+    if nr >= TREND_NEW_MIN and br <= TREND_BASE_MAX:
+        return "개선 경향"
+    if br >= TREND_NEW_MIN and nr <= TREND_BASE_MAX:
+        return "회귀"
+    if br >= TREND_NEW_MIN and nr >= TREND_NEW_MIN:
+        return "유지"
+    return "구분 불가"
+
+
+def field_check(base: list[Report], new: list[Report], targets: list[str]) -> list[FieldVerdict]:
+    """목표 필드(`gs-018:meal_intake` 형식)마다 기준 묶음과 새 묶음의 정답 횟수를 비교한다."""
+    _require(base, "per_field")
+    _require(new, "per_field")
+    verdicts: list[FieldVerdict] = []
+    for target in targets:
+        case, _, fld = target.partition(":")
+        if not fld:
+            raise ValueError(f"목표 필드 형식이 잘못됐다(케이스:필드): {target}")
+        counts: list[int] = []
+        for group in (base, new):
+            outcomes: list[str] = []
+            for report in group:
+                try:
+                    outcomes.append(report["per_field"][case][fld])
+                except KeyError as exc:
+                    raise ValueError(f"보고서에 {target}가 없다") from exc
+            counts.append(sum(o in CORRECT_OUTCOMES for o in outcomes))
+        base_c, new_c = counts
+        verdicts.append(
+            FieldVerdict(
+                target,
+                base_c,
+                len(base),
+                new_c,
+                len(new),
+                _fisher_one_sided(base_c, len(base), new_c, len(new)),
+                _classify(base_c, len(base), new_c, len(new)),
+            )
+        )
+    return verdicts
+
+
+def format_field_checks(verdicts: list[FieldVerdict]) -> str:
+    """목표 필드 판정 표."""
+    lines = ["목표 필드 반복 실행 재현 (기준 X → 새 Y)"]
+    for v in verdicts:
+        p = "–" if v.p_value is None else f"{v.p_value:.3f}"
+        lines.append(
+            f"  {v.target}: 기준 {v.base_correct}/{v.base_runs} → 새 {v.new_correct}/{v.new_runs}"
+            f" · p={p} → {v.label}"
+        )
+    return "\n".join(lines)
+
+
 def _pct(value: float | None) -> str:
     return "n/a" if value is None else f"{value * 100:.1f}%"
 
@@ -257,6 +355,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="carenote.evaluation.variance", description=__doc__)
     parser.add_argument("runs", type=Path, nargs="+", help="같은 설정의 반복 실행 보고서(2개 이상)")
     parser.add_argument("--vs", type=Path, nargs="+", default=None, help="비교할 다른 묶음")
+    parser.add_argument(
+        "--targets",
+        nargs="+",
+        default=None,
+        metavar="CASE:FIELD",
+        help="--vs와 함께: 목표 필드(예: gs-018:meal_intake)의 반복 실행 재현을 판정한다",
+    )
     args = parser.parse_args(argv)
     try:
         xs = load_reports(args.runs)
@@ -265,6 +370,8 @@ def main(argv: list[str] | None = None) -> int:
             ys = load_reports(args.vs)
             print(format_summary(analyze(ys), "Y"))
             print(format_verdict(compare_runs(xs, ys)))
+            if args.targets:
+                print(format_field_checks(field_check(xs, ys, args.targets)))
     except (ValueError, OSError) as exc:
         print(f"분석 불가: {exc}", file=sys.stderr)
         return 2

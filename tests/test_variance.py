@@ -18,6 +18,8 @@ from carenote.evaluation.schema import Evidence, FieldKey, Flag, GoldenCase, Sou
 from carenote.evaluation.variance import (
     analyze,
     compare_runs,
+    field_check,
+    format_field_checks,
     format_summary,
     format_verdict,
     load_reports,
@@ -246,3 +248,69 @@ def test_variance_cli_reads_report_files(
     assert variance_main([paths[0]]) == 2
     assert len(load_reports([Path(paths[0])])) == 1
     assert CORRECT_OUTCOMES == {"tp", "tn"}
+
+
+def _runs(outcomes: list[str]) -> list[dict[str, Any]]:
+    return [_report(0.9, {"c1": {"meal": o, "note": "tn"}}, {"c1": (1, 0, 0)}) for o in outcomes]
+
+
+def test_field_check_labels_follow_the_pre_registered_rules() -> None:
+    base = _runs(["fn", "fn", "tp", "fn", "fn"])
+    new = _runs(["tp"] * 5)
+    [v] = field_check(base, new, ["c1:meal"])
+    assert (v.base_correct, v.new_correct, v.label) == (1, 5, "재현(개선)")
+    assert v.p_value is not None and v.p_value == pytest.approx(6 / 252)
+    assert field_check(_runs(["fn"] * 5), _runs(["tp"] * 5), ["c1:meal"])[
+        0
+    ].p_value == pytest.approx(1 / 252)
+    # 개선 경향: 새 4/5, 기준 2/5
+    assert (
+        field_check(_runs(["tp", "tp", "fn", "fn", "fn"]), _runs(["tp"] * 4 + ["fn"]), ["c1:meal"])[
+            0
+        ].label
+        == "개선 경향"
+    )
+    # 회귀: 기준 5/5, 새 2/5
+    assert (
+        field_check(_runs(["tp"] * 5), _runs(["tp", "tp", "fn", "fn", "fn"]), ["c1:meal"])[0].label
+        == "회귀"
+    )
+    # 유지: 둘 다 5/5
+    assert field_check(_runs(["tp"] * 5), _runs(["tp"] * 5), ["c1:meal"])[0].label == "유지"
+    # 구분 불가: 기준 2/5, 새 3/5
+    mid = field_check(
+        _runs(["tp", "tp", "fn", "fn", "fn"]), _runs(["tp", "tp", "tp", "fn", "fn"]), ["c1:meal"]
+    )
+    assert mid[0].label == "구분 불가"
+    assert "기준 1/5 → 새 5/5" in format_field_checks([v])
+
+
+def test_field_check_rejects_unknown_targets() -> None:
+    runs = _runs(["tp"] * 3)
+    with pytest.raises(ValueError, match="형식"):
+        field_check(runs, runs, ["c1meal"])
+    with pytest.raises(ValueError, match="없다"):
+        field_check(runs, runs, ["c9:meal"])
+
+
+def test_variance_cli_prints_target_field_table(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def write(name: str, outcomes: list[str]) -> list[str]:
+        paths: list[str] = []
+        for i, report in enumerate(_runs(outcomes)):
+            report["per_case"] = {"c1": {"tp": 1, "fp": 0, "fn": 0}}
+            report["overall"] = {"f1": 0.9 + i * 0.001}
+            p = tmp_path / f"{name}{i}.json"
+            p.write_text(json.dumps(report), encoding="utf-8")
+            paths.append(str(p))
+        return paths
+
+    x, y = write("x", ["fn"] * 5), write("y", ["tp"] * 5)
+    assert variance_main([*x, "--vs", *y, "--targets", "c1:meal"]) == 0
+    out = capsys.readouterr().out
+    assert (
+        "목표 필드 반복 실행 재현" in out
+        and "c1:meal: 기준 0/5 → 새 5/5" in out
+        and "재현(개선)" in out
+    )

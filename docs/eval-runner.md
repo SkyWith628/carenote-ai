@@ -31,7 +31,7 @@ PYTHONPATH=src uv run python -m carenote.evaluation --extractor llm-b1 --limit 3
 PYTHONPATH=src uv run python -m carenote.evaluation.variance r0.json r1.json r2.json r3.json r4.json
 PYTHONPATH=src uv run python -m carenote.evaluation.variance X0.json X1.json ... --vs Y0.json Y1.json ...
 ```
-σ_run, 쌍별 평균 |ΔF1|, 불안정 필드, 안정 오류, 다수결 F1을 낸다. `--vs`는 사전 규칙으로 판정한다: 평균 F1 차이가 σ_run 합성값의 2배보다 크고 케이스를 재표집한 실행 평균 결과의 95% 구간이 0을 포함하지 않을 때만 "차이 있음".
+σ_run, 쌍별 평균 |ΔF1|, 불안정 필드, 안정 오류, 다수결 F1을 낸다. `--vs --targets CASE:FIELD ...`를 더하면 목표 필드(예: `gs-018:meal_intake`)의 정답 횟수를 기준 묶음 대 새 묶음으로 세어 사전 기준(재현·개선 경향·회귀·유지·구분 불가, 피셔 단측 p)으로 판정한다. 프롬프트 v4부터 판정은 이 목표 필드 기준을 쓴다. `--vs`는 사전 규칙으로 판정한다: 평균 F1 차이가 σ_run 합성값의 2배보다 크고 케이스를 재표집한 실행 평균 결과의 95% 구간이 0을 포함하지 않을 때만 "차이 있음".
 
 옵션: `--model`(기본 설정값 `claude-sonnet-5-5`), `--effort`(기본 `medium`), `--limit N`, `--cache-dir`, `--out`.
 

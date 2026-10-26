@@ -5,14 +5,16 @@
 - v1: 정책 표를 거의 담지 않은 기준선 (2026-10-23 실측)
 - v2: `docs/label-policy.md`(#1~#13)를 지시문으로 옮긴 버전. 설계 `docs/extractor-prompt-v2-design.md`
 - v3: v2 + 추측 표현이 붙어도 화자가 직접 본 기분은 inferred로 인정 (2026-10-26 정책 #10 보완)
+- v4: v3 + dev 오류에서 나온 5곳(식사 매핑, 특이사항 (b)·중복, 숫자 읽기 예시)과 정책 #14.
+  설계 `docs/extractor-prompt-v4-design.md`. v2·v3 본문은 측정이 끝나 sha256으로 고정한다
 """
 
 from __future__ import annotations
 
 from typing import Literal
 
-PromptVersion = Literal["v1", "v2", "v3"]
-PROMPT_VERSIONS: tuple[PromptVersion, ...] = ("v1", "v2", "v3")
+PromptVersion = Literal["v1", "v2", "v3", "v4"]
+PROMPT_VERSIONS: tuple[PromptVersion, ...] = ("v1", "v2", "v3", "v4")
 # 기본값은 기존 보고서의 재현성을 위해 v1을 유지한다.
 DEFAULT_PROMPT_VERSION: PromptVersion = "v1"
 PROMPT_VERSION = DEFAULT_PROMPT_VERSION  # 하위 호환
@@ -119,6 +121,47 @@ _COMMON_V3 = _COMMON_V2.replace(
     + _V2_MOOD_RULE,
 )
 
+# v4: v3 위에 아래 다섯 군데만 바꾼다. 각 old 문자열은 v3 본문에 정확히 한 번 있어야 한다.
+_V4_EDITS: tuple[tuple[str, str], ...] = (
+    (  # 식사 매핑: "못 드셨다"류를 미섭취로
+        "  전혀 안 드심·거부=미섭취, 식사를 챙기지 않음=미제공)",
+        "  전혀 안 드심·못 드심·안 드심(정도 표현 없이)·거부=미섭취, 식사를 챙기지 않음=미제공)",
+    ),
+    (  # 숫자 한 글자씩 읽기: 새 예시
+        "공=0) 자릿수대로 옮깁니다.",
+        "공=0) 자릿수대로 옮깁니다(예: 일삼오 → 135, 칠오 → 75).",
+    ),
+    (  # 복약 필드가 담는 내용의 이유·정황은 특이사항에 중복하지 않는다
+        "7. 필드가 이미 담는 내용은 special_notes에 중복 기록하지 않습니다(7의 예외: 복약 거부).",
+        "7. 필드가 이미 담는 내용은 special_notes에 중복 기록하지 않습니다. 복약 필드가 담는 내용"
+        "(복용·미복용·중복 복용 의심)의 이유나 정황(기억이 안 난다 등)도 적지 않습니다"
+        "(7의 예외: 복약 거부).",
+    ),
+    (  # 특이사항 (b): 잊었다·기억 못 한다, 확인 누락
+        "  (b) 후속 조치가 필요한 사정: 측정을 못 했거나 빠뜨린 사유, 복약·치료 계획이 바뀌는 예정, 재측정 예정,",
+        "  (b) 후속 조치가 필요한 사정: 측정을 못 했거나 빠뜨린 사유(잊었거나 값을 기억하지 못한다는 말 포함),\n"
+        "      확인·질문을 못 한 항목, 복약·치료 계획이 바뀌는 예정, 재측정 예정,",
+    ),
+    (  # 정책 #14
+        "  어르신이 복용을 거부했다고 전하면 미복용으로 기록하고, special_notes에도 복용 거부 의사를 기록합니다.",
+        "  어르신이 복용을 거부했다고 전하면 미복용으로 기록하고, special_notes에도 복용 거부 의사를 기록합니다.\n"
+        "  오늘 복약을 화자가 직접 보거나 직접 들은 경우만 기록합니다. 평소 관행이나 제3자의 일반적 전언"
+        "(예: 가족이 늘 챙긴다고 한다)은 사실이 아니므로 missing 입니다.",
+    ),
+)
+
+
+def _apply_v4(base: str) -> str:
+    text = base
+    for old, new in _V4_EDITS:
+        if text.count(old) != 1:
+            raise AssertionError(f"v4 편집 대상이 v3 본문에 정확히 한 번 있지 않다: {old[:30]}")
+        text = text.replace(old, new)
+    return text
+
+
+_COMMON_V4 = _apply_v4(_COMMON_V3)
+
 _B0_TAIL = """
 각 필드는 key, value, source, candidates 를 가집니다.
 """
@@ -136,7 +179,7 @@ _B1_TAIL = """
 
 def build_system_prompt(variant: Variant, version: PromptVersion = DEFAULT_PROMPT_VERSION) -> str:
     """버전·변형에 맞는 시스템 프롬프트를 만든다. 요청마다 동일해야 캐시 프리픽스가 유지된다."""
-    common = {"v1": _COMMON, "v2": _COMMON_V2, "v3": _COMMON_V3}[version]
+    common = {"v1": _COMMON, "v2": _COMMON_V2, "v3": _COMMON_V3, "v4": _COMMON_V4}[version]
     return common + (_B1_TAIL if variant == "b1" else _B0_TAIL)
 
 

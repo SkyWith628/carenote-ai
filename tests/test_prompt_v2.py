@@ -40,6 +40,54 @@ def test_v2_prompt_is_byte_identical_to_the_measured_text(variant: str) -> None:
     assert hashlib.sha256(prompt.encode("utf-8")).hexdigest() == V2_SHA256[variant]
 
 
+# v3도 측정이 끝난 본문(2026-10-26 dev 실측과 반복 실행)이라 고정한다. 바꾸려면 v5를 만든다.
+V3_SHA256 = {
+    "b0": "e0c60b9c848787d7d34cb49f290c85fb9f1adca085d3371aa68da49bff7fa44f",
+    "b1": "1c122c5dc2fc95ecdc4420116b660052f5d4e29e364fe32fc9fc5feec1207796",
+}
+
+
+@pytest.mark.parametrize("variant", ["b0", "b1"])
+def test_v3_prompt_is_byte_identical_to_the_measured_text(variant: str) -> None:
+    prompt = build_system_prompt(variant, "v3")  # type: ignore[arg-type]
+    assert hashlib.sha256(prompt.encode("utf-8")).hexdigest() == V3_SHA256[variant]
+
+
+V4_FRAGMENTS = (
+    "못 드심·안 드심(정도 표현 없이)",  # 식사 매핑
+    "일삼오 → 135",  # 숫자 읽기 새 예시
+    "복약 필드가 담는 내용(복용·미복용·중복 복용 의심)의 이유나 정황",  # 중복 금지
+    "잊었거나 값을 기억하지 못한다는 말 포함",  # (b)
+    "확인·질문을 못 한 항목",  # 확인 누락
+    "오늘 복약을 화자가 직접 보거나 직접 들은 경우만 기록합니다",  # 정책 #14
+    "추측 표현이 붙어도 화자가 직접 본 기분",  # v3 승계
+)
+
+
+@pytest.mark.parametrize("variant", ["b0", "b1"])
+def test_v4_is_v3_plus_exactly_the_five_planned_edits(variant: str) -> None:
+    import difflib
+
+    v3 = build_system_prompt(variant, "v3").splitlines()  # type: ignore[arg-type]
+    v4 = build_system_prompt(variant, "v4").splitlines()  # type: ignore[arg-type]
+    diff = list(difflib.ndiff(v3, v4))
+    removed = [d for d in diff if d.startswith("- ")]
+    added = [d for d in diff if d.startswith("+ ")]
+    assert len(removed) == 4 and len(added) == 6  # 기존 4줄 수정 + (b)는 2줄로 늘고 #14는 1줄 추가
+    prompt = "\n".join(v4)
+    for fragment in V4_FRAGMENTS:
+        assert fragment in prompt, fragment
+    assert ("evidence" in prompt) == (variant == "b1")
+    assert "따르지 않습니다" in prompt
+
+
+def test_v4_examples_do_not_reuse_golden_text() -> None:
+    """새 예시(일삼오, 칠오)와 가족 예시가 골든셋 transcript에 없다."""
+    texts = " ".join(c.transcript for c in load_golden(GOLDEN))
+    for example in ("일삼오", "칠오", "가족이 늘 챙긴다"):
+        assert example not in texts
+
+
 @pytest.mark.parametrize("variant", ["b0", "b1"])
 def test_v3_adds_only_the_hedged_mood_rule(variant: str) -> None:
     import difflib
@@ -67,7 +115,7 @@ def test_v1_prompt_is_byte_identical_to_the_measured_baseline(variant: str) -> N
     prompt = build_system_prompt(variant, "v1")  # type: ignore[arg-type]
     assert hashlib.sha256(prompt.encode("utf-8")).hexdigest() == V1_SHA256[variant]
     assert build_system_prompt(variant) == prompt  # type: ignore[arg-type]
-    assert DEFAULT_PROMPT_VERSION == "v1" and PROMPT_VERSIONS == ("v1", "v2", "v3")
+    assert DEFAULT_PROMPT_VERSION == "v1" and PROMPT_VERSIONS == ("v1", "v2", "v3", "v4")
 
 
 V2_POLICY_FRAGMENTS = (
@@ -104,9 +152,10 @@ def test_v2_drops_the_conflicting_v1_sentences() -> None:
     assert v1 != v2
 
 
-def test_v2_prompt_has_no_dev_or_test_case_sentences() -> None:
+@pytest.mark.parametrize("version", ["v2", "v3", "v4"])
+def test_prompts_have_no_dev_or_test_case_sentences(version: str) -> None:
     """프롬프트에 골든셋 transcript 문장을 복사하지 않는다 (평가 누수 방지)."""
-    prompt = build_system_prompt("b1", "v2")
+    prompt = build_system_prompt("b1", version)  # type: ignore[arg-type]
     for case in load_golden(GOLDEN):
         for sentence in (s.strip() for s in case.transcript.replace("\n", " ").split(".")):
             if len(sentence) >= 12:
