@@ -25,6 +25,7 @@ from carenote.extraction.prompts import (
     Variant,
     build_system_prompt,
     build_user_message,
+    normalize_edits,
 )
 from carenote.extraction.schema import (
     LLMExtractionB0,
@@ -118,16 +119,20 @@ class LLMExtractor:
         guard: CostGuard | None = None,
         prompt_version: PromptVersion = DEFAULT_PROMPT_VERSION,
         run_tag: str | None = None,
+        prompt_edits: tuple[int, ...] | None = None,
     ) -> None:
         self._client = client
         self._run_tag = run_tag
+        self._edits = normalize_edits(prompt_edits)
+        if self._edits is not None and prompt_version != "v4":
+            raise ValueError("prompt_edits는 프롬프트 v4에서만 쓴다")
         self._prompt_version: PromptVersion = prompt_version
         self._variant: Variant = variant
         self._model = model
         self._effort = effort
         self._cache_dir = cache_dir
         self._guard = guard
-        self._system = build_system_prompt(variant, prompt_version)
+        self._system = build_system_prompt(variant, prompt_version, self._edits)
         self._schema: type[LLMExtractionB0] | type[LLMExtractionB1] = (
             LLMExtractionB1 if variant == "b1" else LLMExtractionB0
         )
@@ -157,6 +162,7 @@ class LLMExtractor:
             "effort": self._effort,
             "prompt_version": self._prompt_version,
             "run_tag": self._run_tag,
+            "prompt_edits": list(self._edits) if self._edits is not None else None,
             **asdict(self.stats),
         }
 
@@ -216,6 +222,9 @@ class LLMExtractor:
             self._prompt_version,
             transcript,
         ]
+        if self._edits is not None:
+            # ablation 변형(v4의 일부 편집만 적용). 전부 적용(= v4)이면 키가 그대로다.
+            parts.append("edits=" + ",".join(str(e) for e in self._edits))
         if self._run_tag is not None:
             # 같은 입력의 반복 실행(실행 간 변동 측정)을 위해서만 키에 넣는다. 태그가 없으면
             # 키 공식이 이전과 같아 기존 캐시가 그대로 적중한다.
@@ -236,9 +245,7 @@ class LLMExtractor:
         if self._cache_dir is None:
             return
         self._cache_dir.mkdir(parents=True, exist_ok=True)
-        (self._cache_dir / f"{key}.json").write_text(
-            extraction.model_dump_json(), encoding="utf-8"
-        )
+        (self._cache_dir / f"{key}.json").write_text(extraction.model_dump_json(), encoding="utf-8")
 
     # -- 변환과 근거 검증 -------------------------------------------------------
 

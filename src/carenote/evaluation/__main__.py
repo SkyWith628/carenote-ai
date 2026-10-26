@@ -141,6 +141,18 @@ def _build_parser() -> argparse.ArgumentParser:
         help="추출 프롬프트 버전 (기본 v1: 기존 보고서 재현용). v2는 라벨 정책 반영판",
     )
     parser.add_argument(
+        "--prompt-edits",
+        default=None,
+        metavar="N,N",
+        help="--prompt v4 전용 ablation: v3에 적용할 v4 편집 번호(1~5, 쉼표). 기본은 전부(= v4)",
+    )
+    parser.add_argument(
+        "--case-ids",
+        default=None,
+        metavar="ID,ID",
+        help="지정한 케이스만 평가한다(선택한 분할 안에서). 예: gs-003,gs-012",
+    )
+    parser.add_argument(
         "--run-tag",
         default=None,
         help="같은 설정을 캐시 없이 다시 실행하는 반복 실행 표식(실행 간 변동 측정용). 기본 없음",
@@ -158,8 +170,26 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _select_cases(golden: Path, limit: int | None, split: SplitChoice) -> list[GoldenCase]:
+def parse_edits(text: str | None) -> tuple[int, ...] | None:
+    """`1,3,4`를 편집 번호 튜플로. 잘못된 입력은 ValueError."""
+    if text is None:
+        return None
+    try:
+        return tuple(int(x) for x in text.split(",") if x.strip())
+    except ValueError as exc:
+        raise ValueError(f"--prompt-edits 형식이 잘못됐다: {text}") from exc
+
+
+def _select_cases(
+    golden: Path, limit: int | None, split: SplitChoice, case_ids: str | None = None
+) -> list[GoldenCase]:
     cases = load_golden(golden, split)
+    if case_ids is not None:
+        wanted = [c.strip() for c in case_ids.split(",") if c.strip()]
+        unknown = sorted(set(wanted) - {c.id for c in cases})
+        if unknown:
+            raise ValueError(f"분할 {split}에 없는 케이스: {unknown}")
+        cases = [c for c in cases if c.id in set(wanted)]
     return cases if limit is None else cases[:limit]
 
 
@@ -189,7 +219,14 @@ def _run_llm(
             file=sys.stderr,
         )
         return EXIT_REFUSED
-    cases = _select_cases(args.golden, args.limit, args.split)
+    try:
+        edits = parse_edits(args.prompt_edits)
+        cases = _select_cases(args.golden, args.limit, args.split, args.case_ids)
+        if edits is not None and args.prompt != "v4":
+            raise ValueError("--prompt-edits는 --prompt v4에서만 쓴다")
+    except ValueError as exc:
+        print(f"실행 거부: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
     cache_dir = args.cache_dir or Path(settings.extraction_cache_dir)
     probe = LLMExtractor(
         _NoClient(),  # type: ignore[arg-type]
@@ -199,11 +236,13 @@ def _run_llm(
         cache_dir=cache_dir,
         prompt_version=prompt_version,
         run_tag=args.run_tag,
+        prompt_edits=edits,
     )
     estimate = estimate_run(probe, cases, price)
     print(format_estimate(model, effort, estimate, PRICES_AS_OF))
     tag = f" · 실행 태그 {args.run_tag}" if args.run_tag else ""
-    print(f"  프롬프트 {prompt_version} · 변형 {variant}{tag}")
+    chosen = f" · 편집 {','.join(map(str, edits))}" if edits is not None else ""
+    print(f"  프롬프트 {prompt_version}{chosen} · 변형 {variant}{tag}")
     if args.dry_run:
         print("  (dry-run: API를 호출하지 않았다)")
         return 0
@@ -237,6 +276,7 @@ def _run_llm(
         guard=guard,
         prompt_version=prompt_version,
         run_tag=args.run_tag,
+        prompt_edits=edits,
     )
     extractor: Extractor = FlaggingExtractor(llm)
     try:
@@ -269,7 +309,7 @@ def main(
     if args.extractor in LLM_CHOICES:
         return _run_llm(args, settings or get_settings(), client_factory)
 
-    cases = _select_cases(args.golden, args.limit, args.split)
+    cases = _select_cases(args.golden, args.limit, args.split, args.case_ids)
     extractor: Extractor = OracleExtractor(cases) if args.extractor == "oracle" else NullExtractor()
     _emit(evaluate(extractor, cases, args.split), args.out)
     return 0

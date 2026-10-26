@@ -151,9 +151,26 @@ _V4_EDITS: tuple[tuple[str, str], ...] = (
 )
 
 
-def _apply_v4(base: str) -> str:
+V4_EDIT_COUNT = len(_V4_EDITS)
+ALL_V4_EDITS: tuple[int, ...] = tuple(range(1, V4_EDIT_COUNT + 1))
+
+
+def normalize_edits(edits: tuple[int, ...] | None) -> tuple[int, ...] | None:
+    """v4 편집 부분집합을 정규화한다. 전부(또는 None)이면 None(= v4 그대로)을 돌려준다."""
+    if edits is None:
+        return None
+    chosen = tuple(sorted(set(edits)))
+    if not chosen or any(e not in ALL_V4_EDITS for e in chosen):
+        raise ValueError(f"v4 편집 번호는 {ALL_V4_EDITS[0]}~{ALL_V4_EDITS[-1]}여야 한다: {edits}")
+    return None if chosen == ALL_V4_EDITS else chosen
+
+
+def _apply_v4(base: str, edits: tuple[int, ...] = ALL_V4_EDITS) -> str:
+    """v3 본문에 v4 편집 중 `edits`(1부터) 번호만 적용한다."""
     text = base
-    for old, new in _V4_EDITS:
+    for number, (old, new) in enumerate(_V4_EDITS, start=1):
+        if number not in edits:
+            continue
         if text.count(old) != 1:
             raise AssertionError(f"v4 편집 대상이 v3 본문에 정확히 한 번 있지 않다: {old[:30]}")
         text = text.replace(old, new)
@@ -177,8 +194,21 @@ _B1_TAIL = """
 """
 
 
-def build_system_prompt(variant: Variant, version: PromptVersion = DEFAULT_PROMPT_VERSION) -> str:
-    """버전·변형에 맞는 시스템 프롬프트를 만든다. 요청마다 동일해야 캐시 프리픽스가 유지된다."""
+def build_system_prompt(
+    variant: Variant,
+    version: PromptVersion = DEFAULT_PROMPT_VERSION,
+    edits: tuple[int, ...] | None = None,
+) -> str:
+    """버전·변형에 맞는 시스템 프롬프트를 만든다. 요청마다 동일해야 캐시 프리픽스가 유지된다.
+
+    `edits`는 v4 전용 ablation 옵션으로 v3에 적용할 v4 편집 번호의 부분집합이다(전부이면 v4).
+    """
+    chosen = normalize_edits(edits)
+    if chosen is not None:
+        if version != "v4":
+            raise ValueError("--prompt-edits는 프롬프트 v4에서만 쓴다")
+        tail = _B1_TAIL if variant == "b1" else _B0_TAIL
+        return _apply_v4(_COMMON_V3, chosen) + tail
     common = {"v1": _COMMON, "v2": _COMMON_V2, "v3": _COMMON_V3, "v4": _COMMON_V4}[version]
     return common + (_B1_TAIL if variant == "b1" else _B0_TAIL)
 
