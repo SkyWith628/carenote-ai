@@ -644,3 +644,7 @@
 - 실행: `--spec-dir data/golden/rset/specs --out-dir data/golden/rset/candidates_test --split test --approve-cost 2.10`. 태그 `sentinel-rules-v2` 이후. 20건 전부 점검 통과(K27·K39는 2회 시도), 호출 22회, 입력 124,384·출력 31,535 토큰, **실제 비용 $1.1282**(추정 $0.638~$2.097). 배치 점검 [P] 경고 9건(정상 항목 문장 유사)은 통과에 영향 없음.
 - **transcript를 열어 보지 않았다**(경과 출력은 spec_id·통과 여부·비용뿐). 열람은 채점 때까지 금지, 모델 라벨러·채점 스크립트만 읽는다.
 - 다음: 블라인드 모델 라벨러(test 20건, 추정 $0.70~$1.89, dev 실측 $0.984) → 규칙 단독·LLM 단독·합집합 한 번 채점. 승인 전 API 호출 없음.
+
+## 2026-10-27 — Sentinel test R-set 블라인드 시트·키 생성 (API 없음, 열람 없음)
+- `docs/reports/rset-blind2.md`(정답·스펙 ID 비노출 20건), `rset-blind2.labels.json`(빈 라벨), 키 `data/golden/rset/blind_key.rset-blind2.json`. 시트 안 transcript는 열어 보지 않았다(채점 전 봉인 유지).
+- 라벨러 dry-run: 20건, 호출 20회, $0.700~$1.893(dev 실측 $0.984). 제안 승인액 $1.90, 승인 전 API 호출 없음.
