@@ -1,0 +1,48 @@
+"""특이사항 risk Sentinel 프로토타입 v2 (설계 검증용 스케치, 규칙 어휘는 docs/label-policy.md 특이사항 risk 기준표에서 옮김)."""
+import re, sys
+from pathlib import Path
+from carenote.evaluation.loader import load_golden
+from carenote.evaluation.schema import FieldKey, Flag
+
+RULES = {
+ "chest_resp": [r"가슴[이가]?\s?(?:너무\s|많이\s)?(?:답답|아프|아파|조이|쥐어)", r"흉통", r"흉부\s?(?:답답|통증)", r"숨[이을]?\s?(?:차|찬|가쁘|쉬기\s?힘|못\s?쉬)", r"호흡\s?곤란", r"숨쉬기\s?(?:힘들|어렵)"],
+ "neuro": [r"말[이씀]?[이은]?\s?(?:평소보다\s)?(?:어눌|꼬이|꼬여|잘\s?안\s?나|막히)", r"발음[이]?\s?(?:어눌|이상|안\s?좋)", r"(?:한쪽|왼쪽|오른쪽)\s?(?:팔|다리|손|발)[에이]?\s?힘이?\s?(?:없|빠지|안\s?들어)", r"(?:팔|다리|손|발)[에이가]?\s?힘이?\s?(?:없|빠지|안\s?들어|약)", r"의식이?\s?(?:흐리|없)", r"(?:얼굴|입)[이가]?\s?(?:한쪽|돌아|처지)", r"마비"],
+ "intake": [r"(?:이틀|사흘|나흘|[2-9]\s?일)\s?(?:째|동안|연속)[^.]{0,20}?(?:식사|밥|물|음식|죽)[^.]{0,10}?(?:거부|안\s?드|못\s?드|안\s?먹|못\s?먹)", r"(?:식사|밥|물)[^.]{0,12}?(?:이틀|사흘|나흘)\s?째[^.]{0,10}?(?:거부|안\s?드|못\s?드|안\s?먹)"],
+ "body_change": [r"(?:발|다리|얼굴|손|종아리)[이가]?\s?(?:퉁퉁|갑자기\s)?\s?(?:부어|부었|붓|부종)", r"부종", r"(?:피가|출혈|피를)\s?(?:나|많이|토|쏟)", r"상처[가]?\s?(?:깊|곪|벌어)"],
+ "circumstance": [r"멍[이]?\s?(?:여러|곳곳|많)", r"(?:때리|때렸|폭행|밀쳤)", r"(?:아드님|보호자|자제분|며느리)[^.]{0,10}?(?:오시면|오면|있으면)[^.]{0,15}?(?:말을?\s?잘?\s?안|위축|무서워|움츠)"],
+}
+FALL_YES = re.compile(r"(?:넘어지셨|넘어지신\s?(?:뒤|후|다음)|넘어졌|쓰러지셨|쓰러졌|떨어지셨|미끄러져\s?넘어)")
+PAIN_AFTER_FALL = re.compile(r"(?:엉덩이|허리|골반|고관절|팔|다리|머리|손목|어깨)[이가]?\s?(?:많이\s)?(?:아프|아파|붓|부었|못\s?움직)|(?:못\s?걷|걷기\s?힘들|거동이?\s?불편)")
+NEG = re.compile(r"^[가-힣\s]{0,6}?(?:지|진)\s?(?:는|도)?\s?(?:않|못)")        # 증상 서술어 바로 뒤의 부정
+COND = re.compile(r"^[가-힣\s]{0,8}?(?:면|시면)")                             # 가정("~하면")
+FAMILY = re.compile(r"(?:남편|아내|아들|딸|따님|아드님|며느리|손주|저도|제가|옆집)[^.]{0,12}$")
+def sentences(text): return [s for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+def signals(text):
+    out = []
+    sents = sentences(text)
+    for i, sent in enumerate(sents):
+        for cat, pats in RULES.items():
+            for p in pats:
+                for m in re.finditer(p, sent):
+                    tail = sent[m.end():m.end() + 14]
+                    if NEG.search(tail): continue
+                    if COND.search(tail) and re.search(r"연락|전화|알려|말씀", sent[m.end():]): continue
+                    if FAMILY.search(sent[:m.start()][-14:]): continue
+                    out.append((cat, m.group(), sent.strip()))
+        prev = " ".join(sents[max(0, i - 2):i]) + " " + sent
+        if FALL_YES.search(prev):
+            for m in PAIN_AFTER_FALL.finditer(sent):
+                if not NEG.search(sent[m.end():m.end() + 14]):
+                    out.append(("post_fall", m.group(), sent.strip()))
+    return out
+if __name__ == "__main__":
+    split = sys.argv[1]
+    cases = load_golden(Path("data/golden"), split)
+    tp = fp = fn = tn = 0
+    for c in cases:
+        f = c.field(FieldKey.SPECIAL_NOTES)
+        gold = f.value is not None and f.flag is Flag.RISK
+        sig = signals(c.transcript); fired = bool(sig)
+        tp += gold and fired; fn += gold and not fired; fp += (not gold) and fired; tn += (not gold) and not fired
+        if gold or fired: print(("양성" if gold else "음성"), "발동" if fired else "미발동", c.id, c.spec_id or "v1", [(s[0], s[1]) for s in sig][:4], "| 정답:", f.value or "-")
+    print(f"[{split}] 정답 risk {tp+fn}건 중 포착 {tp}, 놓침 {fn} · risk 아님 {fp+tn}건 중 오발동 {fp}")
