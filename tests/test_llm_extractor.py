@@ -143,9 +143,7 @@ def test_b0_does_not_require_or_emit_evidence() -> None:
     """B0는 근거를 요구하지 않고 evidence도 비워 둔다."""
     out = LLMExtractionB0(
         fields=[
-            LLMFieldB0(
-                key=FieldKey.BLOOD_PRESSURE, value="130/80", source="stated", candidates=[]
-            )
+            LLMFieldB0(key=FieldKey.BLOOD_PRESSURE, value="130/80", source="stated", candidates=[])
         ]
     )
     extractor, calls = _make(_Response(out), variant="b0")
@@ -196,7 +194,12 @@ def test_request_shape_and_prompt_isolation() -> None:
     assert call["output_config"] == {"effort": "medium"}
     assert call["output_format"] is LLMExtractionB1
     assert set(call) == {
-        "model", "max_tokens", "system", "messages", "output_format", "output_config"
+        "model",
+        "max_tokens",
+        "system",
+        "messages",
+        "output_format",
+        "output_config",
     }
     messages = cast(list[dict[str, str]], call["messages"])
     assert messages == [{"role": "user", "content": build_user_message(TRANSCRIPT)}]
@@ -243,9 +246,7 @@ def test_cache_key_separates_variant_and_model(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("stop_reason", ["refusal", "max_tokens"])
-def test_unusable_stop_reason_is_failure_and_not_cached(
-    stop_reason: str, tmp_path: Path
-) -> None:
+def test_unusable_stop_reason_is_failure_and_not_cached(stop_reason: str, tmp_path: Path) -> None:
     """거절·잘림 응답은 실패로 기록하고 캐시하지 않는다."""
     extractor, _ = _make(
         _Response(LLMExtractionB1(fields=[BP_OK]), stop_reason=stop_reason), cache_dir=tmp_path

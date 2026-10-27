@@ -166,7 +166,7 @@ def test_split_sentences_keeps_substrings() -> None:
 
 def test_default_rules_file_loads() -> None:
     assert DEFAULT_RULES_PATH.exists()
-    assert RULES.version == 1
+    assert RULES.version == 2
     assert {r.rule_id for r in RULES.text_rules} == {
         "chest_resp",
         "neuro",
@@ -407,3 +407,57 @@ def test_cli_refuses_sentinel_on_non_dev(split: str) -> None:
 
 def test_cli_refuses_sentinel_for_non_llm_extractor() -> None:
     assert main(["--extractor", "oracle", "--sentinel"]) == EXIT_REFUSED
+
+
+# ---- 일반화(2026-10-27): R-set dev 원인 분석 기반 -----------------------------------------------
+# 아래 문장은 R-set dev의 실패 유형(패턴 모양, 가드 범위)에서 뽑은 변형이다. 같은 유형이라
+# 이 테스트와 dev 점수는 in-sample이며 독립 증거가 아니다. 독립 평가는 test R-set 한 번뿐이다.
+
+GENERALIZED_POSITIVES = [
+    # 어순: 증상어 사이에 다른 말이 낀다
+    ("neuro", "어르신 말씀이 오늘은 자꾸 꼬이셔서 알아듣기 힘들었어요."),
+    ("neuro", "말이 평소랑 달리 어눌하셨어요."),
+    ("neuro", "말씀이 요즘 들어 많이 어눌해지셨어요."),
+    # 기간이 거부 뒤에 오고, 동사가 다양하다
+    ("intake_days", "식사를 또 안 하세요, 이게 사흘째예요."),
+    ("intake_days", "밥을 계속 못 드세요, 나흘째 그러세요."),
+    ("intake_days", "나흘째 밥상을 물리세요."),
+    ("intake_days", "물을 입에 안 대세요, 사흘째예요."),
+    # 수식어가 둘 이상
+    ("body_change", "두 다리가 갑자기 퉁퉁 부어서 바지가 안 올라가요."),
+    ("body_change", "발이 오늘 갑자기 많이 부었어요."),
+    ("body_change", "발목이 퉁퉁 갑자기 부어 있었어요."),
+    # 가드가 새어 나가면 안 된다: 부정·조건이 있어도 다른 증상은 살아 있다
+    ("chest_resp", "가슴이 답답하다고 하셨고 약은 아직 안 드셨어요."),
+    ("chest_resp", "숨이 차고 입맛은 없으셨어요."),
+    ("chest_resp", "혹시 몰라 119 번호를 적어 드렸는데 가슴이 답답하다고 하셨어요."),
+    ("chest_resp", "할머니가 가슴이 답답하다고 하셨어요."),
+]
+
+
+@pytest.mark.parametrize(("rule_id", "text"), GENERALIZED_POSITIVES)
+def test_generalized_positive_signal(rule_id: str, text: str) -> None:
+    assert rule_id in ids(text)
+
+
+GENERALIZED_NEGATIVES = [
+    # 부정이 나열 끝에 온다
+    "가슴이 답답하거나 숨이 차거나 하는 건 없으셨어요.",
+    "말이 어눌하거나 팔에 힘이 없거나 한 것은 아니었어요.",
+    "발이 붓거나 다리가 저린 건 없었어요.",
+    # 증상 바로 뒤의 '건 없다'
+    "숨이 차는 건 없으셨어요.",
+    # 조건절이 첫 증상 뒤에 길게 이어진다
+    "혹시 숨이 차거나 가슴이 답답해지면 바로 119에 전화하시라고 했어요.",
+    "팔에 힘이 빠지거나 말이 어눌해지면 응급실에 가시라고 안내했어요.",
+    # 제3자 호칭 보강
+    "이웃 분이 발이 퉁퉁 부었다고 하셨어요.",
+    "사위가 숨이 차서 병원에 갔다고 하셨어요.",
+    # 절이 다르면 어눌과 말씀을 잇지 않는다
+    "말씀은 평소처럼 또렷하셨는데, 혼잣말처럼 노래는 어눌하게 흥얼거리셨어요.",
+]
+
+
+@pytest.mark.parametrize("text", GENERALIZED_NEGATIVES)
+def test_generalized_negative_no_signal(text: str) -> None:
+    assert scan_text(text, RULES) == []

@@ -33,9 +33,7 @@ def price_for(model: str) -> Price | None:
 
 def cost_usd(price: Price, input_tokens: int, output_tokens: int) -> float:
     """토큰 수로 비용을 계산한다. 캐시 읽기 할인은 반영하지 않는다 (보수적)."""
-    return (
-        input_tokens * price.input_per_mtok + output_tokens * price.output_per_mtok
-    ) / 1_000_000
+    return (input_tokens * price.input_per_mtok + output_tokens * price.output_per_mtok) / 1_000_000
 
 
 class BudgetExceeded(RuntimeError):

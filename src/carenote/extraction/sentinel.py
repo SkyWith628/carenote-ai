@@ -20,17 +20,27 @@ DEFAULT_RULES_PATH = Path(__file__).resolve().parents[3] / "rules" / "sentinel.y
 
 GUARD_NAMES = frozenset({"negation", "conditional_advice", "third_party", "past_event"})
 
-# 증상 서술어 바로 뒤의 부정("~지는 않", "~진 못"). 문장 속 무관한 "안"과 구분하려고 짧게 본다.
-_NEGATION = re.compile(r"^[가-힣\s]{0,6}?(?:지|진)\s?(?:는|도)?\s?(?:않|못)")
-# 가정("~하면")과 조언("연락 달라")이 함께 있을 때
-_CONDITIONAL = re.compile(r"^[가-힣\s]{0,8}?(?:면|시면)")
+# 부정 끝맺음: "~지는 않", "~진 못", "~는 건 없", "~한 일은 없"
+_NEG_END = (
+    r"(?:(?:지|진)\s?(?:는|도)?\s?(?:않|못)|(?:건|게|것|일|거)[은는]?\s?(?:전혀\s)?(?:없|아니))"
+)
+# 증상 서술어 바로 뒤의 부정. 문장 속 무관한 "안"과 구분하려고 짧게 본다.
+_NEGATION = re.compile(rf"^[가-힣\s]{{0,6}}?(?:는|은)?\s?{_NEG_END}")
+# 나열 끝의 부정: "가슴이 답답하거나 숨이 차거나 하는 건 없었다". 거나 목록 뒤에 부정이 와야 하고,
+# 쉼표 없이 짧게 이어질 때만 본다(뒤에 오는 다른 말의 '없다'가 새어 들어오지 않게).
+_NEGATION_LIST = re.compile(
+    rf"^[가-힣\s]{{0,4}}?거나(?:[^.,]{{0,16}}?거나)*[^.,]{{0,12}}?{_NEG_END}"
+)
+# 가정("~하면")과 조언("연락 달라")이 함께 있을 때. 나열된 뒤 증상에도 닿도록 창을 넓힌다.
+_CONDITIONAL = re.compile(r"^[가-힣\s]{0,22}?(?:면|시면)")
 # 앞쪽 14자 안의 제3자 주어. 증상의 주인이 이용자가 아니다.
 _THIRD_PARTY = re.compile(
-    r"(?:남편|아내|아들|딸|따님|아드님|며느리|손주|저도|제가|옆집)[^.]{0,12}$"
+    r"(?:남편|아내|부인|아들|딸|따님|아드님|며느리|사위|손주|손자|손녀|동생|언니|형님|친구|이웃|저도|제가|옆집)[^.]{0,12}$"
 )
 
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
 _TAIL = 14
+_COND_TAIL = 26
 _PAST_HEAD = 24
 _BP = re.compile(r"^(\d{2,3})/(\d{2,3})$")
 
@@ -222,11 +232,13 @@ def _guarded(rules: RuleSet, rule: TextRule, sentence: str, match: re.Match[str]
     """가드 중 하나라도 걸리면 True (신호를 버린다)."""
     tail = sentence[match.end() : match.end() + _TAIL]
     head = sentence[: match.start()]
-    if "negation" in rule.guards and _NEGATION.search(tail):
+    if "negation" in rule.guards and (
+        _NEGATION.search(tail) or _NEGATION_LIST.search(sentence[match.end() :])
+    ):
         return True
     if (
         "conditional_advice" in rule.guards
-        and _CONDITIONAL.search(tail)
+        and _CONDITIONAL.search(sentence[match.end() : match.end() + _COND_TAIL])
         and rules.advice.search(sentence[match.end() :])
     ):
         return True
