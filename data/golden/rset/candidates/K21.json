@@ -1,0 +1,179 @@
+{
+  "spec_id": "K21",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "현관 비밀번호를 두 번이나 잘못 눌러서 문 앞에서 좀 헤맸어요. 그래서 들어간 게 오전 10시였고요. 맥박부터 쟀는데 72 나왔어요. 아침 약은 아침 식사 끝나고 바로 드셨고요. 혈압은 120에 76이요. 어르신이 옛날 노래를 흥얼거리시다가 피난 시절 얘기를 한참 하셨는데, 아 그러다가 넘어지신 적은 없다고 하셨어요. 가슴이 답답하거나 숨이 차거나 그런 건 없으셨다고 하시고요. 아침 드신 그릇은 국물까지 싹 비어 있었어요.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "그래서 들어간 게 오전 10시였고요."
+    ],
+    "pulse": [
+      "맥박부터 쟀는데 72 나왔어요."
+    ],
+    "medication_taken": [
+      "아침 약은 아침 식사 끝나고 바로 드셨고요."
+    ],
+    "blood_pressure": [
+      "혈압은 120에 76이요."
+    ],
+    "fall_event": [
+      "아 그러다가 넘어지신 적은 없다고 하셨어요."
+    ],
+    "meal_intake": [
+      "아침 드신 그릇은 국물까지 싹 비어 있었어요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "도착하기 직전 현관이나 복도에서 있었던 일",
+      "opening_scene": "현관 비밀번호를 잘못 눌러 헤맴",
+      "chatter_topics": [
+        "옛날 노래 흥얼거리기",
+        "피난 시절 이야기"
+      ],
+      "field_order": [
+        "visit_start",
+        "pulse",
+        "medication_taken",
+        "blood_pressure",
+        "fall_event",
+        "meal_intake"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "그릇이 비었다는 쪽에서 말한다",
+        "medication_taken": "약 종류나 시간대를 함께 언급하며 말한다",
+        "fall_event": "다른 이야기 도중에 곁다리로 한마디 던진다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "dev",
+    "label_risk": "low"
+  }
+}

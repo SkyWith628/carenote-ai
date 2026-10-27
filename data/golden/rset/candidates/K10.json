@@ -1,0 +1,183 @@
+{
+  "spec_id": "K10",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "아침에 센터 담당자분이 전화 주셔서 목요일 방문을 수요일로 옮기자고 하시더라고요. 어르신 혈압은 114에 70 나왔고요. 아침 혈압약은 제가 챙겨 드렸고 다 드셨어요. 맥박 66이고, 낙상 사고는 없었습니다. 근데 어르신 말씀이 지난 금요일부터 오늘 화요일까지 한 끼도 안 드셨대요. 물도 거의 안 마셨다고 하시고요. 어, 누룽지라도 끓여 드린다니까 됐다고 하셔서 오늘도 아무것도 못 드셨어요. 교회 구역 모임에 이번 주는 안 나간다는 얘기도 하셨고요. 오전 10시에 들어갔을 때부터 식탁 위 누룽지 봉지는 뜯지도 않은 그대로였어요.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "오전 10시에 들어갔을 때부터 식탁 위 누룽지 봉지는 뜯지도 않은 그대로였어요."
+    ],
+    "blood_pressure": [
+      "어르신 혈압은 114에 70 나왔고요."
+    ],
+    "pulse": [
+      "맥박 66이고, 낙상 사고는 없었습니다."
+    ],
+    "meal_intake": [
+      "어, 누룽지라도 끓여 드린다니까 됐다고 하셔서 오늘도 아무것도 못 드셨어요.",
+      "근데 어르신 말씀이 지난 금요일부터 오늘 화요일까지 한 끼도 안 드셨대요."
+    ],
+    "medication_taken": [
+      "아침 혈압약은 제가 챙겨 드렸고 다 드셨어요."
+    ],
+    "fall_event": [
+      "맥박 66이고, 낙상 사고는 없었습니다."
+    ],
+    "special_notes": [
+      "근데 어르신 말씀이 지난 금요일부터 오늘 화요일까지 한 끼도 안 드셨대요.",
+      "물도 거의 안 마셨다고 하시고요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "오는 길이나 출근 전에 받은 연락",
+      "opening_scene": "센터 담당자에게서 일정 변경 전화가 옴",
+      "chatter_topics": [
+        "교회나 절 모임",
+        "누룽지 간식"
+      ],
+      "field_order": [
+        "blood_pressure",
+        "medication_taken",
+        "pulse",
+        "fall_event",
+        "meal_intake",
+        "visit_start"
+      ],
+      "phrasing_hints": {
+        "medication_taken": "약 종류나 시간대를 함께 언급하며 말한다",
+        "fall_event": "'낙상'이나 '사고' 같은 사무적인 단어를 써서 짧게 끝낸다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "dev",
+    "label_risk": "medium"
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "spec_id": "K05",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "어르신 댁에 가 봉께 텔레비전 장이랑 소파 자리가 싹 바뀌어 있드라고요. 근디 오늘은 어르신 말씀이 평소랑 달리 자꾸 꼬이고 어눌하셔서, 음, 알아듣기가 많이 힘들었어요. 혈압은 118에 74 나왔고요, 그거 잰 게 어, 9시 30분 도착해서 바로였어요. 어르신이 \"나 이번 주엔 한 번도 안 넘어졌어\" 그러셨어요. 아침 약 드셨고 맥박은 72였고요. 라디오 아침 프로 틀어 놓고 계셨어요. 밥은 한 공기 놓고 그, 반 공기쯤 드셨어요. 아침 산책길에 은행잎 떨어진 거 쓸었다고도 하셨고요.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "그거 잰 게 어, 9시 30분 도착해서 바로였어요."
+    ],
+    "blood_pressure": [
+      "혈압은 118에 74 나왔고요"
+    ],
+    "pulse": [
+      "아침 약 드셨고 맥박은 72였고요."
+    ],
+    "meal_intake": [
+      "밥은 한 공기 놓고 그, 반 공기쯤 드셨어요."
+    ],
+    "medication_taken": [
+      "아침 약 드셨고 맥박은 72였고요."
+    ],
+    "fall_event": [
+      "어르신이 \"나 이번 주엔 한 번도 안 넘어졌어\" 그러셨어요."
+    ],
+    "special_notes": [
+      "근디 오늘은 어르신 말씀이 평소랑 달리 자꾸 꼬이고 어눌하셔서, 음, 알아듣기가 많이 힘들었어요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "지난 방문 때와 달라진 점 한 가지",
+      "opening_scene": "가구 배치가 바뀌어 있었음",
+      "chatter_topics": [
+        "아침 라디오 프로그램",
+        "아침 산책길"
+      ],
+      "field_order": [
+        "blood_pressure",
+        "visit_start",
+        "fall_event",
+        "medication_taken",
+        "pulse",
+        "meal_intake"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "밥의 양을 그릇 단위로 어림해서 말한다",
+        "medication_taken": "다른 항목과 한 문장에 묶어 말한다",
+        "fall_event": "어르신이 한 말로 전한다. 표현은 직접 지어내되 흔한 관용구는 피하고, 낙상이 없었다는 뜻이 그 문장에서 분명히 읽히게 한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "dev",
+    "label_risk": "medium"
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "spec_id": "K25",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "들어가니까 방 안 공기가 좀 답답하데예, 그래서 창문부터 쪼매 열어 놨습니다. 약은 물 떠 드리서 드셨고, 그라고 군대 간 손자 얘기를 한참 하시대예. 오늘 들어간 기 오후 1시쯤이었고예, 혈압 재니까 126에 80, 맥박은 76 나왔습니다. 점심은 반쯤 드시고 남기셨고 넘어지신 일은 없었습니다. 어, 말씀은 평소하고 똑같이 하셨는데, 혹시 팔에 힘이 빠지거나 말이 어눌해지면 바로 119에 전화하시라고 안내해 드렸습니다. 손주 학교 운동회가 다음 주라 카시대예.",
+  "reference_transcript": null,
+  "evidence": {
+    "medication_taken": [
+      "약은 물 떠 드리서 드셨고, 그라고 군대 간 손자 얘기를 한참 하시대예."
+    ],
+    "visit_start": [
+      "오늘 들어간 기 오후 1시쯤이었고예"
+    ],
+    "blood_pressure": [
+      "혈압 재니까 126에 80"
+    ],
+    "pulse": [
+      "맥박은 76 나왔습니다."
+    ],
+    "meal_intake": [
+      "점심은 반쯤 드시고 남기셨고"
+    ],
+    "fall_event": [
+      "넘어지신 일은 없었습니다."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "집 안에 들어섰을 때의 첫인상(냄새, 정돈 상태, 켜 둔 TV 등)",
+      "opening_scene": "방 안 공기가 답답하게 느껴짐",
+      "chatter_topics": [
+        "군대 간 손자",
+        "손주 학교 운동회"
+      ],
+      "field_order": [
+        "medication_taken",
+        "visit_start",
+        "blood_pressure",
+        "pulse",
+        "meal_intake",
+        "fall_event"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "반쯤 드시고 남겼다는 쪽에서 말한다",
+        "medication_taken": "다른 항목과 한 문장에 묶어 말한다",
+        "fall_event": "약이나 식사 이야기에 이어 붙여 한 문장 안에서 지나가듯 말한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "dev",
+    "label_risk": "medium"
+  }
+}

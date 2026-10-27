@@ -1,0 +1,179 @@
+{
+  "spec_id": "K26",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "베란다에 마른 빨래부터 걷어 놓고 시작했어요. 어르신이 오늘은 한 번도 안 넘어지고 혼자 화장실 댕기셨다고 하시대요. 맥박은 74 나왔고요, 혈압은 122에 78이래요. 약은 밥 먹고 바로 챙겨 먹었다고 어르신이 그러셨어요. 식사는 절반 정도 드셨어요. 어제 할아버지가 가슴이 답답하다 해서 병원에 다녀오셨다고 어르신이 얘기하시대요. 어르신은 편안하게 계셨고요. 미국 사는 아드님하고 영상통화도 잠깐 하셨어요. 음, 오늘 2시에 왔는데, 그 베란다 제라늄이 빨갛게 폈더라고요.",
+  "reference_transcript": null,
+  "evidence": {
+    "fall_event": [
+      "어르신이 오늘은 한 번도 안 넘어지고 혼자 화장실 댕기셨다고 하시대요."
+    ],
+    "pulse": [
+      "맥박은 74 나왔고요"
+    ],
+    "blood_pressure": [
+      "혈압은 122에 78이래요."
+    ],
+    "medication_taken": [
+      "약은 밥 먹고 바로 챙겨 먹었다고 어르신이 그러셨어요."
+    ],
+    "meal_intake": [
+      "식사는 절반 정도 드셨어요."
+    ],
+    "visit_start": [
+      "오늘 2시에 왔는데"
+    ]
+  },
+  "notes": "must_include의 '어르신은 편안함'을 '편안하게 계셨고요'로 넣었으나 mood 정답은 비어 있어 감정 표현은 더하지 않음.",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "도착하자마자 먼저 한 일(환기, 장 본 것 정리, 전기밥솥 확인 등)",
+      "opening_scene": "마른 빨래를 먼저 걷음",
+      "chatter_topics": [
+        "해외 사는 자녀와 영상통화",
+        "베란다 화분과 꽃"
+      ],
+      "field_order": [
+        "fall_event",
+        "pulse",
+        "blood_pressure",
+        "medication_taken",
+        "meal_intake",
+        "visit_start"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "절반 정도라고 직설적으로 말한다",
+        "medication_taken": "어르신이 한 말로 전한다. 표현은 직접 지어내되, 약을 드셨다는 뜻이 그 문장에서 분명히 읽히게 한다",
+        "fall_event": "어르신이 한 말로 전한다. 표현은 직접 지어내되 흔한 관용구는 피하고, 낙상이 없었다는 뜻이 그 문장에서 분명히 읽히게 한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['fall_event', 'meal_intake']"
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "dev",
+    "label_risk": "low"
+  }
+}

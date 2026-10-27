@@ -1,0 +1,184 @@
+{
+  "spec_id": "K09",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "들어가자마자 창문부터 열어 놓고 환기 좀 시켰어유. 어, 혈압은 116에 70 나왔구유. 약은 드셨어유. 근디 식사를 또 안 하셨어유, 이게 나흘째여유. 오늘도 아침 겸 해서 상 차려 드렸는디 그냥 물리셨어유. 그, 제가 11시 30분에 들어왔으니께 그때부터 한 숟갈도 안 뜨신 거쥬. 보리차 끓여 놓고 음, 새로 나온 과자 얘기 좀 하다가, 아 넘어지신 일은 없으시구유, 그 과자 이름은 끝내 생각이 안 나드라구유. 맥박은 68 나왔어유.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "그, 제가 11시 30분에 들어왔으니께 그때부터 한 숟갈도 안 뜨신 거쥬."
+    ],
+    "blood_pressure": [
+      "어, 혈압은 116에 70 나왔구유."
+    ],
+    "pulse": [
+      "맥박은 68 나왔어유."
+    ],
+    "meal_intake": [
+      "근디 식사를 또 안 하셨어유, 이게 나흘째여유.",
+      "오늘도 아침 겸 해서 상 차려 드렸는디 그냥 물리셨어유.",
+      "그, 제가 11시 30분에 들어왔으니께 그때부터 한 숟갈도 안 뜨신 거쥬."
+    ],
+    "medication_taken": [
+      "약은 드셨어유."
+    ],
+    "fall_event": [
+      "아 넘어지신 일은 없으시구유"
+    ],
+    "special_notes": [
+      "근디 식사를 또 안 하셨어유, 이게 나흘째여유.",
+      "오늘도 아침 겸 해서 상 차려 드렸는디 그냥 물리셨어유."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "도착하자마자 먼저 한 일(환기, 장 본 것 정리, 전기밥솥 확인 등)",
+      "opening_scene": "창문부터 열어 환기시킴",
+      "chatter_topics": [
+        "새로 나온 과자",
+        "보리차 끓이기"
+      ],
+      "field_order": [
+        "blood_pressure",
+        "medication_taken",
+        "meal_intake",
+        "visit_start",
+        "fall_event",
+        "pulse"
+      ],
+      "phrasing_hints": {
+        "medication_taken": "아주 짧게 한마디로 말한다",
+        "fall_event": "다른 이야기 도중에 곁다리로 한마디 던진다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "dev",
+    "label_risk": "medium"
+  }
+}

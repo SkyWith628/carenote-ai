@@ -1,0 +1,179 @@
+{
+  "spec_id": "K37",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "신발장 앞에 못 보던 구두가 하나 놓여 있길래 누군가 했더니 따님이 사흘 만에 오셨드래요. 맥박은 76이었고요, 들어간 게 12시 30분쯤이에요. 어르신은 안 넘어지셨어요. 따님이 어제 본 저녁 드라마 얘기를 하는데 주인공이 계단에서 굴러떨어졌다나, 그 줄거리를 한참 얘기했어요. 혈압은 124에 78 나왔고요. 약은 드셨고. 어, 따님이랑 같이 식사하셨는데 어르신 밥그릇이 싹 비었드래요, 다 드셨어요. 따님은 버스 노선이 바뀌어서 정류장에서 한참 걸어왔다 그러더라고요.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "들어간 게 12시 30분쯤이에요."
+    ],
+    "blood_pressure": [
+      "혈압은 124에 78 나왔고요."
+    ],
+    "pulse": [
+      "맥박은 76이었고요"
+    ],
+    "meal_intake": [
+      "어르신 밥그릇이 싹 비었드래요, 다 드셨어요."
+    ],
+    "medication_taken": [
+      "약은 드셨고."
+    ],
+    "fall_event": [
+      "어르신은 안 넘어지셨어요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "도착하기 직전 현관이나 복도에서 있었던 일",
+      "opening_scene": "신발장 앞에 못 보던 신발이 놓여 있었음",
+      "chatter_topics": [
+        "버스 노선 변경",
+        "저녁 드라마 줄거리"
+      ],
+      "field_order": [
+        "pulse",
+        "visit_start",
+        "fall_event",
+        "blood_pressure",
+        "medication_taken",
+        "meal_intake"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "그릇이 비었다는 쪽에서 말한다",
+        "medication_taken": "아주 짧게 한마디로 말한다",
+        "fall_event": "'안 ~셨다' 꼴의 부정 서술로 말한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "dev",
+    "label_risk": "low"
+  }
+}
