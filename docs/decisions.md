@@ -634,3 +634,8 @@
 ## 2026-10-27 — Sentinel LLM s2 dev 재실행 (승인 $0.05, 실제 $0.0147) · in-sample
 - 어휘 밖 양성 4/4 유지, R-set 음성 LLM 오발동 2/10 → 0/10, 골든 dev 음성 3/27 → 0/27, 합집합 오발동은 K26(규칙) 1건. 호출 50회, 실패 0, test 실행 0회. 보고서 `docs/reports/20261027-sentinel-llm-dev-haiku-s2.json`.
 - s2는 s1의 dev 오경보에서 나왔으므로 점수는 in-sample이다. 프롬프트 수정 1/2회 사용. 다음 단계: 동결(프롬프트 s2 해시 + 규칙 v2 태그) → test R-set 20건 생성(승인 필요, 약 $1.0~1.4) → 한 번 채점. 사람 확인 표본(LLM만 낸 신호: 어휘 밖 양성 근거 인용과 정황)도 필요.
+
+## 2026-10-27 — Sentinel 동결: 규칙 v2 + 프롬프트 s2 (태그 sentinel-rules-v2), test R-set 평가 준비
+- 동결 파일 해시를 테스트로 고정: rules/sentinel.yaml, sentinel.py, sentinel_llm.py, 프롬프트 s1·s2. 전체 677개 통과. 태그 `sentinel-rules-v2`.
+- 규칙: test R-set 채점 이후 변경 금지(필요하면 version 3과 새 태그, 채점 후 변경은 test 본 뒤 튜닝으로 표시). test 생성 출력은 `candidates_test/`에 격리하고 열람하지 않는다.
+- 다음: test R-set 20건 생성 dry-run /bin/zsh.638~.097(기대 약 .0~1.4), 블라인드 라벨러 약 (추정 /bin/zsh.70~.89). 승인 전 API 호출 없음.

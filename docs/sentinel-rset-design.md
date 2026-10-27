@@ -97,3 +97,9 @@
 - 사전 등록 판정 규칙: novel recall이 dev에서 50% 미만(0/4)이므로 **LLM 보조 단계 설계로 간다**. 다만 lexicon이 예측(75%)보다 훨씬 낮아, 정규식 패턴 자체를 일반화하는 개선(어순·동사 변형, 부정 범위)도 먼저 필요하다.
 - 표본이 작다(양성 9, 음성 10). 구간이 넓어 "40%"와 "75%"의 차이도 구간이 겹친다(12~77%). 방향은 분명하지만 정밀한 수치는 아니다.
 - 규칙 수정은 dev R-set 결과로만 하기로 했으므로 지금부터 수정할 수 있다. 수정한 뒤 dev 점수는 in-sample이 되고, test R-set(미생성)만 독립 평가로 남는다.
+
+## 동결 (2026-10-27) — test R-set 평가 전
+- 동결 대상: `rules/sentinel.yaml`(version 2), `src/carenote/extraction/sentinel.py`(가드 코드), `src/carenote/extraction/sentinel_llm.py`(검증 V1~V6), 프롬프트 s2(sha256 `10572be54686566fe25ba801ab43350507f2ee2afee953fb16026657d0d89be0`). 테스트가 파일 해시를 고정해, 바꾸면 실패한다(`FROZEN_SHA256`, `PINNED`).
+- git 태그: `sentinel-rules-v2`(규칙·가드·검증 코드·프롬프트 s2 전체). 태그 뒤에 이 파일들을 바꾸려면 version을 올리고 새 태그를 만들며, 그 사유를 decisions.md에 남긴다. **test R-set 채점 이후에는 변경 금지**(채점 후 변경은 test를 본 뒤의 튜닝이다).
+- 동결 시점에 dev는 in-sample(규칙 v2 일반화와 프롬프트 s2 모두 dev 실패에서 나왔다). 프롬프트 수정 1회는 남아 있지만 동결과 함께 쓰지 않는다.
+- test R-set 평가 절차: 20건 생성(별도 폴더 `data/golden/rset/candidates_test`, 열람 금지) → 블라인드 모델 라벨러로 정답 점검(스펙과 불일치하면 정답 수정 규칙을 미리 정한다: 스펙을 고치지 않고 불일치 케이스는 보고에 별도 표시) → 규칙 단독 · LLM 단독 · 합집합 한 번 채점 → 사전 등록 지표로 보고.

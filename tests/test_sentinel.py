@@ -461,3 +461,22 @@ GENERALIZED_NEGATIVES = [
 @pytest.mark.parametrize("text", GENERALIZED_NEGATIVES)
 def test_generalized_negative_no_signal(text: str) -> None:
     assert scan_text(text, RULES) == []
+
+
+# ---- 동결 (2026-10-27): test R-set 평가 전에 규칙·가드 코드·검증 코드를 고정한다 ---------------
+# 바꾸려면 version을 올리고 새 태그를 만든 뒤 해시를 갱신한다. test R-set 채점 이후에는 금지.
+
+FROZEN_SHA256 = {
+    "rules/sentinel.yaml": "6e616747bf698e9ee7ec79bd34a85eefdc5b16e9f5a6bd9474cb32febfd010fd",
+    "src/carenote/extraction/sentinel.py": "b0d787bcb30fab9ce0b086d89923591b5249aea5686c296698eea01e4a1ebf98",  # noqa: E501
+    "src/carenote/extraction/sentinel_llm.py": "25f07f60eb96dd1669ff7acd31228e7f1316ae2308e3a699a8fe39853ec38640",  # noqa: E501
+}
+
+
+@pytest.mark.parametrize("relative", sorted(FROZEN_SHA256))
+def test_sentinel_files_are_frozen(relative: str) -> None:
+    import hashlib
+
+    digest = hashlib.sha256((Path(__file__).parent.parent / relative).read_bytes()).hexdigest()
+    assert digest == FROZEN_SHA256[relative], f"{relative}가 동결 후 바뀌었다"
+    assert RULES.version == 2
