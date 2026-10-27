@@ -1,0 +1,1166 @@
+{
+  "version": 1,
+  "labeler": "",
+  "cases": {
+    "B01": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B02": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B03": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B04": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B05": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B06": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B07": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B08": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B09": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B10": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B11": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B12": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B13": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B14": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B15": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B16": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B17": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B18": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B19": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    },
+    "B20": {
+      "visit_start": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "blood_pressure": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "pulse": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "meal_intake": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "medication_taken": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "fall_event": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "mood": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      },
+      "special_notes": {
+        "value": "",
+        "source": "",
+        "flag": "",
+        "candidates": [],
+        "memo": ""
+      }
+    }
+  }
+}
