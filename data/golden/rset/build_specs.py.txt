@@ -1,0 +1,242 @@
+"""R-set(Sentinel 독립 평가용) 스펙 40건 생성기. 실행: python3 data/golden/rset/build_specs.py.txt
+
+스펙 JSON은 이 표에서 만들어진다. 모델에 노출된 적 없고 transcript는 아직 없다.
+수치(혈압·맥박)는 전부 정상 범위로 둔다: 수치 임계값은 전문가 기준이 없어 독립 평가할 수 없다.
+"""
+import json
+from pathlib import Path
+
+OUT = Path(__file__).parent / "specs" / "probe_K.json"
+
+# (id, split, kind, category, expression, title, scene, notes, fall, med, meal, mood, hour, bp, pulse, style, hypo, extra)
+# kind: pos|neg. expression: lexicon(규칙 어휘와 가까운 표현)|novel(같은 위험을 규칙 어휘 밖으로 표현)|-
+# notes = (value, flag) 또는 None. fall: 없음|있음|미확인.
+NO = None
+def S(who, region, formal="존댓말", stut="약함"):
+    return {"화자": who, "지역": region, "격식": formal, "말더듬": stut}
+
+CASES = [
+ # ---- 양성: 흉부·호흡
+ dict(id="K01", split="dev", kind="pos", cat="흉부·호흡", expr="lexicon", title="가슴 통증 호소",
+  scene="어르신이 가슴이 아프다고 하며 손으로 가슴을 움켜쥐고 앉아 계셨다고 말한다. 표현은 화자가 자연스럽게 정한다.",
+  inc=["어르신이 가슴 통증을 호소하며 가슴을 움켜쥠"], notes=("가슴 통증 호소", "risk"), hour="10:00", bp="124/78", pulse="76", meal="절반", med="복용", fall="없음", style=S("50대 여성","수도권"),
+  hypo="어휘에 가까운 표현이 나오면 포착한다. 생성기가 규칙 어휘를 쓰는지가 변수."),
+ dict(id="K02", split="dev", kind="pos", cat="흉부·호흡", expr="novel", title="누우면 숨이 막혀 앉아서 주무심",
+  scene="어르신이 밤마다 눕기만 하면 컥컥 하시며 앉아서 겨우 주무신다고 보호자에게 들었다고 말한다. 낮에도 몇 걸음 걷고 멈춰 서서 어깨를 들썩이며 숨을 몰아쉬었다.",
+  inc=["눕지 못하고 앉아서 주무신다", "걷다 멈춰 서서 어깨를 들썩이며 숨을 몰아쉼"], mnot=["숨이 차","숨찬","숨이 가쁘","숨쉬기","호흡곤란","호흡 곤란","가슴이 답답"], notes=("누우면 숨이 막혀 앉아서 주무심, 걸음 중 숨을 몰아쉼", "risk"), hour="14:00", bp="130/80", pulse="88", meal="절반", med="복용", fall="없음", style=S("60대 여성","경상"),
+  hypo="규칙 어휘 밖의 표현이라 놓칠 것이다(예측 recall 낮음)."),
+ dict(id="K03", split="test", kind="pos", cat="흉부·호흡", expr="lexicon", title="숨이 가빠 말을 끊어서 함",
+  scene="어르신이 숨이 가빠서 말씀을 한 문장씩 끊어 하시고 의자에 기대 쉬셨다고 말한다.",
+  inc=["숨이 가빠 말을 끊어서 하심"], notes=("숨이 가빠 말을 끊어서 함", "risk"), hour="11:00", bp="122/76", pulse="84", meal="소량", med="복용", fall="없음", style=S("40대 남성","충청","존댓말","보통"),
+  hypo="어휘에 가까우면 포착."),
+ dict(id="K04", split="test", kind="pos", cat="흉부·호흡", expr="novel", title="입술이 푸르고 헐떡임",
+  scene="어르신 입술이 푸르스름해 보였고 가만히 앉아 계신데도 계속 헐떡이셨다고 말한다.",
+  inc=["입술이 푸르스름함", "가만히 있어도 헐떡임"], mnot=["숨이 차","숨찬","숨이 가쁘","숨쉬기","호흡곤란","호흡 곤란","가슴"], notes=("입술이 푸르고 가만히 있어도 헐떡임", "risk"), hour="15:00", bp="126/80", pulse="92", meal="소량", med="복용", fall="없음", style=S("30대 남성","강원"),
+  hypo="규칙 어휘 밖이라 놓친다."),
+ # ---- 양성: 신경·의식
+ dict(id="K05", split="dev", kind="pos", cat="신경·의식", expr="lexicon", title="말씀이 어눌하고 꼬임",
+  scene="어르신 말씀이 평소와 달리 꼬이고 어눌해서 알아듣기 힘들었다고 말한다.",
+  inc=["말이 꼬이고 어눌해 알아듣기 힘듦"], notes=("말이 꼬이고 어눌함", "risk"), hour="09:30", bp="118/74", pulse="72", meal="절반", med="복용", fall="없음", style=S("50대 여성","전라","존댓말","보통"),
+  hypo="포착."),
+ dict(id="K06", split="dev", kind="pos", cat="신경·의식", expr="novel", title="웃을 때 입꼬리가 삐뚤고 물을 흘림",
+  scene="어르신이 웃으실 때 입꼬리 한쪽만 올라가고 물을 마시다 입가로 흘리셨다고 말한다.",
+  inc=["웃을 때 입꼬리가 삐뚤어짐", "물을 마시다 입가로 흘림"], mnot=["한쪽","처지","돌아","어눌","마비","힘이 없"], notes=("입꼬리가 삐뚤어지고 물을 흘림", "risk"), hour="13:00", bp="128/82", pulse="74", meal="전량", med="복용", fall="없음", style=S("60대 여성","수도권"),
+  hypo="'한쪽'을 못 쓰게 했으므로 놓친다."),
+ dict(id="K07", split="test", kind="pos", cat="신경·의식", expr="lexicon", title="오른팔에 힘이 빠져 숟가락을 놓침",
+  scene="어르신이 오른팔에 힘이 안 들어간다며 숟가락을 떨어뜨리셨다고 말한다.",
+  inc=["오른팔에 힘이 안 들어가 숟가락을 떨어뜨림"], notes=("오른팔에 힘이 안 들어감, 숟가락을 떨어뜨림", "risk"), hour="12:30", bp="132/84", pulse="78", meal="절반", med="복용", fall="없음", style=S("50대 남성","경상"),
+  hypo="포착."),
+ dict(id="K08", split="test", kind="pos", cat="신경·의식", expr="novel", title="대답이 느리고 날짜를 못 맞춤",
+  scene="어르신이 오늘따라 불러도 한참 있다 대답하고 멍하니 앉아 계셨으며 오늘이 무슨 요일인지 물어도 못 맞추셨다고 말한다.",
+  inc=["부르면 한참 뒤에 대답함", "요일을 못 맞춤"], mnot=["의식","흐리","정신이 없","어눌"], notes=("대답이 느리고 멍하며 요일을 못 맞춤", "risk"), hour="10:30", bp="120/78", pulse="70", meal="소량", med="복용", fall="없음", style=S("40대 여성","수도권","존댓말","보통"),
+  hypo="규칙 어휘 밖이라 놓친다."),
+ # ---- 양성: 식사·수분
+ dict(id="K09", split="dev", kind="pos", cat="식사·수분", expr="lexicon", title="나흘째 식사를 안 하심",
+  scene="어르신이 나흘째 식사를 하지 않으시고 오늘도 상을 물리셨다고 말한다.",
+  inc=["나흘째 식사를 안 하심", "오늘도 상을 물림"], notes=("나흘째 식사 거부", "risk"), hour="11:30", bp="116/70", pulse="68", meal="미섭취", med="복용", fall="없음", style=S("60대 여성","충청","존댓말","보통"),
+  hypo="포착."),
+ dict(id="K10", split="dev", kind="pos", cat="식사·수분", expr="novel", title="금요일부터 오늘까지 아무것도 안 드심",
+  scene="오늘은 화요일이다. 어르신이 지난 금요일부터 오늘까지 한 끼도 안 드셨고 물도 거의 안 마셨다고 요일로 말한다.",
+  inc=["금요일부터 오늘 화요일까지 식사를 안 하심", "물도 거의 안 마심"], mnot=["이틀","사흘","나흘","닷새","일째","째","동안","연속"], notes=("금요일부터 식사 안 함, 물도 거의 안 마심", "risk"), hour="10:00", bp="114/70", pulse="66", meal="미섭취", med="복용", fall="없음", style=S("50대 남성","수도권"),
+  hypo="기간을 요일로 말해 놓친다."),
+ dict(id="K11", split="test", kind="pos", cat="식사·수분", expr="lexicon", title="물도 사흘째 거의 못 드심",
+  scene="어르신이 사흘째 물도 거의 못 드신다고 말한다.",
+  inc=["사흘째 물도 거의 못 드심"], notes=("사흘째 물도 거의 못 마심", "risk"), hour="15:30", bp="112/68", pulse="80", meal="미섭취", med="복용", fall="없음", style=S("50대 여성","경상","존댓말","보통"),
+  hypo="포착."),
+ dict(id="K12", split="test", kind="pos", cat="식사·수분", expr="novel", title="일주일 가까이 죽 한 숟가락으로 버팀",
+  scene="어르신이 일주일 가까이 하루 죽 한 숟가락 정도로 버티시고 상 앞에서 고개만 저으신다고 말한다.",
+  inc=["일주일 가까이 하루에 죽 한 숟가락 정도만 드심"], mnot=["이틀","사흘","나흘","닷새","일째","째","동안","연속","거부"], notes=("일주일 가까이 하루 죽 한 숟가락 정도만 드심", "risk"), hour="12:00", bp="110/66", pulse="74", meal="소량", med="복용", fall="없음", style=S("60대 여성","전라"),
+  hypo="기간 표현이 규칙 밖이라 놓친다."),
+ # ---- 양성: 신체 변화
+ dict(id="K13", split="dev", kind="pos", cat="신체 변화", expr="lexicon", title="두 다리가 퉁퉁 부음",
+  scene="어르신 두 다리가 갑자기 퉁퉁 부어서 바지가 안 올라갔다고 말한다.",
+  inc=["두 다리가 갑자기 퉁퉁 부음"], notes=("두 다리가 갑자기 부음", "risk"), hour="14:30", bp="128/78", pulse="82", meal="절반", med="복용", fall="없음", style=S("50대 여성","수도권"),
+  hypo="포착."),
+ dict(id="K14", split="dev", kind="pos", cat="신체 변화", expr="novel", title="발등이 빵빵하고 양말 자국이 깊음",
+  scene="어르신 발등이 빵빵하고 양말 자국이 깊게 패였으며 손가락으로 누르면 자국이 한참 남았다고 말한다.",
+  inc=["발등이 빵빵함", "양말 자국이 깊고 눌러도 자국이 남음"], mnot=["붓","부어","부었","부종","퉁퉁"], notes=("발등이 빵빵하고 눌러도 자국이 남음", "risk"), hour="16:00", bp="126/76", pulse="78", meal="절반", med="복용", fall="없음", style=S("40대 여성","충청"),
+  hypo="어휘 밖이라 놓친다."),
+ dict(id="K15", split="test", kind="pos", cat="신체 변화", expr="lexicon", title="코피가 오래 멎지 않음",
+  scene="어르신이 코에서 피가 나서 한참 멎지 않아 휴지를 여러 장 쓰셨다고 말한다.",
+  inc=["코에서 피가 한참 멎지 않음"], notes=("코피가 오래 멎지 않음", "risk"), hour="09:00", bp="130/80", pulse="76", meal="절반", med="복용", fall="없음", style=S("60대 남성","경상","존댓말","보통"),
+  hypo="'피가 나'가 있으면 포착."),
+ dict(id="K16", split="test", kind="pos", cat="신체 변화", expr="novel", title="엉덩이 상처에서 노란 진물",
+  scene="어르신 엉덩이 쪽 상처에서 노란 진물이 계속 나오고 냄새가 나서 거즈를 갈았다고 말한다.",
+  inc=["엉덩이 쪽 상처에서 노란 진물과 냄새"], mnot=["곪","깊","벌어","출혈","피가"], notes=("엉덩이 상처에서 노란 진물과 냄새", "risk"), hour="13:30", bp="124/76", pulse="80", meal="절반", med="복용", fall="없음", style=S("50대 여성","수도권"),
+  hypo="어휘 밖이라 놓친다."),
+ # ---- 양성: 낙상 후
+ dict(id="K17", split="dev", kind="pos", cat="낙상 후", expr="lexicon", title="어제 화장실에서 넘어지고 허리를 못 폄",
+  scene="어르신이 어젯밤 화장실에서 미끄러져 넘어지셨고 오늘 허리를 못 펴고 아파하신다고 말한다.",
+  inc=["어젯밤 화장실에서 넘어지심", "오늘 허리가 아파 못 펌"], notes=("어제 낙상 후 허리 통증", "risk"), hour="11:00", bp="122/78", pulse="80", meal="소량", med="복용", fall="있음", style=S("50대 여성","전라"),
+  hypo="포착(문장이 갈려도 앞 2문장 안이면)."),
+ dict(id="K18", split="test", kind="pos", cat="낙상 후", expr="novel", title="이불에 걸려 주저앉고 다리를 끎",
+  scene="어르신이 엊그제 이불에 걸려 그 자리에 주저앉으셨다고 하고, 오늘은 오른쪽 다리를 끌며 걸으시고 체중을 못 싣겠다고 하신다고 말한다.",
+  inc=["이불에 걸려 주저앉음(낙상)", "오른쪽 다리를 끌며 걷고 체중을 못 실음"], mnot=["넘어지","쓰러지","미끄러","아프","붓"], notes=("엊그제 주저앉은 뒤 오른다리를 끌며 걷고 체중을 못 실음", "risk"), hour="10:00", bp="128/80", pulse="84", meal="절반", med="복용", fall="있음", style=S("40대 남성","수도권","존댓말","보통"),
+  hypo="'주저앉'은 낙상 어휘 밖이라 놓친다."),
+ # ---- 양성: 정황(전문가 확인 필요)
+ dict(id="K19", split="dev", kind="pos", cat="정황", expr="novel", title="손자국 같은 멍과 아드님 얘기에 입을 닫음", review=True,
+  scene="어르신 팔뚝에 손가락 모양으로 보이는 멍이 있었고, 아드님 얘기를 꺼내자 어르신이 입을 꾹 닫고 고개를 돌리셨다고 조심스럽게 말한다.",
+  inc=["팔뚝에 손가락 모양 멍", "아드님 얘기에 입을 닫고 고개를 돌림"], mnot=["멍이 여러","곳곳","때리","폭행","학대","위축"], notes=("팔뚝에 손가락 모양 멍, 아드님 얘기에 입을 닫음", "risk"), hour="14:00", bp="122/74", pulse="76", meal="절반", med="복용", fall="없음", style=S("50대 여성","경상"),
+  hypo="어휘 밖이라 놓친다. 정답 자체가 전문가 확인 전이라 헤드라인에서 제외."),
+ dict(id="K20", split="test", kind="pos", cat="정황", expr="lexicon", title="때렸다는 말을 작은 소리로 함", review=True,
+  scene="어르신이 그 사람이 소리 지르고 때렸다고 작은 소리로 말씀하셨다고 화자가 전한다.",
+  inc=["누가 소리 지르고 때렸다고 작은 소리로 말함"], notes=("누가 소리 지르고 때렸다고 작은 소리로 말함", "risk"), hour="12:00", bp="118/72", pulse="74", meal="절반", med="복용", fall="없음", style=S("50대 여성","전라"),
+  hypo="'때렸'이 있으면 포착. 정답 자체가 전문가 확인 전이라 헤드라인에서 제외."),
+ # ---- 음성: 부정
+ dict(id="K21", split="dev", kind="neg", cat="부정", expr="-", title="가슴·호흡 이상 없다고 확인",
+  scene="화자가 가슴이 답답하거나 숨이 찬 것은 없이 편안하셨다고 확인하듯 말한다.",
+  inc=["가슴이 답답하거나 숨이 차지 않으셨다"], notes=NO, hour="10:00", bp="120/76", pulse="72", meal="전량", med="복용", fall="없음", style=S("50대 여성","수도권"),
+  hypo="부정 가드로 미발동."),
+ dict(id="K22", split="test", kind="neg", cat="부정", expr="-", title="말씀과 팔 힘 모두 괜찮음",
+  scene="화자가 어르신 말씀이 또렷하셨고 팔에 힘도 잘 들어가 컵을 문제없이 드셨다고 말한다.",
+  inc=["말씀이 어눌하지 않고 또렷함", "팔에 힘이 있어 컵을 문제없이 듦"], notes=NO, hour="11:00", bp="124/78", pulse="74", meal="절반", med="복용", fall="없음", style=S("60대 남성","충청"),
+  hypo="'어눌하지', '힘이 없지 않' 형태면 부정 가드로 미발동."),
+ dict(id="K23", split="dev", kind="neg", cat="부정", expr="-", title="발·다리 붓기 없음",
+  scene="화자가 발이나 다리가 붓지 않았고 신발도 잘 들어갔다고 말한다.",
+  inc=["발과 다리가 붓지 않음", "신발이 잘 들어감"], notes=NO, hour="15:00", bp="118/72", pulse="70", meal="전량", med="복용", fall="없음", style=S("50대 여성","전라"),
+  hypo="부정 가드로 미발동."),
+ # ---- 음성: 조언·가정
+ dict(id="K24", split="test", kind="neg", cat="조언·가정", expr="-", title="가슴 답답하면 연락하라고 안내", gray=True,
+  scene="화자가 어르신께 가슴이 답답하거나 숨이 차면 바로 센터로 전화하시라고 안내드렸다고 말한다. 어르신은 그 순간 편안하셨다.",
+  inc=["가슴이 답답하거나 숨이 차면 센터로 전화하라고 안내함", "현재는 편안하셨음"], notes=NO, hour="10:30", bp="122/76", pulse="72", meal="절반", med="복용", fall="없음", style=S("40대 여성","수도권"),
+  hypo="조언·가정 가드로 미발동. 안내 사실을 특이사항에 적을지는 정책이 갈릴 수 있다(gray)."),
+ dict(id="K25", split="dev", kind="neg", cat="조언·가정", expr="-", title="말이 어눌해지면 119라고 안내", gray=True,
+  scene="화자가 팔에 힘이 빠지거나 말이 어눌해지면 바로 119에 전화하시라고 안내드렸다고 말한다. 어르신은 평소처럼 말씀하셨다.",
+  inc=["팔에 힘이 빠지거나 말이 어눌해지면 119에 전화하라고 안내함", "현재는 평소와 같음"], notes=NO, hour="13:00", bp="126/80", pulse="76", meal="절반", med="복용", fall="없음", style=S("50대 남성","경상"),
+  hypo="조언·가정 가드로 미발동."),
+ # ---- 음성: 제3자
+ dict(id="K26", split="dev", kind="neg", cat="제3자", expr="-", title="남편분이 가슴이 답답해 병원에 다녀옴",
+  scene="어르신의 남편분이 어제 가슴이 답답해 병원에 다녀오셨다는 이야기를 어르신이 전하셨다고 말한다. 어르신 본인은 편안하셨다.",
+  inc=["남편분이 가슴이 답답해 병원에 다녀옴(어르신 본인 아님)", "어르신은 편안함"], notes=NO, hour="14:00", bp="122/78", pulse="74", meal="절반", med="복용", fall="없음", style=S("60대 여성","강원"),
+  hypo="제3자 가드로 미발동."),
+ dict(id="K27", split="test", kind="neg", cat="제3자", expr="-", title="옆집 할머니가 쓰러져 실려 감",
+  scene="옆집 할머니가 어제 쓰러져 구급차에 실려 가셨다는 이야기를 어르신이 하셨다고 말한다. 어르신 본인은 멀쩡하셨다.",
+  inc=["옆집 할머니가 쓰러져 구급차로 감(어르신 본인 아님)", "어르신은 멀쩡함"], notes=NO, hour="11:30", bp="120/74", pulse="72", meal="전량", med="복용", fall="없음", style=S("50대 여성","수도권"),
+  hypo="제3자 가드로 미발동."),
+ # ---- 음성: 만성 통증
+ dict(id="K28", split="dev", kind="neg", cat="만성 통증", expr="-", title="무릎이 늘 쑤심",
+  scene="어르신이 무릎이 늘 쑤신다며 오늘도 파스를 붙이셨다고 말한다.",
+  inc=["무릎이 늘 쑤심", "파스를 붙임"], notes=("무릎 통증 호소", "ok"), hour="10:00", bp="130/80", pulse="76", meal="절반", med="복용", fall="없음", style=S("50대 여성","경상"),
+  hypo="위험 규칙 없음, 미발동."),
+ dict(id="K29", split="test", kind="neg", cat="만성 통증", expr="-", title="허리가 아파 파스를 붙임",
+  scene="어르신이 허리가 오래전부터 아파 오늘도 파스를 붙이고 계셨다고 말한다.",
+  inc=["허리가 오래전부터 아픔", "파스를 붙임"], notes=("허리 통증 호소", "ok"), hour="09:30", bp="126/78", pulse="72", meal="전량", med="복용", fall="없음", style=S("60대 남성","충청"),
+  hypo="미발동."),
+ dict(id="K30", split="dev", kind="neg", cat="만성 통증", expr="-", title="어깨 결림과 마른기침",
+  scene="어르신이 어깨가 결린다고 하시고 며칠 전부터 마른기침을 하신다고 말한다.",
+  inc=["어깨가 결림", "마른기침을 함"], notes=("어깨 결림, 마른기침", "ok"), hour="16:00", bp="124/76", pulse="78", meal="절반", med="복용", fall="없음", style=S("40대 여성","수도권"),
+  hypo="기침은 위험 목록에 없다. 미발동."),
+ # ---- 음성: 과거
+ dict(id="K31", split="test", kind="neg", cat="과거 사건", expr="-", title="작년에 다리가 부었던 이력", gray=True,
+  scene="어르신이 작년에 다리가 퉁퉁 부어 입원한 적이 있다고 이야기하셨고 지금은 괜찮다고 화자가 말한다.",
+  inc=["작년에 다리가 퉁퉁 부어 입원한 적이 있음", "지금은 괜찮음"], notes=NO, hour="14:00", bp="122/76", pulse="74", meal="절반", med="복용", fall="없음", style=S("50대 여성","전라"),
+  hypo="과거 가드로 미발동. 과거 병력을 특이사항에 적을지는 정책이 갈릴 수 있다(gray)."),
+ dict(id="K32", split="dev", kind="neg", cat="과거 사건", expr="-", title="몇 달 전 낙상 이력",
+  scene="어르신이 몇 달 전에 넘어져 고관절을 다치셨던 이야기를 하시고 지금은 잘 걸으신다고 화자가 말한다.",
+  inc=["몇 달 전 넘어져 고관절을 다쳤던 이야기", "지금은 잘 걸음"], notes=NO, hour="11:00", bp="124/78", pulse="76", meal="전량", med="복용", fall="없음", style=S("60대 남성","경상"),
+  hypo="낙상 긍정형+통증 규칙이 과거 낙상에 걸리는지 확인한다. 과거 가드가 post_fall에 없으므로 미발동하지 않을 수 있다(예측: 발동 가능)."),
+ # ---- 음성: 낙상 부정
+ dict(id="K33", split="dev", kind="neg", cat="낙상 부정", expr="-", title="넘어진 적 없고 무릎이 쑤심",
+  scene="어르신이 최근에 넘어지신 적은 없다고 하시고 무릎이 쑤신다고만 하셨다고 화자가 말한다.",
+  inc=["최근 넘어진 적 없음", "무릎이 쑤심"], notes=("무릎 통증 호소", "ok"), hour="13:30", bp="128/80", pulse="78", meal="절반", med="복용", fall="없음", style=S("50대 여성","충청"),
+  hypo="미발동."),
+ dict(id="K34", split="test", kind="neg", cat="낙상 부정", expr="-", title="넘어질 뻔했지만 잡고 섬",
+  scene="어르신이 문턱에 걸려 넘어질 뻔했지만 문틀을 잡고 서서 넘어지지는 않으셨고 손목이 조금 뻐근하다고만 하셨다고 화자가 말한다.",
+  inc=["문턱에 걸려 넘어질 뻔했으나 잡고 섬(넘어지지 않음)", "손목이 조금 뻐근함"], notes=("문턱에 걸려 넘어질 뻔함, 손목이 조금 뻐근함", "ok"), hour="10:30", bp="122/74", pulse="76", meal="절반", med="복용", fall="없음", style=S("40대 남성","수도권"), fall_flag="needs_confirm",
+  hypo="낙상 직전(정책 #8). 낙상 긍정형이 없어 미발동."),
+ # ---- 음성: 기간 없는 식사
+ dict(id="K35", split="dev", kind="neg", cat="기간 없는 식사 감소", expr="-", title="오늘 아침만 거르심",
+  scene="어르신이 오늘 아침만 입맛이 없어 거르셨다고 하고 화자가 점심 전에 죽을 데워 드렸다고 말한다.",
+  inc=["오늘 아침을 거르심(하루만)"], notes=NO, hour="10:00", bp="120/74", pulse="72", meal="미섭취", med="복용", fall="없음", style=S("50대 여성","전라"),
+  hypo="기간 표현이 없어 미발동."),
+ dict(id="K36", split="test", kind="neg", cat="기간 없는 식사 감소", expr="-", title="어제 저녁 한 끼 거름",
+  scene="어르신이 어제 저녁은 거르셨고 오늘은 아침을 반쯤 드셨다고 화자가 말한다.",
+  inc=["어제 저녁 한 끼 거름", "오늘 아침 반쯤 드심"], notes=NO, hour="10:30", bp="122/76", pulse="74", meal="절반", med="복용", fall="없음", style=S("60대 여성","경상"),
+  hypo="미발동."),
+ # ---- 음성: 어휘만 닮음
+ dict(id="K37", split="dev", kind="neg", cat="어휘 유사", expr="-", title="사흘 만에 따님이 와서 같이 식사",
+  scene="따님이 사흘 만에 와서 어르신과 같이 식사를 했고 어르신이 밥을 다 드셨다고 화자가 말한다.",
+  inc=["따님이 사흘 만에 와서 같이 식사", "어르신이 다 드심"], notes=NO, hour="12:30", bp="124/78", pulse="76", meal="전량", med="복용", fall="없음", style=S("50대 남성","강원"),
+  hypo="'사흘 만에'는 거부 표현이 아니다. 미발동."),
+ dict(id="K38", split="test", kind="neg", cat="어휘 유사", expr="-", title="드라마를 보다 가슴이 아팠다는 이야기", gray=True,
+  scene="어르신이 어제 본 드라마 주인공 사연에 가슴이 아팠다고 이야기하시며 눈시울이 붉어지셨다고 화자가 말한다. 신체 증상은 아니다.",
+  inc=["드라마 주인공 사연에 가슴이 아팠다는 이야기(마음이 아픔, 신체 증상 아님)"], notes=NO, hour="14:00", bp="122/76", pulse="74", meal="절반", med="복용", fall="없음", style=S("40대 여성","수도권"),
+  hypo="'가슴이 아프'에 걸려 오발동한다(예측: 오발동). 비유 표현이라 정책이 갈릴 수 있다(gray)."),
+ # ---- 음성: 위험 아닌 기록
+ dict(id="K39", split="test", kind="neg", cat="복약 거부 의사", expr="-", title="약을 안 먹겠다고 하심",
+  scene="어르신이 오늘은 약을 안 먹겠다고 하셔서 드리지 못했다고 화자가 말한다.",
+  inc=["약을 안 먹겠다고 하심(복용 거부 의사)", "약을 드리지 못함"], notes=("복용 거부 의사", "ok"), hour="09:30", bp="124/78", pulse="76", meal="절반", med="미복용", fall="없음", style=S("50대 여성","충청"), med_flag="risk",
+  hypo="복약은 별도 필드에서 risk. 특이사항 Sentinel은 미발동."),
+ dict(id="K40", split="test", kind="neg", cat="기분 변화", expr="-", title="기분이 좋다가 갑자기 우심",
+  scene="어르신이 이야기하다 기분이 좋아 보이셨는데 갑자기 우셨다고 화자가 말한다.",
+  inc=["좋아 보이다 갑자기 우심"], notes=("기분이 좋다가 갑자기 우심", "ok"), hour="15:00", bp="120/76", pulse="72", meal="절반", med="복용", fall="없음", style=S("60대 여성","수도권"),
+  hypo="미발동."),
+]
+
+def gold_field(value, flag="ok", source="stated"):
+    if value is None:
+        return {"value": None, "source": "missing", "flag": "ok" if flag == "ok" else flag, "candidates": []}
+    return {"value": value, "source": source, "flag": flag, "candidates": []}
+
+def build(c):
+    notes = c["notes"]
+    fall_flag = c.get("fall_flag", "risk" if c["fall"] == "있음" else "ok")
+    med_flag = c.get("med_flag", "ok")
+    gold = {
+        "visit_start": gold_field(c["hour"]),
+        "blood_pressure": gold_field(c["bp"]),
+        "pulse": gold_field(c["pulse"]),
+        "meal_intake": gold_field(c["meal"]),
+        "medication_taken": gold_field(c["med"], med_flag),
+        "fall_event": gold_field(c["fall"], fall_flag),
+        "mood": gold_field(None),
+        "special_notes": gold_field(notes[0], notes[1]) if notes else gold_field(None),
+    }
+    h, m = c["hour"].split(":")
+    when = f"방문 시각 {'오전' if int(h) < 12 else '오후'} {int(h) if int(h) <= 12 else int(h) - 12}시" + (f" {int(m)}분" if int(m) else "")
+    sp, dp = c["bp"].split("/")
+    inc = list(c["inc"]) + [when, f"혈압 {sp}에 {dp}", f"맥박 {c['pulse']}",
+                            {"전량": "식사 전량", "절반": "식사 절반", "소량": "식사 소량", "미섭취": "식사 못 함"}[c["meal"]],
+                            "약 복용" if c["med"] == "복용" else "약 못 드림",
+                            "낙상 있음" if c["fall"] == "있음" else "낙상 없음"]
+    mnot = list(c.get("mnot", [])) + ["원인 추정 표현", "병원에 가라는 권유 표현"]
+    return {
+        "spec_id": c["id"], "probe": "R", "split": c["split"], "title": c["title"],
+        "scene": c["scene"] + " 수치는 모두 정상 범위로 말한다.",
+        "style": c["style"], "length_chars": [150, 300],
+        "must_include": inc, "must_not": mnot,
+        "traps": ("위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다." if c["kind"] == "pos"
+                  else f"비슷한 어휘 때문에 위험으로 오인한다({c['cat']})."),
+        "hypothesis": c["hypo"],
+        "policy": f"Sentinel R-set · {c['kind']} · {c['cat']} · 표현 {c['expr']} · 정책 #11 · 위험 기준표",
+        "label_risk": "high" if c.get("review") else ("medium" if c.get("gray") or c["kind"] == "pos" else "low"),
+        "gray_fields": ["special_notes"] if c.get("gray") else [],
+        "author": "llm", "field_review_required": bool(c.get("review")),
+        "gold": gold,
+    }
+
+if __name__ == "__main__":
+    specs = [build(c) for c in CASES]
+    assert len(specs) == 40 and len({s["spec_id"] for s in specs}) == 40
+    OUT.write_text(json.dumps({"version": 1, "probe": "R", "specs": specs}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print("wrote", OUT, len(specs))

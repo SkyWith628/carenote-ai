@@ -580,3 +580,9 @@
 ## 2026-10-27 — Sentinel·Rule Engine dev 캐시 재채점 (비용 0, test 미사용)
 - 16구성(v1~v4 × Haiku·Sonnet × B0·B1) 전부 dev 위험 recall 8/13 → 13/13, F1·과다 확인·확인 recall 불변, 위험이 아닌 필드의 risk flag 0. 상세는 `docs/rule-engine-sentinel-design.md` 마지막 절.
 - 한계: 규칙을 dev에 맞춰 만들었으므로 in-sample이다. 일반화 주장은 R-set 이후에만 한다.
+
+## 2026-10-27 — Sentinel 독립 평가용 R-set 40건 스펙 설계 (API 호출 없음)
+- 설계 `docs/sentinel-rset-design.md`, 스펙 `data/golden/rset/specs/probe_K.json`(dev 20·test 20, 양성 20·어려운 음성 20, 기존 골든셋·동결 매니페스트와 분리). 양성은 규칙 어휘에 가까운 표현 10건과 어휘 밖 표현 10건(must_not으로 어휘 차단)으로 나눠 규칙이 못 보는 영역의 크기를 잰다.
+- 사전 등록 예측: lexicon recall ≥ 75%, novel ≤ 30%, 음성 오발동 최소 K32(과거 낙상, post_fall에 past 가드 없음)·K38(비유 "가슴이 아프"). novel dev recall < 50%이면 LLM 보조 단계를 설계한다. 규칙 수정은 dev로만, 태그 동결 뒤 test 한 번 채점.
+- 수치(혈압) 임계값은 R-set에서 평가하지 않는다(수치는 전부 정상 범위): 정답을 내가 정하게 되어 독립 평가가 안 된다. 정황(K19·K20)은 전문가 확인 전이라 헤드라인 제외.
+- dry-run: 생성 40건 $1.275~$4.194(보정 기대 약 $2.1~2.8), 블라인드 라벨러 약 $1.9(추정 최대 약 $3.5), 합계 기대 약 $4.0~4.7. 호출 0회. 한계: 스펙을 규칙 작성자가 썼다 → 사용자가 novel 양성·음성 8건을 직접 쓰기를 권한다.

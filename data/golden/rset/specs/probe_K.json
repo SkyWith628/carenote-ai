@@ -1,0 +1,3582 @@
+{
+  "version": 1,
+  "probe": "R",
+  "specs": [
+    {
+      "spec_id": "K01",
+      "probe": "R",
+      "split": "dev",
+      "title": "가슴 통증 호소",
+      "scene": "어르신이 가슴이 아프다고 하며 손으로 가슴을 움켜쥐고 앉아 계셨다고 말한다. 표현은 화자가 자연스럽게 정한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "어르신이 가슴 통증을 호소하며 가슴을 움켜쥠",
+        "방문 시각 오전 10시",
+        "혈압 124에 78",
+        "맥박 76",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "어휘에 가까운 표현이 나오면 포착한다. 생성기가 규칙 어휘를 쓰는지가 변수.",
+      "policy": "Sentinel R-set · pos · 흉부·호흡 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "124/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "가슴 통증 호소",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K02",
+      "probe": "R",
+      "split": "dev",
+      "title": "누우면 숨이 막혀 앉아서 주무심",
+      "scene": "어르신이 밤마다 눕기만 하면 컥컥 하시며 앉아서 겨우 주무신다고 보호자에게 들었다고 말한다. 낮에도 몇 걸음 걷고 멈춰 서서 어깨를 들썩이며 숨을 몰아쉬었다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "눕지 못하고 앉아서 주무신다",
+        "걷다 멈춰 서서 어깨를 들썩이며 숨을 몰아쉼",
+        "방문 시각 오후 2시",
+        "혈압 130에 80",
+        "맥박 88",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "숨이 차",
+        "숨찬",
+        "숨이 가쁘",
+        "숨쉬기",
+        "호흡곤란",
+        "호흡 곤란",
+        "가슴이 답답",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "규칙 어휘 밖의 표현이라 놓칠 것이다(예측 recall 낮음).",
+      "policy": "Sentinel R-set · pos · 흉부·호흡 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "130/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "88",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "누우면 숨이 막혀 앉아서 주무심, 걸음 중 숨을 몰아쉼",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K03",
+      "probe": "R",
+      "split": "test",
+      "title": "숨이 가빠 말을 끊어서 함",
+      "scene": "어르신이 숨이 가빠서 말씀을 한 문장씩 끊어 하시고 의자에 기대 쉬셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "40대 남성",
+        "지역": "충청",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "숨이 가빠 말을 끊어서 하심",
+        "방문 시각 오전 11시",
+        "혈압 122에 76",
+        "맥박 84",
+        "식사 소량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "어휘에 가까우면 포착.",
+      "policy": "Sentinel R-set · pos · 흉부·호흡 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "11:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "84",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "소량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "숨이 가빠 말을 끊어서 함",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K04",
+      "probe": "R",
+      "split": "test",
+      "title": "입술이 푸르고 헐떡임",
+      "scene": "어르신 입술이 푸르스름해 보였고 가만히 앉아 계신데도 계속 헐떡이셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "30대 남성",
+        "지역": "강원",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "입술이 푸르스름함",
+        "가만히 있어도 헐떡임",
+        "방문 시각 오후 3시",
+        "혈압 126에 80",
+        "맥박 92",
+        "식사 소량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "숨이 차",
+        "숨찬",
+        "숨이 가쁘",
+        "숨쉬기",
+        "호흡곤란",
+        "호흡 곤란",
+        "가슴",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "규칙 어휘 밖이라 놓친다.",
+      "policy": "Sentinel R-set · pos · 흉부·호흡 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "15:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "126/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "92",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "소량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "입술이 푸르고 가만히 있어도 헐떡임",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K05",
+      "probe": "R",
+      "split": "dev",
+      "title": "말씀이 어눌하고 꼬임",
+      "scene": "어르신 말씀이 평소와 달리 꼬이고 어눌해서 알아듣기 힘들었다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "말이 꼬이고 어눌해 알아듣기 힘듦",
+        "방문 시각 오전 9시 30분",
+        "혈압 118에 74",
+        "맥박 72",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "포착.",
+      "policy": "Sentinel R-set · pos · 신경·의식 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "09:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "118/74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "말이 꼬이고 어눌함",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K06",
+      "probe": "R",
+      "split": "dev",
+      "title": "웃을 때 입꼬리가 삐뚤고 물을 흘림",
+      "scene": "어르신이 웃으실 때 입꼬리 한쪽만 올라가고 물을 마시다 입가로 흘리셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "웃을 때 입꼬리가 삐뚤어짐",
+        "물을 마시다 입가로 흘림",
+        "방문 시각 오후 1시",
+        "혈압 128에 82",
+        "맥박 74",
+        "식사 전량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "한쪽",
+        "처지",
+        "돌아",
+        "어눌",
+        "마비",
+        "힘이 없",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "'한쪽'을 못 쓰게 했으므로 놓친다.",
+      "policy": "Sentinel R-set · pos · 신경·의식 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "13:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "128/82",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "입꼬리가 삐뚤어지고 물을 흘림",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K07",
+      "probe": "R",
+      "split": "test",
+      "title": "오른팔에 힘이 빠져 숟가락을 놓침",
+      "scene": "어르신이 오른팔에 힘이 안 들어간다며 숟가락을 떨어뜨리셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 남성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "오른팔에 힘이 안 들어가 숟가락을 떨어뜨림",
+        "방문 시각 오후 12시 30분",
+        "혈압 132에 84",
+        "맥박 78",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "포착.",
+      "policy": "Sentinel R-set · pos · 신경·의식 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "12:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "132/84",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "오른팔에 힘이 안 들어감, 숟가락을 떨어뜨림",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K08",
+      "probe": "R",
+      "split": "test",
+      "title": "대답이 느리고 날짜를 못 맞춤",
+      "scene": "어르신이 오늘따라 불러도 한참 있다 대답하고 멍하니 앉아 계셨으며 오늘이 무슨 요일인지 물어도 못 맞추셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "부르면 한참 뒤에 대답함",
+        "요일을 못 맞춤",
+        "방문 시각 오전 10시 30분",
+        "혈압 120에 78",
+        "맥박 70",
+        "식사 소량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "의식",
+        "흐리",
+        "정신이 없",
+        "어눌",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "규칙 어휘 밖이라 놓친다.",
+      "policy": "Sentinel R-set · pos · 신경·의식 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "120/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "소량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "대답이 느리고 멍하며 요일을 못 맞춤",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K09",
+      "probe": "R",
+      "split": "dev",
+      "title": "나흘째 식사를 안 하심",
+      "scene": "어르신이 나흘째 식사를 하지 않으시고 오늘도 상을 물리셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "충청",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "나흘째 식사를 안 하심",
+        "오늘도 상을 물림",
+        "방문 시각 오전 11시 30분",
+        "혈압 116에 70",
+        "맥박 68",
+        "식사 못 함",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "포착.",
+      "policy": "Sentinel R-set · pos · 식사·수분 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "11:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "116/70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "68",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "미섭취",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "나흘째 식사 거부",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K10",
+      "probe": "R",
+      "split": "dev",
+      "title": "금요일부터 오늘까지 아무것도 안 드심",
+      "scene": "오늘은 화요일이다. 어르신이 지난 금요일부터 오늘까지 한 끼도 안 드셨고 물도 거의 안 마셨다고 요일로 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 남성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "금요일부터 오늘 화요일까지 식사를 안 하심",
+        "물도 거의 안 마심",
+        "방문 시각 오전 10시",
+        "혈압 114에 70",
+        "맥박 66",
+        "식사 못 함",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "이틀",
+        "사흘",
+        "나흘",
+        "닷새",
+        "일째",
+        "째",
+        "동안",
+        "연속",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "기간을 요일로 말해 놓친다.",
+      "policy": "Sentinel R-set · pos · 식사·수분 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "114/70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "66",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "미섭취",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "금요일부터 식사 안 함, 물도 거의 안 마심",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K11",
+      "probe": "R",
+      "split": "test",
+      "title": "물도 사흘째 거의 못 드심",
+      "scene": "어르신이 사흘째 물도 거의 못 드신다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "사흘째 물도 거의 못 드심",
+        "방문 시각 오후 3시 30분",
+        "혈압 112에 68",
+        "맥박 80",
+        "식사 못 함",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "포착.",
+      "policy": "Sentinel R-set · pos · 식사·수분 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "15:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "112/68",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "미섭취",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "사흘째 물도 거의 못 마심",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K12",
+      "probe": "R",
+      "split": "test",
+      "title": "일주일 가까이 죽 한 숟가락으로 버팀",
+      "scene": "어르신이 일주일 가까이 하루 죽 한 숟가락 정도로 버티시고 상 앞에서 고개만 저으신다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "일주일 가까이 하루에 죽 한 숟가락 정도만 드심",
+        "방문 시각 오후 12시",
+        "혈압 110에 66",
+        "맥박 74",
+        "식사 소량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "이틀",
+        "사흘",
+        "나흘",
+        "닷새",
+        "일째",
+        "째",
+        "동안",
+        "연속",
+        "거부",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "기간 표현이 규칙 밖이라 놓친다.",
+      "policy": "Sentinel R-set · pos · 식사·수분 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "12:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "110/66",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "소량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "일주일 가까이 하루 죽 한 숟가락 정도만 드심",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K13",
+      "probe": "R",
+      "split": "dev",
+      "title": "두 다리가 퉁퉁 부음",
+      "scene": "어르신 두 다리가 갑자기 퉁퉁 부어서 바지가 안 올라갔다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "두 다리가 갑자기 퉁퉁 부음",
+        "방문 시각 오후 2시 30분",
+        "혈압 128에 78",
+        "맥박 82",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "포착.",
+      "policy": "Sentinel R-set · pos · 신체 변화 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "14:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "128/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "82",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "두 다리가 갑자기 부음",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K14",
+      "probe": "R",
+      "split": "dev",
+      "title": "발등이 빵빵하고 양말 자국이 깊음",
+      "scene": "어르신 발등이 빵빵하고 양말 자국이 깊게 패였으며 손가락으로 누르면 자국이 한참 남았다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "충청",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "발등이 빵빵함",
+        "양말 자국이 깊고 눌러도 자국이 남음",
+        "방문 시각 오후 4시",
+        "혈압 126에 76",
+        "맥박 78",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "붓",
+        "부어",
+        "부었",
+        "부종",
+        "퉁퉁",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "어휘 밖이라 놓친다.",
+      "policy": "Sentinel R-set · pos · 신체 변화 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "16:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "126/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "발등이 빵빵하고 눌러도 자국이 남음",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K15",
+      "probe": "R",
+      "split": "test",
+      "title": "코피가 오래 멎지 않음",
+      "scene": "어르신이 코에서 피가 나서 한참 멎지 않아 휴지를 여러 장 쓰셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 남성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "코에서 피가 한참 멎지 않음",
+        "방문 시각 오전 9시",
+        "혈압 130에 80",
+        "맥박 76",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "'피가 나'가 있으면 포착.",
+      "policy": "Sentinel R-set · pos · 신체 변화 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "09:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "130/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "코피가 오래 멎지 않음",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K16",
+      "probe": "R",
+      "split": "test",
+      "title": "엉덩이 상처에서 노란 진물",
+      "scene": "어르신 엉덩이 쪽 상처에서 노란 진물이 계속 나오고 냄새가 나서 거즈를 갈았다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "엉덩이 쪽 상처에서 노란 진물과 냄새",
+        "방문 시각 오후 1시 30분",
+        "혈압 124에 76",
+        "맥박 80",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "곪",
+        "깊",
+        "벌어",
+        "출혈",
+        "피가",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "어휘 밖이라 놓친다.",
+      "policy": "Sentinel R-set · pos · 신체 변화 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "13:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "124/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "엉덩이 상처에서 노란 진물과 냄새",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K17",
+      "probe": "R",
+      "split": "dev",
+      "title": "어제 화장실에서 넘어지고 허리를 못 폄",
+      "scene": "어르신이 어젯밤 화장실에서 미끄러져 넘어지셨고 오늘 허리를 못 펴고 아파하신다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "어젯밤 화장실에서 넘어지심",
+        "오늘 허리가 아파 못 펌",
+        "방문 시각 오전 11시",
+        "혈압 122에 78",
+        "맥박 80",
+        "식사 소량",
+        "약 복용",
+        "낙상 있음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "포착(문장이 갈려도 앞 2문장 안이면).",
+      "policy": "Sentinel R-set · pos · 낙상 후 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "11:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "소량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "있음",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "어제 낙상 후 허리 통증",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K18",
+      "probe": "R",
+      "split": "test",
+      "title": "이불에 걸려 주저앉고 다리를 끎",
+      "scene": "어르신이 엊그제 이불에 걸려 그 자리에 주저앉으셨다고 하고, 오늘은 오른쪽 다리를 끌며 걸으시고 체중을 못 싣겠다고 하신다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "40대 남성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "보통"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "이불에 걸려 주저앉음(낙상)",
+        "오른쪽 다리를 끌며 걷고 체중을 못 실음",
+        "방문 시각 오전 10시",
+        "혈압 128에 80",
+        "맥박 84",
+        "식사 절반",
+        "약 복용",
+        "낙상 있음"
+      ],
+      "must_not": [
+        "넘어지",
+        "쓰러지",
+        "미끄러",
+        "아프",
+        "붓",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "'주저앉'은 낙상 어휘 밖이라 놓친다.",
+      "policy": "Sentinel R-set · pos · 낙상 후 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "128/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "84",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "있음",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "엊그제 주저앉은 뒤 오른다리를 끌며 걷고 체중을 못 실음",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K19",
+      "probe": "R",
+      "split": "dev",
+      "title": "손자국 같은 멍과 아드님 얘기에 입을 닫음",
+      "scene": "어르신 팔뚝에 손가락 모양으로 보이는 멍이 있었고, 아드님 얘기를 꺼내자 어르신이 입을 꾹 닫고 고개를 돌리셨다고 조심스럽게 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "팔뚝에 손가락 모양 멍",
+        "아드님 얘기에 입을 닫고 고개를 돌림",
+        "방문 시각 오후 2시",
+        "혈압 122에 74",
+        "맥박 76",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "멍이 여러",
+        "곳곳",
+        "때리",
+        "폭행",
+        "학대",
+        "위축",
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "어휘 밖이라 놓친다. 정답 자체가 전문가 확인 전이라 헤드라인에서 제외.",
+      "policy": "Sentinel R-set · pos · 정황 · 표현 novel · 정책 #11 · 위험 기준표",
+      "label_risk": "high",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": true,
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "팔뚝에 손가락 모양 멍, 아드님 얘기에 입을 닫음",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K20",
+      "probe": "R",
+      "split": "test",
+      "title": "때렸다는 말을 작은 소리로 함",
+      "scene": "어르신이 그 사람이 소리 지르고 때렸다고 작은 소리로 말씀하셨다고 화자가 전한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "누가 소리 지르고 때렸다고 작은 소리로 말함",
+        "방문 시각 오후 12시",
+        "혈압 118에 72",
+        "맥박 74",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "위험 신호를 특이사항에서 빠뜨리거나 위험 표시가 붙지 않는다.",
+      "hypothesis": "'때렸'이 있으면 포착. 정답 자체가 전문가 확인 전이라 헤드라인에서 제외.",
+      "policy": "Sentinel R-set · pos · 정황 · 표현 lexicon · 정책 #11 · 위험 기준표",
+      "label_risk": "high",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": true,
+      "gold": {
+        "visit_start": {
+          "value": "12:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "118/72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "누가 소리 지르고 때렸다고 작은 소리로 말함",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K21",
+      "probe": "R",
+      "split": "dev",
+      "title": "가슴·호흡 이상 없다고 확인",
+      "scene": "화자가 가슴이 답답하거나 숨이 찬 것은 없이 편안하셨다고 확인하듯 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "가슴이 답답하거나 숨이 차지 않으셨다",
+        "방문 시각 오전 10시",
+        "혈압 120에 76",
+        "맥박 72",
+        "식사 전량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(부정).",
+      "hypothesis": "부정 가드로 미발동.",
+      "policy": "Sentinel R-set · neg · 부정 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "120/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K22",
+      "probe": "R",
+      "split": "test",
+      "title": "말씀과 팔 힘 모두 괜찮음",
+      "scene": "화자가 어르신 말씀이 또렷하셨고 팔에 힘도 잘 들어가 컵을 문제없이 드셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 남성",
+        "지역": "충청",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "말씀이 어눌하지 않고 또렷함",
+        "팔에 힘이 있어 컵을 문제없이 듦",
+        "방문 시각 오전 11시",
+        "혈압 124에 78",
+        "맥박 74",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(부정).",
+      "hypothesis": "'어눌하지', '힘이 없지 않' 형태면 부정 가드로 미발동.",
+      "policy": "Sentinel R-set · neg · 부정 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "11:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "124/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K23",
+      "probe": "R",
+      "split": "dev",
+      "title": "발·다리 붓기 없음",
+      "scene": "화자가 발이나 다리가 붓지 않았고 신발도 잘 들어갔다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "발과 다리가 붓지 않음",
+        "신발이 잘 들어감",
+        "방문 시각 오후 3시",
+        "혈압 118에 72",
+        "맥박 70",
+        "식사 전량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(부정).",
+      "hypothesis": "부정 가드로 미발동.",
+      "policy": "Sentinel R-set · neg · 부정 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "15:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "118/72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "70",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K24",
+      "probe": "R",
+      "split": "test",
+      "title": "가슴 답답하면 연락하라고 안내",
+      "scene": "화자가 어르신께 가슴이 답답하거나 숨이 차면 바로 센터로 전화하시라고 안내드렸다고 말한다. 어르신은 그 순간 편안하셨다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "가슴이 답답하거나 숨이 차면 센터로 전화하라고 안내함",
+        "현재는 편안하셨음",
+        "방문 시각 오전 10시 30분",
+        "혈압 122에 76",
+        "맥박 72",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(조언·가정).",
+      "hypothesis": "조언·가정 가드로 미발동. 안내 사실을 특이사항에 적을지는 정책이 갈릴 수 있다(gray).",
+      "policy": "Sentinel R-set · neg · 조언·가정 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [
+        "special_notes"
+      ],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K25",
+      "probe": "R",
+      "split": "dev",
+      "title": "말이 어눌해지면 119라고 안내",
+      "scene": "화자가 팔에 힘이 빠지거나 말이 어눌해지면 바로 119에 전화하시라고 안내드렸다고 말한다. 어르신은 평소처럼 말씀하셨다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 남성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "팔에 힘이 빠지거나 말이 어눌해지면 119에 전화하라고 안내함",
+        "현재는 평소와 같음",
+        "방문 시각 오후 1시",
+        "혈압 126에 80",
+        "맥박 76",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(조언·가정).",
+      "hypothesis": "조언·가정 가드로 미발동.",
+      "policy": "Sentinel R-set · neg · 조언·가정 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [
+        "special_notes"
+      ],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "13:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "126/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K26",
+      "probe": "R",
+      "split": "dev",
+      "title": "남편분이 가슴이 답답해 병원에 다녀옴",
+      "scene": "어르신의 남편분이 어제 가슴이 답답해 병원에 다녀오셨다는 이야기를 어르신이 전하셨다고 말한다. 어르신 본인은 편안하셨다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "강원",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "남편분이 가슴이 답답해 병원에 다녀옴(어르신 본인 아님)",
+        "어르신은 편안함",
+        "방문 시각 오후 2시",
+        "혈압 122에 78",
+        "맥박 74",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(제3자).",
+      "hypothesis": "제3자 가드로 미발동.",
+      "policy": "Sentinel R-set · neg · 제3자 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K27",
+      "probe": "R",
+      "split": "test",
+      "title": "옆집 할머니가 쓰러져 실려 감",
+      "scene": "옆집 할머니가 어제 쓰러져 구급차에 실려 가셨다는 이야기를 어르신이 하셨다고 말한다. 어르신 본인은 멀쩡하셨다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "옆집 할머니가 쓰러져 구급차로 감(어르신 본인 아님)",
+        "어르신은 멀쩡함",
+        "방문 시각 오전 11시 30분",
+        "혈압 120에 74",
+        "맥박 72",
+        "식사 전량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(제3자).",
+      "hypothesis": "제3자 가드로 미발동.",
+      "policy": "Sentinel R-set · neg · 제3자 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "11:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "120/74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K28",
+      "probe": "R",
+      "split": "dev",
+      "title": "무릎이 늘 쑤심",
+      "scene": "어르신이 무릎이 늘 쑤신다며 오늘도 파스를 붙이셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "무릎이 늘 쑤심",
+        "파스를 붙임",
+        "방문 시각 오전 10시",
+        "혈압 130에 80",
+        "맥박 76",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(만성 통증).",
+      "hypothesis": "위험 규칙 없음, 미발동.",
+      "policy": "Sentinel R-set · neg · 만성 통증 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "130/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "무릎 통증 호소",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K29",
+      "probe": "R",
+      "split": "test",
+      "title": "허리가 아파 파스를 붙임",
+      "scene": "어르신이 허리가 오래전부터 아파 오늘도 파스를 붙이고 계셨다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 남성",
+        "지역": "충청",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "허리가 오래전부터 아픔",
+        "파스를 붙임",
+        "방문 시각 오전 9시 30분",
+        "혈압 126에 78",
+        "맥박 72",
+        "식사 전량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(만성 통증).",
+      "hypothesis": "미발동.",
+      "policy": "Sentinel R-set · neg · 만성 통증 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "09:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "126/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "허리 통증 호소",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K30",
+      "probe": "R",
+      "split": "dev",
+      "title": "어깨 결림과 마른기침",
+      "scene": "어르신이 어깨가 결린다고 하시고 며칠 전부터 마른기침을 하신다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "어깨가 결림",
+        "마른기침을 함",
+        "방문 시각 오후 4시",
+        "혈압 124에 76",
+        "맥박 78",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(만성 통증).",
+      "hypothesis": "기침은 위험 목록에 없다. 미발동.",
+      "policy": "Sentinel R-set · neg · 만성 통증 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "16:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "124/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "어깨 결림, 마른기침",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K31",
+      "probe": "R",
+      "split": "test",
+      "title": "작년에 다리가 부었던 이력",
+      "scene": "어르신이 작년에 다리가 퉁퉁 부어 입원한 적이 있다고 이야기하셨고 지금은 괜찮다고 화자가 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "작년에 다리가 퉁퉁 부어 입원한 적이 있음",
+        "지금은 괜찮음",
+        "방문 시각 오후 2시",
+        "혈압 122에 76",
+        "맥박 74",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(과거 사건).",
+      "hypothesis": "과거 가드로 미발동. 과거 병력을 특이사항에 적을지는 정책이 갈릴 수 있다(gray).",
+      "policy": "Sentinel R-set · neg · 과거 사건 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [
+        "special_notes"
+      ],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K32",
+      "probe": "R",
+      "split": "dev",
+      "title": "몇 달 전 낙상 이력",
+      "scene": "어르신이 몇 달 전에 넘어져 고관절을 다치셨던 이야기를 하시고 지금은 잘 걸으신다고 화자가 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 남성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "몇 달 전 넘어져 고관절을 다쳤던 이야기",
+        "지금은 잘 걸음",
+        "방문 시각 오전 11시",
+        "혈압 124에 78",
+        "맥박 76",
+        "식사 전량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(과거 사건).",
+      "hypothesis": "낙상 긍정형+통증 규칙이 과거 낙상에 걸리는지 확인한다. 과거 가드가 post_fall에 없으므로 미발동하지 않을 수 있다(예측: 발동 가능).",
+      "policy": "Sentinel R-set · neg · 과거 사건 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "11:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "124/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K33",
+      "probe": "R",
+      "split": "dev",
+      "title": "넘어진 적 없고 무릎이 쑤심",
+      "scene": "어르신이 최근에 넘어지신 적은 없다고 하시고 무릎이 쑤신다고만 하셨다고 화자가 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "충청",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "최근 넘어진 적 없음",
+        "무릎이 쑤심",
+        "방문 시각 오후 1시 30분",
+        "혈압 128에 80",
+        "맥박 78",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(낙상 부정).",
+      "hypothesis": "미발동.",
+      "policy": "Sentinel R-set · neg · 낙상 부정 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "13:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "128/80",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "무릎 통증 호소",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K34",
+      "probe": "R",
+      "split": "test",
+      "title": "넘어질 뻔했지만 잡고 섬",
+      "scene": "어르신이 문턱에 걸려 넘어질 뻔했지만 문틀을 잡고 서서 넘어지지는 않으셨고 손목이 조금 뻐근하다고만 하셨다고 화자가 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "40대 남성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "문턱에 걸려 넘어질 뻔했으나 잡고 섬(넘어지지 않음)",
+        "손목이 조금 뻐근함",
+        "방문 시각 오전 10시 30분",
+        "혈압 122에 74",
+        "맥박 76",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(낙상 부정).",
+      "hypothesis": "낙상 직전(정책 #8). 낙상 긍정형이 없어 미발동.",
+      "policy": "Sentinel R-set · neg · 낙상 부정 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "needs_confirm",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "문턱에 걸려 넘어질 뻔함, 손목이 조금 뻐근함",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K35",
+      "probe": "R",
+      "split": "dev",
+      "title": "오늘 아침만 거르심",
+      "scene": "어르신이 오늘 아침만 입맛이 없어 거르셨다고 하고 화자가 점심 전에 죽을 데워 드렸다고 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "전라",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "오늘 아침을 거르심(하루만)",
+        "방문 시각 오전 10시",
+        "혈압 120에 74",
+        "맥박 72",
+        "식사 못 함",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(기간 없는 식사 감소).",
+      "hypothesis": "기간 표현이 없어 미발동.",
+      "policy": "Sentinel R-set · neg · 기간 없는 식사 감소 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "120/74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "미섭취",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K36",
+      "probe": "R",
+      "split": "test",
+      "title": "어제 저녁 한 끼 거름",
+      "scene": "어르신이 어제 저녁은 거르셨고 오늘은 아침을 반쯤 드셨다고 화자가 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "경상",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "어제 저녁 한 끼 거름",
+        "오늘 아침 반쯤 드심",
+        "방문 시각 오전 10시 30분",
+        "혈압 122에 76",
+        "맥박 74",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(기간 없는 식사 감소).",
+      "hypothesis": "미발동.",
+      "policy": "Sentinel R-set · neg · 기간 없는 식사 감소 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "10:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K37",
+      "probe": "R",
+      "split": "dev",
+      "title": "사흘 만에 따님이 와서 같이 식사",
+      "scene": "따님이 사흘 만에 와서 어르신과 같이 식사를 했고 어르신이 밥을 다 드셨다고 화자가 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 남성",
+        "지역": "강원",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "따님이 사흘 만에 와서 같이 식사",
+        "어르신이 다 드심",
+        "방문 시각 오후 12시 30분",
+        "혈압 124에 78",
+        "맥박 76",
+        "식사 전량",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(어휘 유사).",
+      "hypothesis": "'사흘 만에'는 거부 표현이 아니다. 미발동.",
+      "policy": "Sentinel R-set · neg · 어휘 유사 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "12:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "124/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "전량",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K38",
+      "probe": "R",
+      "split": "test",
+      "title": "드라마를 보다 가슴이 아팠다는 이야기",
+      "scene": "어르신이 어제 본 드라마 주인공 사연에 가슴이 아팠다고 이야기하시며 눈시울이 붉어지셨다고 화자가 말한다. 신체 증상은 아니다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "40대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "드라마 주인공 사연에 가슴이 아팠다는 이야기(마음이 아픔, 신체 증상 아님)",
+        "방문 시각 오후 2시",
+        "혈압 122에 76",
+        "맥박 74",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(어휘 유사).",
+      "hypothesis": "'가슴이 아프'에 걸려 오발동한다(예측: 오발동). 비유 표현이라 정책이 갈릴 수 있다(gray).",
+      "policy": "Sentinel R-set · neg · 어휘 유사 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "medium",
+      "gray_fields": [
+        "special_notes"
+      ],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "14:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "122/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "74",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K39",
+      "probe": "R",
+      "split": "test",
+      "title": "약을 안 먹겠다고 하심",
+      "scene": "어르신이 오늘은 약을 안 먹겠다고 하셔서 드리지 못했다고 화자가 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "50대 여성",
+        "지역": "충청",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "약을 안 먹겠다고 하심(복용 거부 의사)",
+        "약을 드리지 못함",
+        "방문 시각 오전 9시 30분",
+        "혈압 124에 78",
+        "맥박 76",
+        "식사 절반",
+        "약 못 드림",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(복약 거부 의사).",
+      "hypothesis": "복약은 별도 필드에서 risk. 특이사항 Sentinel은 미발동.",
+      "policy": "Sentinel R-set · neg · 복약 거부 의사 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "09:30",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "124/78",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "미복용",
+          "source": "stated",
+          "flag": "risk",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "복용 거부 의사",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    },
+    {
+      "spec_id": "K40",
+      "probe": "R",
+      "split": "test",
+      "title": "기분이 좋다가 갑자기 우심",
+      "scene": "어르신이 이야기하다 기분이 좋아 보이셨는데 갑자기 우셨다고 화자가 말한다. 수치는 모두 정상 범위로 말한다.",
+      "style": {
+        "화자": "60대 여성",
+        "지역": "수도권",
+        "격식": "존댓말",
+        "말더듬": "약함"
+      },
+      "length_chars": [
+        150,
+        300
+      ],
+      "must_include": [
+        "좋아 보이다 갑자기 우심",
+        "방문 시각 오후 3시",
+        "혈압 120에 76",
+        "맥박 72",
+        "식사 절반",
+        "약 복용",
+        "낙상 없음"
+      ],
+      "must_not": [
+        "원인 추정 표현",
+        "병원에 가라는 권유 표현"
+      ],
+      "traps": "비슷한 어휘 때문에 위험으로 오인한다(기분 변화).",
+      "hypothesis": "미발동.",
+      "policy": "Sentinel R-set · neg · 기분 변화 · 표현 - · 정책 #11 · 위험 기준표",
+      "label_risk": "low",
+      "gray_fields": [],
+      "author": "llm",
+      "field_review_required": false,
+      "gold": {
+        "visit_start": {
+          "value": "15:00",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "blood_pressure": {
+          "value": "120/76",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "pulse": {
+          "value": "72",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "meal_intake": {
+          "value": "절반",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "medication_taken": {
+          "value": "복용",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "fall_event": {
+          "value": "없음",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        },
+        "mood": {
+          "value": null,
+          "source": "missing",
+          "flag": "ok",
+          "candidates": []
+        },
+        "special_notes": {
+          "value": "기분이 좋다가 갑자기 우심",
+          "source": "stated",
+          "flag": "ok",
+          "candidates": []
+        }
+      }
+    }
+  ]
+}
