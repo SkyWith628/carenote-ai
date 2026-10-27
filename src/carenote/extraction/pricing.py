@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from threading import Lock
 
 
 @dataclass(frozen=True)
@@ -50,6 +51,7 @@ class CostGuard:
         self.limit_usd = limit_usd
         self._price = price
         self.spent_usd = 0.0
+        self._lock = Lock()
 
     def check(self) -> None:
         """한도에 도달했으면 BudgetExceeded."""
@@ -60,4 +62,5 @@ class CostGuard:
 
     def add(self, input_tokens: int, output_tokens: int) -> None:
         """호출 비용을 누적한다."""
-        self.spent_usd += cost_usd(self._price, input_tokens, output_tokens)
+        with self._lock:
+            self.spent_usd += cost_usd(self._price, input_tokens, output_tokens)

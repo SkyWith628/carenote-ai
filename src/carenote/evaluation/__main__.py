@@ -47,7 +47,20 @@ from carenote.extraction.prompts import (
     PromptVersion,
     Variant,
 )
+from carenote.extraction.relistener import (
+    RelistenerEstimate,
+    TextRelistener,
+    estimate_relistener_run,
+    format_relistener_estimate,
+)
 from carenote.extraction.sentinel import load_rules
+from carenote.extraction.verifier import (
+    Verifier,
+    VerifierEstimate,
+    VerifyingExtractor,
+    estimate_verifier_run,
+    format_verifier_estimate,
+)
 
 DEFAULT_GOLDEN = Path("data/golden")
 EXIT_REFUSED = 2
@@ -166,6 +179,15 @@ def format_report(report: EvalReport) -> str:
             f"latency={float(str(u.get('latency_s') or 0)):.1f}s "
             f"cost≈${u.get('estimated_cost_usd')}"
         )
+        for name in ("verifier", "relistener"):
+            v = u.get(name)
+            if not isinstance(v, dict):
+                continue
+            lines.append(
+                f"{name}: calls={v.get('calls')} cache_hits={v.get('cache_hits')} "
+                f"failures={v.get('failures')} downgraded={v.get('downgraded')} "
+                f"cost≈${v.get('estimated_cost_usd')}"
+            )
     return "\n".join(lines)
 
 
@@ -189,6 +211,18 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Sentinel·수치 Rule Engine(rules/sentinel.yaml)을 켠다. dev 분할 LLM 실행에만 허용"
         " (test는 규칙의 독립 평가가 아니다: docs/rule-engine-sentinel-design.md 6장)",
+    )
+    parser.add_argument(
+        "--verifier",
+        action="store_true",
+        help="Verifier(타 티어 모델 재검증, docs/verifier-design.md)를 켠다. dev 분할 LLM 실행에만"
+        " 허용. 모델은 설정(CARENOTE_VERIFIER_MODEL), 비용은 --approve-cost에 합산한다",
+    )
+    parser.add_argument(
+        "--relistener",
+        action="store_true",
+        help="Re-listener 텍스트 폴백(docs/relistener-design.md)을 켠다. dev 분할"
+        " LLM 실행에만 허용. --verifier와 함께 쓰면 Verifier 위에 겹친다",
     )
     parser.add_argument("--out", type=Path, default=None, help="JSON 보고서 저장 경로")
     parser.add_argument("--model", default=None, help="기본값은 설정(CARENOTE_EXTRACTOR_MODEL)")
@@ -307,7 +341,66 @@ def _run_llm(
     tag = f" · 실행 태그 {args.run_tag}" if args.run_tag else ""
     chosen = f" · 편집 {','.join(map(str, edits))}" if edits is not None else ""
     print(f"  프롬프트 {prompt_version}{chosen} · 변형 {variant}{tag}")
+    rules = load_rules() if args.sentinel else None
+    verifier_estimate: VerifierEstimate | None = None
+    verifier_price = price_for(settings.verifier_model)
+    if args.verifier:
+        if verifier_price is None:
+            print(f"단가가 등록되지 않은 Verifier 모델: {settings.verifier_model}", file=sys.stderr)
+            return EXIT_REFUSED
+        probe_verifier = Verifier(
+            _NoClient(),  # type: ignore[arg-type]
+            model=settings.verifier_model,
+            effort=settings.verifier_effort,
+            cache_dir=Path(settings.verifier_cache_dir),
+            run_tag=args.run_tag,
+        )
+        verifier_estimate = estimate_verifier_run(
+            probe_verifier,
+            FlaggingExtractor(probe, rules),
+            probe.is_cached,
+            [c.transcript for c in cases],
+            settings.verifier_model,
+        )
+        print(
+            format_verifier_estimate(
+                settings.verifier_model, settings.verifier_effort, verifier_estimate
+            )
+        )
+    relistener_estimate: RelistenerEstimate | None = None
+    relistener_price = price_for(settings.relistener_model)
+    if args.relistener:
+        if relistener_price is None:
+            print(
+                f"단가가 등록되지 않은 Re-listener 모델: {settings.relistener_model}",
+                file=sys.stderr,
+            )
+            return EXIT_REFUSED
+        probe_relistener = TextRelistener(
+            _NoClient(),  # type: ignore[arg-type]
+            model=settings.relistener_model,
+            effort=settings.relistener_effort,
+            cache_dir=Path(settings.relistener_cache_dir),
+            run_tag=args.run_tag,
+        )
+        relistener_estimate = estimate_relistener_run(
+            probe_relistener,
+            FlaggingExtractor(probe, rules),
+            probe.is_cached,
+            [c.transcript for c in cases],
+            settings.relistener_model,
+        )
+        print(
+            format_relistener_estimate(
+                settings.relistener_model, settings.relistener_effort, relistener_estimate
+            )
+        )
+    verifier_limit = verifier_estimate.cost_high if verifier_estimate else 0.0
+    relistener_limit = relistener_estimate.cost_high if relistener_estimate else 0.0
+    total_high = estimate.cost_high + verifier_limit + relistener_limit
     if args.dry_run:
+        if verifier_estimate is not None or relistener_estimate is not None:
+            print(f"  합계 최대 ${total_high:.3f}")
         print("  (dry-run: API를 호출하지 않았다)")
         return 0
 
@@ -319,9 +412,9 @@ def _run_llm(
             file=sys.stderr,
         )
         return EXIT_REFUSED
-    if estimate.cost_high > approved:
+    if total_high > approved:
         print(
-            f"\n실행 거부: 추정 최대 비용 ${estimate.cost_high:.3f}가 승인액 ${approved:.2f}를 "
+            f"\n실행 거부: 추정 최대 비용 ${total_high:.3f}가 승인액 ${approved:.2f}를 "
             "넘는다. --limit으로 줄이거나 승인액을 올린다.",
             file=sys.stderr,
         )
@@ -330,7 +423,8 @@ def _run_llm(
         print("\n실행 거부: ANTHROPIC_API_KEY가 없다 (.env에 넣는다).", file=sys.stderr)
         return EXIT_REFUSED
 
-    guard = CostGuard(approved, price)
+    # 승인액을 모델별 추정 최대 비용으로 나눠 합계가 승인액을 넘지 않게 한다.
+    guard = CostGuard(approved - verifier_limit - relistener_limit, price)
     if args.split != "dev":
         print(
             final_run_banner(
@@ -356,8 +450,32 @@ def _run_llm(
         run_tag=args.run_tag,
         prompt_edits=edits,
     )
-    rules = load_rules() if args.sentinel else None
     extractor: Extractor = FlaggingExtractor(llm, rules)
+    if args.verifier and verifier_price is not None:
+        extractor = VerifyingExtractor(
+            extractor,
+            Verifier(
+                client_factory(settings),
+                model=settings.verifier_model,
+                effort=settings.verifier_effort,
+                cache_dir=Path(settings.verifier_cache_dir),
+                guard=CostGuard(max(verifier_limit, 0.0001), verifier_price),
+                run_tag=args.run_tag,
+            ),
+        )
+    if args.relistener and relistener_price is not None:
+        extractor = VerifyingExtractor(
+            extractor,
+            TextRelistener(
+                client_factory(settings),
+                model=settings.relistener_model,
+                effort=settings.relistener_effort,
+                cache_dir=Path(settings.relistener_cache_dir),
+                guard=CostGuard(max(relistener_limit, 0.0001), relistener_price),
+                run_tag=args.run_tag,
+            ),
+            name="relistener",
+        )
     try:
         report = evaluate(extractor, cases, args.split)
     except BudgetExceeded as exc:
@@ -385,6 +503,16 @@ def main(
 ) -> int:
     """CLI 진입점. settings·client_factory는 테스트에서 바꿔 끼운다."""
     args = _build_parser().parse_args(argv)
+    if (args.verifier or args.relistener) and (
+        args.split != "dev" or args.extractor not in LLM_CHOICES
+    ):
+        print(
+            "--verifier·--relistener는 dev 분할의 LLM 실행에만 쓸 수 있다. "
+            "test는 이미 최종 보고에 썼으므로 "
+            "Verifier 튜닝에 쓰지 않는다 (docs/verifier-design.md).",
+            file=sys.stderr,
+        )
+        return EXIT_REFUSED
     if args.sentinel and (args.split != "dev" or args.extractor not in LLM_CHOICES):
         print(
             "--sentinel은 dev 분할의 LLM 실행에만 쓸 수 있다. test 케이스는 이 규칙의 설계 근거와 "

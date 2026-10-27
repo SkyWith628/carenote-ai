@@ -7,6 +7,7 @@ STT 오인식을 걸러내기 위한 "생리적으로 불가능한 범위"다. �
 from __future__ import annotations
 
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 from carenote.evaluation.extractor import Extractor, PredictedField, SupportsUsage
 from carenote.evaluation.schema import RISK_FIELDS, FieldKey, Flag, Source
@@ -180,10 +181,18 @@ class FlaggingExtractor:
 
     def extract(self, transcript: str) -> list[PredictedField]:
         """추출 후 모든 키에 대해 flag를 계산해 반환한다."""
-        by_key = {f.key: f for f in self._inner.extract(transcript)}
-        found = scan_text(transcript, self._rules) if self._rules is not None else []
         if self._assist is not None:
-            assisted = self._assist.assess(transcript)
+            # Extractor와 Sentinel 보조는 서로의 결과가 필요 없어 동시에 실행한다(지연 ≈ 느린 쪽).
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                extracted = pool.submit(self._inner.extract, transcript)
+                assisted = self._assist.assess(transcript)
+                inner_fields = extracted.result()
+        else:
+            assisted = None
+            inner_fields = self._inner.extract(transcript)
+        by_key = {f.key: f for f in inner_fields}
+        found = scan_text(transcript, self._rules) if self._rules is not None else []
+        if assisted is not None:
             self._assist_results[transcript] = assisted
             found = merge_signals(found, assisted.signals)
         self._signals[transcript] = found
