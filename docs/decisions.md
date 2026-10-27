@@ -648,3 +648,9 @@
 ## 2026-10-27 — Sentinel test R-set 블라인드 시트·키 생성 (API 없음, 열람 없음)
 - `docs/reports/rset-blind2.md`(정답·스펙 ID 비노출 20건), `rset-blind2.labels.json`(빈 라벨), 키 `data/golden/rset/blind_key.rset-blind2.json`. 시트 안 transcript는 열어 보지 않았다(채점 전 봉인 유지).
 - 라벨러 dry-run: 20건, 호출 20회, $0.700~$1.893(dev 실측 $0.984). 제안 승인액 $1.90, 승인 전 API 호출 없음.
+
+## 2026-10-27 — Sentinel test R-set 블라인드 모델 라벨러 (승인 $1.90, 실제 $0.9993)
+- 실행: `--model-label docs/reports/rset-blind2.model-labels.json --blind-sheet docs/reports/rset-blind2.md`, transcript 미열람. 호출 20회, 입력 146,763·출력 20,614 토큰, **실제 비용 $0.9993**(추정 $0.700~$1.893).
+- 비교: 필드 160개 값 일치 99.4%, flag 일치 100%. **특이사항(Sentinel 대상)은 20건 모두 스펙과 일치**(양성 10 risk, 음성 10 값 없음 또는 ok). 불일치는 K38 mood 1건(드라마 사연에 눈시울이 붉어짐 → 저조로 읽음)뿐이고 Sentinel과 무관하다.
+- 라벨러가 애매하다고 표시한 특이사항: K34(넘어질 뻔함 + 손목 뻐근: 낙상 후 통증 기준인지 모호해 ok), K36(어제 저녁 한 끼 결식). 둘 다 정답과 일치한다. 이 두 건은 채점 때 gray로 함께 표시한다.
+- 스펙 정답은 수정하지 않았다. 다음: test 채점 경로(동결 태그 확인 후 한 번) 구현·dry-run·승인. 승인 전 API 호출 없음.
