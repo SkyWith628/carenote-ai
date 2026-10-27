@@ -1,0 +1,833 @@
+{
+  "model": "claude-haiku-5-5",
+  "usage": {
+    "estimated_cost_usd": 0.014689,
+    "model": "claude-haiku-5-5",
+    "effort": "low",
+    "prompt_version": "s2",
+    "run_tag": null,
+    "calls": 50,
+    "cache_hits": 0,
+    "failures": 0,
+    "input_tokens": 137357,
+    "output_tokens": 1907,
+    "latency_s": 67.67362329203752
+  },
+  "rows": [
+    {
+      "id": "gs-001",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-002",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-003",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-004",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-005",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-006",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-007",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-008",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-009",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-010",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-011",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-012",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-013",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-014",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-015",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-016",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": [
+        {
+          "check": "V4",
+          "quote": "화장실에서 너머지셨다고 해요",
+          "reason": "지금 방문 시점의 일이 아니다 (past)"
+        }
+      ]
+    },
+    {
+      "id": "gs-017",
+      "origin": "golden",
+      "group": "golden-pos",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "낙상 후",
+          "quote": "엉덩이가 아프다고 하세요"
+        }
+      ],
+      "rejected": [
+        {
+          "check": "V4",
+          "quote": "어제 밤에 침대에서 넘어지셨대요",
+          "reason": "지금 방문 시점의 일이 아니다 (past)"
+        }
+      ]
+    },
+    {
+      "id": "gs-018",
+      "origin": "golden",
+      "group": "golden-pos",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "신경·의식",
+          "quote": "오늘 말씀이 평소보다 어눌하고"
+        },
+        {
+          "category": "신경·의식",
+          "quote": "왼쪽 손에 힘이 없다고 하셨어요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "gs-019",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-020",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-023",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-028",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-032",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-037",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": [
+        {
+          "check": "V4",
+          "quote": "사흘 전 저녁에 화장실 앞에서 넘어지셨대요.",
+          "reason": "지금 방문 시점의 일이 아니다 (past)"
+        }
+      ]
+    },
+    {
+      "id": "gs-041",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-045",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-048",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-053",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-055",
+      "origin": "golden",
+      "group": "golden-neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "gs-058",
+      "origin": "golden",
+      "group": "golden-pos",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "흉부·호흡",
+          "quote": "가슴이 답답하다고 하시면서 숨이 차서 말씀을 끝까지 못 이으시고"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K01",
+      "origin": "rset",
+      "group": "lexicon",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "흉부·호흡",
+          "quote": "어르신이 가슴이 아프다고 하시면서 손으로 가슴을 꽉 움켜쥐고 앉아 계셨어요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K02",
+      "origin": "rset",
+      "group": "novel",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "흉부·호흡",
+          "quote": "몇 걸음 걷다 멈춰 서서 어깨를 들썩이며 숨을 몰아쉬시더라고예"
+        }
+      ],
+      "rejected": [
+        {
+          "check": "V5",
+          "quote": "눕기만 하면 컥컥 하셔서 눕지 못하고 앉아서 주무신다",
+          "reason": "규칙의 부정·조건·제3자·과거 가드와 모순된다"
+        }
+      ]
+    },
+    {
+      "id": "K05",
+      "origin": "rset",
+      "group": "lexicon",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "신경·의식",
+          "quote": "오늘은 어르신 말씀이 평소랑 달리 자꾸 꼬이고 어눌하셔서"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K06",
+      "origin": "rset",
+      "group": "novel",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "신경·의식",
+          "quote": "웃을 때 보니까 입꼬리가 삐뚤어지더라고요"
+        },
+        {
+          "category": "신경·의식",
+          "quote": "물 드시는데 입가로 물이 주르륵 흘렀어요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K09",
+      "origin": "rset",
+      "group": "lexicon",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "식사·수분",
+          "quote": "식사를 또 안 하셨어유, 이게 나흘째여유"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K10",
+      "origin": "rset",
+      "group": "novel",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "식사·수분",
+          "quote": "지난 금요일부터 오늘 화요일까지 한 끼도 안 드셨대요"
+        },
+        {
+          "category": "식사·수분",
+          "quote": "물도 거의 안 마셨다고 하시고요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K13",
+      "origin": "rset",
+      "group": "lexicon",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "신체 변화",
+          "quote": "두 다리가 갑자기 퉁퉁 부어 가지고"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K14",
+      "origin": "rset",
+      "group": "novel",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "신체 변화",
+          "quote": "발등이 빵빵해유"
+        },
+        {
+          "category": "신체 변화",
+          "quote": "손가락으로 눌러보니 자국이 한참 안 없어지더라고요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K17",
+      "origin": "rset",
+      "group": "lexicon",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "낙상 후",
+          "quote": "오늘 허리가 아파서 못 펴시고 계속 아프다고 하세요"
+        }
+      ],
+      "rejected": [
+        {
+          "check": "V4",
+          "quote": "어젯밤에 화장실에서 미끄러져서 넘어지셨대요",
+          "reason": "지금 방문 시점의 일이 아니다 (past)"
+        }
+      ]
+    },
+    {
+      "id": "K19",
+      "origin": "rset",
+      "group": "circ",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "정황",
+          "quote": "팔뚝에 손가락 모양 같은 멍이 하나 있었어예"
+        },
+        {
+          "category": "정황",
+          "quote": "아드님 얘기를 꺼내니까 입을 꾹 닫으시고 고개를 돌리시더라고요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K21",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K23",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K25",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": true,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K26",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": true,
+      "rules": true,
+      "llm": false,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K28",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K30",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K32",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K33",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K35",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K37",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    }
+  ]
+}
