@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>케어노트 초안 검토</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1c2430; --muted:#667085; --line:#e4e7ec;
+          --ok:#12805c; --warn:#b54708; --risk:#c01048; --hl:#fff3b0; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12161c; --card:#1b212a; --text:#e8ecf2; --muted:#98a2b3; --line:#2c3440;
+            --ok:#4cc9a0; --warn:#f5a85c; --risk:#ff7aa2; --hl:#5a4b00; } }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--text);
+         font:16px/1.5 -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+  main { max-width:760px; margin:0 auto; display:grid; gap:16px; }
+  h1 { font-size:20px; margin:0; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  textarea { width:100%; min-height:130px; padding:10px; border:1px solid var(--line);
+             border-radius:8px; background:transparent; color:inherit; font:inherit; resize:vertical; }
+  button { margin-top:8px; padding:10px 18px; border:0; border-radius:8px; background:#2f5bea;
+           color:#fff; font:inherit; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  .row { display:grid; grid-template-columns:110px 1fr auto; gap:8px; padding:10px 0;
+         border-top:1px solid var(--line); align-items:start; }
+  .row:first-child { border-top:0; }
+  .key { color:var(--muted); font-size:14px; }
+  .val { font-weight:600; word-break:break-word; }
+  .val.empty { color:var(--muted); font-weight:400; }
+  .ev { grid-column:2 / 4; font-size:14px; color:var(--muted); cursor:pointer; }
+  .badge { font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid currentColor; white-space:nowrap; }
+  .ok { color:var(--ok); } .needs_confirm { color:var(--warn); } .risk { color:var(--risk); }
+  #transcript { white-space:pre-wrap; word-break:break-word; }
+  mark { background:var(--hl); color:inherit; border-radius:3px; }
+  #msg { color:var(--risk); margin-top:8px; min-height:1em; }
+  .ctl { grid-column:2 / 4; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .ctl input[type=text] { flex:1 1 160px; min-width:0; padding:6px 8px; border:1px solid var(--line);
+                          border-radius:6px; background:transparent; color:inherit; font:inherit; }
+  .chk { font-size:14px; white-space:nowrap; }
+  button.secondary { background:transparent; color:var(--risk); border:1px solid currentColor; margin-left:8px; }
+  #state { font-weight:600; margin-top:8px; }
+  .unresolved { outline:2px solid var(--warn); outline-offset:2px; border-radius:6px; }
+  @media (max-width:520px) { .row { grid-template-columns:1fr auto; } .key { grid-column:1 / 3; }
+    .ev, .ctl { grid-column:1 / 3; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>케어노트 초안 검토</h1>
+  <section>
+    <label for="input">방문 기록 (합성 데이터만 입력)</label>
+    <textarea id="input" placeholder="예: 어르신 혈압 130에 80 나왔고, 약은 드셨어요."></textarea>
+    <button id="go">초안 만들기</button>
+    <button id="mic" class="secondary" type="button">녹음 시작</button>
+    <div class="key" id="micnote">녹음은 서버에서 글로 바꾼 뒤 바로 버립니다(저장 안 함). 받아 적은 글은
+      틀릴 수 있으니 숫자를 꼭 확인하고 고친 뒤 초안을 만드세요.</div>
+    <div id="msg" role="status"></div>
+  </section>
+  <section id="result" hidden>
+    <div id="counts" class="key"></div>
+    <div id="fields"></div>
+  </section>
+  <section id="decision" hidden>
+    <label for="reason">거절 사유 (선택, 감사 기록에는 내용이 남지 않음)</label>
+    <input id="reason" type="text" maxlength="500" style="width:100%">
+    <div><button id="approve">승인</button><button id="reject" class="secondary">거절</button></div>
+    <div id="state" role="status"></div>
+  </section>
+  <section id="original" hidden>
+    <div class="key">원문 (필드 근거를 누르면 표시)</div>
+    <div id="transcript"></div>
+  </section>
+</main>
+<script>
+const LABELS = { visit_start:"방문 시작", blood_pressure:"혈압", pulse:"맥박", meal_intake:"식사",
+  medication_taken:"복약", fall_event:"낙상", mood:"기분", special_notes:"특이사항" };
+const FLAGS = { ok:"정상", needs_confirm:"확인 필요", risk:"위험" };
+const CHECK_NAMES = { verifier:"재검증", relistener:"독립 재읽기" };
+const CHECKS = { supported:"일치", unsupported:"원문과 다름", ambiguous:"모호함",
+  unavailable:"검증하지 못함 (사람이 확인)" };
+const $ = (id) => document.getElementById(id);
+let draft = null;
+let edits = {}, confirmed = {};
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function showOriginal(span) {
+  const box = $("transcript"), t = draft.transcript;
+  box.replaceChildren();
+  if (!span || span.start === null) { box.textContent = t; return; }
+  box.append(t.slice(0, span.start));
+  box.append(el("mark", "", t.slice(span.start, span.end)));
+  box.append(t.slice(span.end));
+}
+
+const STATUS = { in_review:"검토 중", approved:"승인됨", rejected:"거절됨" };
+
+function controls(f) {
+  const box = el("div", "ctl");
+  const input = el("input");
+  input.type = "text"; input.maxLength = 200; input.value = edits[f.key] || "";
+  input.placeholder = "수정할 값 (비우면 그대로)";
+  input.addEventListener("input", () => { edits[f.key] = input.value; });
+  box.append(input);
+  if (f.flag !== "ok") {
+    const label = el("label", "chk"), cb = el("input");
+    cb.type = "checkbox"; cb.checked = !!confirmed[f.key];
+    cb.addEventListener("change", () => { confirmed[f.key] = cb.checked; });
+    label.append(cb, " 확인함");
+    box.append(label);
+  }
+  return box;
+}
+
+function renderDecision() {
+  const open = draft.status === "in_review";
+  $("decision").hidden = false;
+  $("approve").hidden = !open; $("reject").hidden = !open;
+  $("reason").hidden = !open; document.querySelector("label[for=reason]").hidden = !open;
+  $("state").textContent = open ? "" : `${STATUS[draft.status] || draft.status} (revision ${draft.revision})`;
+}
+
+async function decide(kind) {
+  const body = { decision: kind };
+  if (kind === "approve") {
+    body.edits = Object.fromEntries(Object.entries(edits).filter(([, v]) => v.trim() !== "")
+      .map(([k, v]) => [k, v.trim()]));
+    body.confirmed = Object.keys(confirmed).filter((k) => confirmed[k]);
+  } else if ($("reason").value.trim()) {
+    body.reason = $("reason").value.trim();
+  }
+  $("approve").disabled = $("reject").disabled = true;
+  $("state").textContent = "처리 중…";
+  try {
+    const res = await fetch(`/drafts/${draft.id}/decision`, { method:"POST",
+      headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (res.status === 422 && data.detail && data.detail.unresolved) {
+      const names = data.detail.unresolved.map((k) => LABELS[k] || k).join(", ");
+      $("state").textContent = `확인하지 않은 항목: ${names} (고치거나 "확인함"을 체크하세요)`;
+      return;
+    }
+    if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : res.status);
+    draft = data; edits = {}; confirmed = {};
+    render();
+  } catch (e) {
+    $("state").textContent = `실패: ${e.message}`;
+  } finally {
+    $("approve").disabled = $("reject").disabled = false;
+  }
+}
+
+const MAX_RECORD_MS = 110000;  // 서버 한도(120초)보다 먼저 멈춘다
+let recorder = null, recChunks = [], recTimer = null;
+
+async function sendAudio(blob) {
+  $("msg").textContent = "받아 적는 중…";
+  try {
+    const res = await fetch("/transcribe", { method:"POST",
+      headers:{ "Content-Type": blob.type || "audio/webm" }, body: blob });
+    const data = await res.json();
+    if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : res.status);
+    const old = $("input").value.trim();
+    $("input").value = old ? `${old} ${data.text}` : data.text;
+    const masked = data.masked_count ? ` · 개인정보 ${data.masked_count}건 가림` : "";
+    $("msg").textContent = `받아 적었습니다 (${data.duration_s}초 음성, ${data.elapsed_s}초 걸림${masked}). `
+      + "틀린 부분(특히 숫자)을 고친 뒤 '초안 만들기'를 누르세요.";
+  } catch (e) {
+    $("msg").textContent = `받아 적지 못했습니다: ${e.message}`;
+  }
+}
+
+async function toggleRecord() {
+  if (recorder && recorder.state === "recording") { recorder.stop(); return; }
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    $("msg").textContent = "이 브라우저는 녹음을 지원하지 않습니다.";
+    return;
+  }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch (e) { $("msg").textContent = "마이크를 쓸 수 없습니다. 브라우저의 마이크 권한을 확인하세요."; return; }
+  recChunks = [];
+  recorder = new MediaRecorder(stream);
+  recorder.ondataavailable = (e) => { if (e.data.size) recChunks.push(e.data); };
+  recorder.onstop = async () => {
+    clearTimeout(recTimer);
+    stream.getTracks().forEach((t) => t.stop());
+    $("mic").textContent = "녹음 시작"; $("go").disabled = false;
+    await sendAudio(new Blob(recChunks, { type: recorder.mimeType || "audio/webm" }));
+  };
+  recorder.start();
+  $("mic").textContent = "녹음 끝내기"; $("go").disabled = true;
+  $("msg").textContent = "녹음 중… (최대 110초)";
+  recTimer = setTimeout(() => { if (recorder.state === "recording") recorder.stop(); }, MAX_RECORD_MS);
+}
+
+$("mic").addEventListener("click", toggleRecord);
+$("approve").addEventListener("click", () => decide("approve"));
+$("reject").addEventListener("click", () => {
+  if (confirm("이 초안을 거절할까요? 되돌릴 수 없습니다.")) decide("reject");
+});
+
+function render() {
+  const c = draft.flag_counts;
+  $("counts").textContent = `정상 ${c.ok} · 확인 필요 ${c.needs_confirm} · 위험 ${c.risk}`;
+  const list = $("fields");
+  list.replaceChildren();
+  for (const f of draft.fields) {
+    const row = el("div", "row");
+    row.append(el("div", "key", LABELS[f.key] || f.key));
+    const shown = f.value ?? (f.candidates.length ? `후보: ${f.candidates.join(" / ")}` : "기록 없음");
+    row.append(el("div", f.value ? "val" : "val empty", shown));
+    row.append(el("span", `badge ${f.flag}`, FLAGS[f.flag] || f.flag));
+    for (const [name, label] of Object.entries(CHECK_NAMES)) {
+      const check = f.checks && f.checks[name];
+      if (!check) continue;
+      const warn = check !== "supported";
+      row.append(el("div", warn ? "ev needs_confirm" : "ev", `${label}: ${CHECKS[check] || check}`));
+    }
+    if (draft.status === "in_review") row.append(controls(f));
+    for (const ev of f.evidence) {
+      const line = el("div", "ev", `근거: ${ev.text}`);
+      line.addEventListener("click", () => showOriginal(ev));
+      row.append(line);
+    }
+    list.append(row);
+  }
+  if (draft.signals.length) {
+    const row = el("div", "row");
+    row.append(el("div", "key", "위험 신호"));
+    row.append(el("div", "val", draft.signals.map((s) => `${s.category}: ${s.quote}`).join("\n")));
+    row.append(el("span", "badge risk", FLAGS.risk));
+    list.append(row);
+  }
+  showOriginal(null);
+  renderDecision();
+  $("result").hidden = false;
+  $("original").hidden = false;
+}
+
+$("go").addEventListener("click", async () => {
+  const transcript = $("input").value.trim();
+  if (!transcript) { $("msg").textContent = "기록을 입력하세요."; return; }
+  $("go").disabled = true;
+  $("msg").textContent = "추출 중…";
+  try {
+    const res = await fetch("/drafts", { method:"POST",
+      headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ transcript }) });
+    if (!res.ok) throw new Error((await res.json()).detail || res.status);
+    draft = await res.json();
+    edits = {}; confirmed = {};
+    $("msg").textContent = "";
+    render();
+  } catch (e) {
+    $("msg").textContent = `실패: ${e.message}`;
+  } finally {
+    $("go").disabled = false;
+  }
+});
+</script>
+</body>
+</html>
