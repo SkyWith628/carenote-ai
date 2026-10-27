@@ -1,0 +1,181 @@
+{
+  "spec_id": "K39",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "어르신이 문 열어 주시면서 대뜸 현관 열쇠가 어디 갔나 모르겠다고 하시대요. 신발장 위에 있길래 찾아 드렸고요. 맥박은 76 나왔어유. 아침은 밥 한 공기 퍼 드렸는디 반 그릇쯤 드시고 숟가락 놓으셨어요. 오늘 들어온 게 9시 30분이었는데, 어르신 말씀이 요새 집 안에서든 마당에서든 넘어지신 적은 한 번도 없다고 하셨어요. 음, 약은 오늘은 안 먹겠다고 하셔서 못 드렸어요. 텃밭 상추 얘기 좀 하시고, 택배 아저씨가 어제 상자를 옆집에 두고 갔다는 얘기도 하시대요. 혈압은 124에 78이었어유.",
+  "reference_transcript": null,
+  "evidence": {
+    "pulse": [
+      "맥박은 76 나왔어유."
+    ],
+    "meal_intake": [
+      "아침은 밥 한 공기 퍼 드렸는디 반 그릇쯤 드시고 숟가락 놓으셨어요."
+    ],
+    "visit_start": [
+      "오늘 들어온 게 9시 30분이었는데"
+    ],
+    "fall_event": [
+      "어르신 말씀이 요새 집 안에서든 마당에서든 넘어지신 적은 한 번도 없다고 하셨어요."
+    ],
+    "medication_taken": [
+      "약은 오늘은 안 먹겠다고 하셔서 못 드렸어요."
+    ],
+    "blood_pressure": [
+      "혈압은 124에 78이었어유."
+    ],
+    "special_notes": [
+      "약은 오늘은 안 먹겠다고 하셔서 못 드렸어요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 2,
+    "diversity": {
+      "opening_type": "어르신이 문을 열어 주며 먼저 건넨 한마디",
+      "opening_scene": "열쇠를 못 찾겠다며 허둥대심",
+      "chatter_topics": [
+        "텃밭 상추",
+        "택배 아저씨"
+      ],
+      "field_order": [
+        "pulse",
+        "meal_intake",
+        "visit_start",
+        "fall_event",
+        "medication_taken",
+        "blood_pressure"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "밥의 양을 그릇 단위로 어림해서 말한다",
+        "fall_event": "어르신이 한 말로 전한다. 표현은 직접 지어내되 흔한 관용구는 피하고, 낙상이 없었다는 뜻이 그 문장에서 분명히 읽히게 한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['fall_event', 'meal_intake']"
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "test",
+    "label_risk": "low"
+  }
+}

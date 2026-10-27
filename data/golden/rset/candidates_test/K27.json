@@ -1,0 +1,179 @@
+{
+  "spec_id": "K27",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "들어가니까 방 공기가 좀 답답해서 창문부터 조금 열어 드렸어요. 아침 드신 그릇 보니까 남기신 게 하나도 없더라고요. 제가 도착한 게 오전 열한 시 반쯤이었는데, 어르신이 옆집 할머니가 어제 쓰러지셔서 구급차에 실려 가셨다는 얘기를 하셨어요. 어르신 본인은 멀쩡하세요. 맥박은 72였고요, 넘어지신 일은 없으셨고 약도 챙겨 드셨어요. 어, 새로 맞추신 안경 쓰시고 오래된 사진첩 꺼내서 같이 한 장씩 넘겨 봤고요. 혈압은 사진첩 다 보고 나서 쟀는데 120에 74 나왔어요.",
+  "reference_transcript": null,
+  "evidence": {
+    "meal_intake": [
+      "아침 드신 그릇 보니까 남기신 게 하나도 없더라고요."
+    ],
+    "visit_start": [
+      "제가 도착한 게 오전 열한 시 반쯤이었는데, 어르신이 옆집 할머니가 어제 쓰러지셔서 구급차에 실려 가셨다는 얘기를 하셨어요."
+    ],
+    "pulse": [
+      "맥박은 72였고요, 넘어지신 일은 없으셨고 약도 챙겨 드셨어요."
+    ],
+    "fall_event": [
+      "맥박은 72였고요, 넘어지신 일은 없으셨고 약도 챙겨 드셨어요."
+    ],
+    "medication_taken": [
+      "맥박은 72였고요, 넘어지신 일은 없으셨고 약도 챙겨 드셨어요."
+    ],
+    "blood_pressure": [
+      "혈압은 사진첩 다 보고 나서 쟀는데 120에 74 나왔어요."
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 2,
+    "diversity": {
+      "opening_type": "집 안에 들어섰을 때의 첫인상(냄새, 정돈 상태, 켜 둔 TV 등)",
+      "opening_scene": "방 안 공기가 답답하게 느껴짐",
+      "chatter_topics": [
+        "새로 맞춘 안경",
+        "오래된 사진첩"
+      ],
+      "field_order": [
+        "meal_intake",
+        "visit_start",
+        "pulse",
+        "fall_event",
+        "medication_taken",
+        "blood_pressure"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "남기신 게 없다는 쪽에서 말한다",
+        "medication_taken": "다른 항목과 한 문장에 묶어 말한다",
+        "fall_event": "약이나 식사 이야기에 이어 붙여 한 문장 안에서 지나가듯 말한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "test",
+    "label_risk": "low"
+  }
+}

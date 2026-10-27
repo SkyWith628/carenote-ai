@@ -1,0 +1,182 @@
+{
+  "spec_id": "K15",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "아이고, 내가 어제 잠을 설치가 오늘 좀 피곤합니더. 어르신이 아침에 코에서 피가 나가 한참을 안 멎었다 카시데요, 휴지를 여러 장 쓰셨다 카고. 넘어지신 일은 없었고예. 어, 맥박은 76 나왔고 혈압은 130에 80이라예. 아침은 절반 정도 드셨어예. 약은 제가 물 떠다 드리가 다 드시는 거까지 챙겼습니더. 음, 옆집 할매가 이사 갔다꼬 그 얘기 좀 하시고, 텃밭에 상추가 올라왔다 카시데요. 그, 오늘 들어간 기 아침 9시였습니더. 코 닦은 휴지는 제가 모아가 치워 드리고 나왔어예.",
+  "reference_transcript": null,
+  "evidence": {
+    "visit_start": [
+      "오늘 들어간 기 아침 9시였습니더."
+    ],
+    "blood_pressure": [
+      "혈압은 130에 80이라예."
+    ],
+    "pulse": [
+      "어, 맥박은 76 나왔고 혈압은 130에 80이라예."
+    ],
+    "meal_intake": [
+      "아침은 절반 정도 드셨어예."
+    ],
+    "medication_taken": [
+      "약은 제가 물 떠다 드리가 다 드시는 거까지 챙겼습니더."
+    ],
+    "fall_event": [
+      "넘어지신 일은 없었고예."
+    ],
+    "special_notes": [
+      "어르신이 아침에 코에서 피가 나가 한참을 안 멎었다 카시데요, 휴지를 여러 장 쓰셨다 카고."
+    ]
+  },
+  "notes": "field_order상 낙상이 첫 항목이라 식사·약 이야기에 붙여 말하라는 phrasing_hint 대신 코피 이야기 뒤에 짧게 지나가듯 말함.",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "화자 자신의 개인적인 사정이나 컨디션 한마디",
+      "opening_scene": "어제 잠을 설쳐서 피곤했음",
+      "chatter_topics": [
+        "이사 간 이웃",
+        "텃밭 상추"
+      ],
+      "field_order": [
+        "fall_event",
+        "pulse",
+        "blood_pressure",
+        "meal_intake",
+        "medication_taken",
+        "visit_start"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "절반 정도라고 직설적으로 말한다",
+        "medication_taken": "챙겨 드린 행동을 중심으로 말한다",
+        "fall_event": "약이나 식사 이야기에 이어 붙여 한 문장 안에서 지나가듯 말한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "test",
+    "label_risk": "medium"
+  }
+}

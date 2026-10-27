@@ -1,0 +1,183 @@
+{
+  "spec_id": "K34",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "제가 오늘 아침을 못 먹고 나와서 배가 계속 꼬르륵거렸는데요, 어르신이 누룽지 꺼내 주시려고 부엌 쪽으로 가시다가 문턱에 걸려서 넘어질 뻔하셨어요. 문틀 잡고 서셔서 넘어지시진 않았고, 손목이 조금 뻐근하다고만 하셨어요. 도착은 오전 10시 30분이었고요. 혈압은 122에 74 나왔습니다. 아침 약은 식후에 혈압약까지 다 드셨어요. 식사는 밥 한 공기 중에 반 공기 정도 드셨고요. 어, 다음 주에 동창 모임이 있다고 그 얘기 한참 하셨고, 맥박은 나오기 직전에 재니까 76이었습니다.",
+  "reference_transcript": null,
+  "evidence": {
+    "fall_event": [
+      "문틀 잡고 서셔서 넘어지시진 않았고, 손목이 조금 뻐근하다고만 하셨어요."
+    ],
+    "visit_start": [
+      "도착은 오전 10시 30분이었고요."
+    ],
+    "blood_pressure": [
+      "혈압은 122에 74 나왔습니다."
+    ],
+    "medication_taken": [
+      "아침 약은 식후에 혈압약까지 다 드셨어요."
+    ],
+    "meal_intake": [
+      "식사는 밥 한 공기 중에 반 공기 정도 드셨고요."
+    ],
+    "pulse": [
+      "맥박은 나오기 직전에 재니까 76이었습니다."
+    ],
+    "special_notes": [
+      "어르신이 누룽지 꺼내 주시려고 부엌 쪽으로 가시다가 문턱에 걸려서 넘어질 뻔하셨어요.",
+      "문틀 잡고 서셔서 넘어지시진 않았고, 손목이 조금 뻐근하다고만 하셨어요."
+    ]
+  },
+  "notes": "오전 10시 30분 방문이라 opening_scene의 '점심을 거름'을 '아침을 못 먹고 나옴'으로 바꿈.",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "화자 자신의 개인적인 사정이나 컨디션 한마디",
+      "opening_scene": "점심을 거르고 오느라 배가 고팠음",
+      "chatter_topics": [
+        "누룽지 간식",
+        "동창 모임 소식"
+      ],
+      "field_order": [
+        "fall_event",
+        "visit_start",
+        "blood_pressure",
+        "medication_taken",
+        "meal_intake",
+        "pulse"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "밥의 양을 그릇 단위로 어림해서 말한다",
+        "medication_taken": "약 종류나 시간대를 함께 언급하며 말한다",
+        "fall_event": "다른 이야기 도중에 곁다리로 한마디 던진다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "warn",
+      "message": "다른 후보와 비슷한 보고 문장: ['meal_intake']"
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "test",
+    "label_risk": "low"
+  }
+}

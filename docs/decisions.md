@@ -639,3 +639,8 @@
 - 동결 파일 해시를 테스트로 고정: rules/sentinel.yaml, sentinel.py, sentinel_llm.py, 프롬프트 s1·s2. 전체 677개 통과. 태그 `sentinel-rules-v2`.
 - 규칙: test R-set 채점 이후 변경 금지(필요하면 version 3과 새 태그, 채점 후 변경은 test 본 뒤 튜닝으로 표시). test 생성 출력은 `candidates_test/`에 격리하고 열람하지 않는다.
 - 다음: test R-set 20건 생성 dry-run /bin/zsh.638~.097(기대 약 .0~1.4), 블라인드 라벨러 약 (추정 /bin/zsh.70~.89). 승인 전 API 호출 없음.
+
+## 2026-10-27 — Sentinel test R-set 20건 생성 (승인 $2.10, 실제 $1.1282) · 봉인
+- 실행: `--spec-dir data/golden/rset/specs --out-dir data/golden/rset/candidates_test --split test --approve-cost 2.10`. 태그 `sentinel-rules-v2` 이후. 20건 전부 점검 통과(K27·K39는 2회 시도), 호출 22회, 입력 124,384·출력 31,535 토큰, **실제 비용 $1.1282**(추정 $0.638~$2.097). 배치 점검 [P] 경고 9건(정상 항목 문장 유사)은 통과에 영향 없음.
+- **transcript를 열어 보지 않았다**(경과 출력은 spec_id·통과 여부·비용뿐). 열람은 채점 때까지 금지, 모델 라벨러·채점 스크립트만 읽는다.
+- 다음: 블라인드 모델 라벨러(test 20건, 추정 $0.70~$1.89, dev 실측 $0.984) → 규칙 단독·LLM 단독·합집합 한 번 채점. 승인 전 API 호출 없음.

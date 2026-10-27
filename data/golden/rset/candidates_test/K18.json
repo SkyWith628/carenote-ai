@@ -1,0 +1,182 @@
+{
+  "spec_id": "K18",
+  "status": "passed",
+  "comparison_only": false,
+  "transcript": "들어가니까 어르신이 돋보기 쓰시고 신문 읽고 계시더라고요. 혈압은 128에 80 나왔고요, 맥박은 84요. 어, 약은 어르신이 \"아침 먹고 약 다 먹었어\" 하시더라고요. 아침은 반쯤 드시다가 나머지는 남기셨고요. 음, 김장은 다음 달에 조금만 하신다 하시고, 보험 광고 전화가 자꾸 온다는 얘기도 하셨어요. 그리고 엊그제 이불에 발이 걸려서 그 자리에 주저앉으셨대요. 그, 오늘은 오른쪽 다리를 끌면서 걸으시고 그쪽으로 체중을 못 싣겠다고 하세요. 오전 열 시에 들어갔을 때부터 계속 그렇게 다리 끌고 다니셨어요.",
+  "reference_transcript": null,
+  "evidence": {
+    "blood_pressure": [
+      "혈압은 128에 80 나왔고요"
+    ],
+    "pulse": [
+      "맥박은 84요"
+    ],
+    "medication_taken": [
+      "약은 어르신이 \"아침 먹고 약 다 먹었어\" 하시더라고요"
+    ],
+    "meal_intake": [
+      "아침은 반쯤 드시다가 나머지는 남기셨고요"
+    ],
+    "fall_event": [
+      "엊그제 이불에 발이 걸려서 그 자리에 주저앉으셨대요"
+    ],
+    "visit_start": [
+      "오전 열 시에 들어갔을 때부터 계속 그렇게 다리 끌고 다니셨어요"
+    ],
+    "special_notes": [
+      "엊그제 이불에 발이 걸려서 그 자리에 주저앉으셨대요",
+      "오늘은 오른쪽 다리를 끌면서 걸으시고 그쪽으로 체중을 못 싣겠다고 하세요"
+    ]
+  },
+  "notes": "",
+  "generator": {
+    "model": "claude-opus-5-5",
+    "effort": "medium",
+    "prompt_version": "g9",
+    "attempts": 1,
+    "diversity": {
+      "opening_type": "어르신이 하고 계시던 일(TV, 화분, 뜨개질 등)을 본 장면",
+      "opening_scene": "돋보기를 쓰고 신문을 읽고 계심",
+      "chatter_topics": [
+        "김장 계획",
+        "보험 광고 전화"
+      ],
+      "field_order": [
+        "blood_pressure",
+        "pulse",
+        "medication_taken",
+        "meal_intake",
+        "fall_event",
+        "visit_start"
+      ],
+      "phrasing_hints": {
+        "meal_intake": "반쯤 드시고 남겼다는 쪽에서 말한다",
+        "medication_taken": "어르신이 한 말로 전한다. 표현은 직접 지어내되, 약을 드셨다는 뜻이 그 문장에서 분명히 읽히게 한다"
+      }
+    }
+  },
+  "checks": [
+    {
+      "code": "A",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "B",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "C",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "D",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "E",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "F",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "G",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "I",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "J",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "M",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "Q",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "R",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "T",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "N",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "O",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "batch_checks": [
+    {
+      "code": "H",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "K",
+      "level": "pass",
+      "message": ""
+    },
+    {
+      "code": "P",
+      "level": "pass",
+      "message": ""
+    }
+  ],
+  "review": {
+    "status": "pending",
+    "date": null,
+    "note": ""
+  },
+  "spec": {
+    "probe": "R",
+    "split": "test",
+    "label_risk": "medium"
+  }
+}
