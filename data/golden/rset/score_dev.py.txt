@@ -1,0 +1,40 @@
+"""R-set dev 20건 Sentinel 단독 채점(규칙 수정 없음, API 없음, test 없음).
+실행: PYTHONPATH=src uv run python -c "import runpy; runpy.run_path('data/golden/rset/score_dev.py.txt', run_name='__main__')"
+"""
+import json
+from math import sqrt
+from pathlib import Path
+from carenote.extraction.sentinel import load_rules, scan_text
+
+def wilson(k, n, z=1.96):
+    if n == 0: return (0, 0)
+    p = k / n; d = 1 + z*z/n; c = p + z*z/(2*n); a = z*sqrt(p*(1-p)/n + z*z/(4*n*n))
+    return round((c-a)/d*100), round((c+a)/d*100)
+
+root = Path("data/golden/rset")
+specs = {s["spec_id"]: s for s in json.loads((root/"specs/probe_K.json").read_text(encoding="utf-8"))["specs"]}
+rules = load_rules()
+rows = []
+for sid, s in sorted(specs.items()):
+    if s["split"] != "dev": continue
+    t = json.loads((root/f"candidates/{sid}.json").read_text(encoding="utf-8"))["transcript"]
+    sig = scan_text(t, rules)
+    g = s["gold"]["special_notes"]
+    pos = g["value"] is not None and g["flag"] == "risk"
+    pol = s["policy"]
+    expr = "lexicon" if "표현 lexicon" in pol else ("novel" if "표현 novel" in pol else "-")
+    rows.append(dict(id=sid, pos=pos, fired=bool(sig), expr=expr, circ=s["field_review_required"],
+                     gray=bool(s["gray_fields"]) or sid == "K26", cat=pol.split(" · ")[3],
+                     rules=[(x.rule_id, x.matched) for x in sig]))
+for r in rows:
+    print(r["id"], "양성" if r["pos"] else "음성", r["expr"], r["cat"], "→", "발동" if r["fired"] else "미발동", r["rules"])
+def rate(sel):
+    k = sum(r["fired"] for r in sel); n = len(sel); return k, n, wilson(k, n)
+head = [r for r in rows if r["pos"] and not r["circ"]]
+print("\n양성(정황 제외)", rate(head))
+print(" lexicon", rate([r for r in head if r["expr"] == "lexicon"]))
+print(" novel  ", rate([r for r in head if r["expr"] == "novel"]))
+print("정황 양성", rate([r for r in rows if r["pos"] and r["circ"]]))
+neg = [r for r in rows if not r["pos"]]
+print("음성 전체 오발동", rate(neg))
+print("음성 gray 제외 오발동", rate([r for r in neg if not r["gray"]]))
