@@ -22,6 +22,7 @@ uv run pytest        # 테스트
 uv run ruff check .  # 린트
 uv run pyright       # 타입 검사 (strict)
 uv run python -m carenote.evaluation --extractor oracle   # 골든셋 평가 (PYTHONPATH=src 필요 시)
+uv run python -m carenote.evaluation.sentinel_llm_run --sentinel-llm haiku --dry-run   # Sentinel LLM 보조 dev 실행(승인액 필요, test 불가)
 uv run uvicorn carenote.main:app --app-dir src --reload   # 개발 서버, GET /health
 ```
 
@@ -39,6 +40,7 @@ uv run uvicorn carenote.main:app --app-dir src --reload   # 개발 서버, GET /
 - 음성은 STT 전에 마스킹 불가 → 온디바이스 STT 또는 센터 동의 설계 필요
 - Harness2는 2차 보도만 확인(원문 미확인) → 의존 전 repo·논문 확인
 - iCloud 경로에서는 `.venv`의 editable `.pth`에 hidden 플래그가 붙어 `import carenote`가 실패할 수 있다. pytest·pyright는 `src`를 직접 경로로 잡아 우회하고, 스크립트·uvicorn은 `--app-dir src` 또는 `PYTHONPATH=src`를 쓴다
+- `data/golden/rset/candidates_test/`의 transcript는 test R-set 채점 전 열람 금지. 동결 파일(`rules/sentinel.yaml`, `sentinel.py`, `sentinel_llm.py`)을 바꾸면 테스트가 실패한다
 - 대회 공고 미공개: 제출 형태·배점 확정 시 blueprint 5·9장 조정
 
 ## 알려진 위험
@@ -46,10 +48,6 @@ uv run uvicorn carenote.main:app --app-dir src --reload   # 개발 서버, GET /
 
 ## 현재 단계
 - **test 최종 보고 완료(2026-10-26, 8구성 1회씩)**: v4가 v1보다 Haiku에서 +4.5~5.1%p(차이 있음), B1−B0 구분 불가, test 포화(상위 99%대), 위험 recall 2/3(특이사항 risk 공백). 표 `docs/reports/test-final-table.md`, 요약 `docs/ablation.md`. 이후 라벨·프롬프트 수정은 test를 본 뒤의 수정으로 표시.
-- 추출 프롬프트 **기본값 v4**(2026-10-26 기본 후보로 채택, test 미실행). 이전 버전은 `--prompt v1|v2|v3`, 변동 측정은 `--run-tag`와 `evaluation.variance`, 판정은 목표 필드 재현
-- 지금: 1주차 완료분. 스캐폴딩, 골든셋 v1 20건, Eval Runner 뼈대 (`docs/eval-runner.md`)
-- 지금 2주차: LLM Extractor B0/B1과 Flagger 구현 완료(가짜 클라이언트 테스트만, API 미호출), 설계 `docs/extractor-design.md`
-- 1차 ablation 완료(`docs/ablation.md`): 20건은 포화돼 구성 간 차이가 노이즈. 다음: 골든셋 확장(설계 `docs/golden-expansion-design.md`, 열린 결정 5개 확인 필요)
-- 골든셋 v2 **잠정 동결**(2026-10-26, 태그 `golden-v2-frozen`, `data/golden/FROZEN.json`, R3·G1 전문가 검토 미실시). 라벨 수정은 `python -m carenote.evaluation.freeze --write --revise "사유"`로만, test는 최종 보고 때 `--final-report`로 1회. F2 미충족은 한계로 수용(불일치 하한 약 7%). 골든셋 v2 승격 완료(미동결): `data/golden/v2_dev.jsonl` 10건, `v2_test.jsonl` 30건, 평가 CLI 기본 분할 dev, test는 `--final-report` 필요. 동결 전 남은 일: R3·G1 현장 검토, 사람 독립 라벨링(95%), sha256·태그
-- transcript 생성 도구 구현 완료(`docs/transcript-generation-design.md`, 파일럿은 `python -m carenote.generation --pilot --dry-run` 후 승인 시 실행)
-- 실측 CLI(준비됨: `--dry-run`으로 비용 확인 → `--approve-cost`로 승인 후 실행)(`.env`에 ANTHROPIC_API_KEY 필요, 비용 승인 후) → `POST /extract` → 검토 화면. 원래 목표 — Extractor(LLM, 구조화 출력 + evidence)를 `Extractor` 인터페이스로 구현해 단일 LLM 베이스라인 측정, 검토 화면(원문 보기)
+- 추출 프롬프트 **기본값 v4**. 이전 버전은 `--prompt v1|v2|v3`, 변동 측정은 `--run-tag`와 `evaluation.variance`, 판정은 목표 필드 재현
+- 골든셋 v2 **잠정 동결**(2026-10-26, 태그 `golden-v2-frozen`, `data/golden/FROZEN.json`, R3·G1 전문가 검토 미실시). 라벨 수정은 `python -m carenote.evaluation.freeze --write --revise "사유"`로만. dev 기본, test는 `--final-report`로 1회. F2(사람 독립 라벨링 95%) 미충족은 한계로 수용(불일치 하한 약 7%)
+- **Sentinel(특이사항 risk)**: 규칙 v2 + LLM 보조 프롬프트 s2 동결(태그 `sentinel-rules-v2`, 파일 해시는 `tests/test_sentinel*.py`). 독립 평가셋 R-set은 `data/golden/rset/`(dev 20은 in-sample 점수만 있음, test 20은 생성·모델 라벨링 완료, **채점만 남음**). 설계 `docs/rule-engine-sentinel-design.md`, `sentinel-llm-assist-design.md`, `sentinel-rset-design.md`. 남은 일: test 채점 경로(`--final-report`, 동결 태그 확인) 구현 후 1회 채점, 식사 규칙 이틀·사흘 정리(v3), 사람 확인 표본
