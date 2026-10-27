@@ -1,0 +1,375 @@
+{
+  "model": "claude-haiku-5-5",
+  "usage": {
+    "estimated_cost_usd": 0.006285,
+    "model": "claude-haiku-5-5",
+    "effort": "low",
+    "prompt_version": "s2",
+    "run_tag": null,
+    "calls": 20,
+    "cache_hits": 0,
+    "failures": 0,
+    "input_tokens": 56723,
+    "output_tokens": 1225,
+    "latency_s": 28.342700918015908
+  },
+  "rows": [
+    {
+      "id": "K03",
+      "origin": "rset",
+      "group": "lexicon",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "흉부·호흡",
+          "quote": "숨이 가쁘셔서 말씀을 한 문장 하시고 쉬고"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K04",
+      "origin": "rset",
+      "group": "novel",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "흉부·호흡",
+          "quote": "어르신 입술이 좀 푸르스름해 보였어요"
+        },
+        {
+          "category": "흉부·호흡",
+          "quote": "가만히 앉아 계신데도 계속 헐떡이셨어요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K07",
+      "origin": "rset",
+      "group": "lexicon",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "신경·의식",
+          "quote": "오른팔에 힘이 안 들어간다 카시면서 숟가락을 떨어뜨리셨어요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K08",
+      "origin": "rset",
+      "group": "novel",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "신경·의식",
+          "quote": "오늘따라 불러도 한참 있다가 대답하시고 멍하니 앉아만 계셨어요"
+        },
+        {
+          "category": "신경·의식",
+          "quote": "오늘 무슨 요일이냐고 여쭤봐도 못 맞추셨고요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K11",
+      "origin": "rset",
+      "group": "lexicon",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "식사·수분",
+          "quote": "어르신이 사흘째 물도 거의 못 드신다 카시네예"
+        },
+        {
+          "category": "식사·수분",
+          "quote": "물 한 모금도 넘기기 힘들다 카셨어예"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K12",
+      "origin": "rset",
+      "group": "novel",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "식사·수분",
+          "quote": "요새 일주일 가까이 하루에 죽 한 숟가락 정도만 드시고 버티신다 하네요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K15",
+      "origin": "rset",
+      "group": "lexicon",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "신체 변화",
+          "quote": "어르신이 아침에 코에서 피가 나가 한참을 안 멎었다 카시데요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K16",
+      "origin": "rset",
+      "group": "novel",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "신체 변화",
+          "quote": "엉덩이 쪽 상처에서 노란 진물이 계속 나오고 냄새도 나서"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K18",
+      "origin": "rset",
+      "group": "novel",
+      "gold_risk": true,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "낙상 후",
+          "quote": "오른쪽 다리를 끌면서 걸으시고 그쪽으로 체중을 못 싣겠다고 하세요"
+        }
+      ],
+      "rejected": [
+        {
+          "check": "V4",
+          "quote": "엊그제 이불에 발이 걸려서 그 자리에 주저앉으셨대요",
+          "reason": "지금 방문 시점의 일이 아니다 (past)"
+        }
+      ]
+    },
+    {
+      "id": "K20",
+      "origin": "rset",
+      "group": "circ",
+      "gold_risk": true,
+      "gray": false,
+      "rules": true,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "정황",
+          "quote": "그 사람이 소리 지르고 때렸다고 말씀하시더라고요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K22",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K24",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": true,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K27",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K29",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K31",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": true,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K34",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": true,
+      "union": true,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [
+        {
+          "category": "낙상 후",
+          "quote": "문턱에 걸려서 넘어질 뻔하셨어요"
+        },
+        {
+          "category": "낙상 후",
+          "quote": "손목이 조금 뻐근하다고만 하셨어요"
+        }
+      ],
+      "rejected": []
+    },
+    {
+      "id": "K36",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K38",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": true,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K39",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    },
+    {
+      "id": "K40",
+      "origin": "rset",
+      "group": "neg",
+      "gold_risk": false,
+      "gray": false,
+      "rules": false,
+      "llm": false,
+      "union": false,
+      "status": "ok",
+      "reason": "",
+      "llm_signals": [],
+      "rejected": []
+    }
+  ]
+}

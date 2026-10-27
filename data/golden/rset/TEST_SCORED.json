@@ -1,0 +1,9 @@
+{
+  "scored_at": "2026-10-27T10:44:35+00:00",
+  "freeze_tag": "sentinel-rules-v2",
+  "tag_commit": "7e8e4063e9d7af978951637ad8ab69f19977acde",
+  "head_commit": "c23c2e4d5c626598d98ddf07fcc330d02b709c27",
+  "model": "claude-haiku-5-5",
+  "prompt": "s2",
+  "items": 20
+}

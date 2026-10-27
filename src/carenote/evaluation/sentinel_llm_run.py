@@ -1,21 +1,27 @@
 """Sentinel LLM 보조 단계 dev 실행기 (설계: docs/sentinel-llm-assist-design.md 7장).
 
-dev 분할만 읽는다: 골든셋 dev 30건과 R-set dev 20건. test는 어떤 경로로도 읽지 않는다.
+기본은 dev 분할만 읽는다: 골든셋 dev 30건과 R-set dev 20건.
+R-set test 20건은 `--source rset-test --final-report`로만 읽고, 동결 태그·파일 해시·프롬프트·모델을
+확인한 뒤 단 한 번 채점한다(채점 표식 `TEST_SCORED.json`이 있으면 거부).
 API 호출은 --approve-cost가 추정 최대 이상일 때만 한다. --dry-run은 호출하지 않는다.
 
   python -m carenote.evaluation.sentinel_llm_run --sentinel-llm haiku --dry-run
   python -m carenote.evaluation.sentinel_llm_run --sentinel-llm haiku --approve-cost 0.06 \\
       --out OUT.json
+  python -m carenote.evaluation.sentinel_llm_run --sentinel-llm haiku --source rset-test \\
+      --final-report --approve-cost 0.45 --out OUT.json
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from math import sqrt
 from pathlib import Path
 from typing import Any
@@ -36,6 +42,14 @@ from carenote.extraction.sentinel_llm import (
 )
 from carenote.generation.spec import load_specs
 
+FREEZE_TAG = "sentinel-rules-v2"
+FROZEN_FILES = (
+    "rules/sentinel.yaml",
+    "src/carenote/extraction/sentinel.py",
+    "src/carenote/extraction/sentinel_llm.py",
+)
+TEST_MARKER = "TEST_SCORED.json"
+TEST_MODEL, TEST_PROMPT = "haiku", "s2"
 EXIT_REFUSED = 2
 EXIT_BUDGET = 3
 MODEL_IDS = {"haiku": "claude-haiku-5-5", "sonnet": "claude-sonnet-5-5"}
@@ -70,7 +84,7 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[int, int]:
 
 
 def load_items(golden: Path, rset_dir: Path, source: str) -> list[Item]:
-    """dev 항목만 읽는다. R-set은 스펙의 split이 dev인 것만, 후보 transcript가 없으면 ValueError."""
+    """R-set은 source가 rset-test일 때만 test, 그 밖에는 dev만 읽는다. 후보가 없으면 ValueError."""
     items: list[Item] = []
     if source in ("both", "golden-dev"):
         for case in load_golden(golden, "dev"):
@@ -86,11 +100,13 @@ def load_items(golden: Path, rset_dir: Path, source: str) -> list[Item]:
                     case.transcript,
                 )
             )
-    if source in ("both", "rset-dev"):
+    if source in ("both", "rset-dev", "rset-test"):
+        split = "test" if source == "rset-test" else "dev"
+        folder = "candidates_test" if split == "test" else "candidates"
         for spec in load_specs(rset_dir / "specs"):
-            if spec.split != "dev":
+            if spec.split != split:
                 continue
-            path = rset_dir / "candidates" / f"{spec.spec_id}.json"
+            path = rset_dir / folder / f"{spec.spec_id}.json"
             if not path.exists():
                 raise ValueError(f"R-set 후보가 없다: {spec.spec_id}")
             transcript = str(json.loads(path.read_text(encoding="utf-8")).get("transcript") or "")
@@ -105,6 +121,60 @@ def load_items(golden: Path, rset_dir: Path, source: str) -> list[Item]:
             gray = bool(spec.gray_fields) or spec.spec_id == "K26"
             items.append(Item(spec.spec_id, "rset", group, risk, gray, transcript))
     return items
+
+
+def _git(root: Path, *args: str) -> str | None:
+    """git 출력(공백 제거). 실패하면 None."""
+    try:
+        out = subprocess.run(
+            ["git", *args], cwd=root, capture_output=True, text=True, check=True, timeout=30
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return out.stdout.strip()
+
+
+def final_gate_error(
+    *, model_key: str, prompt: str, run_tag: str | None, rset_dir: Path, root: Path
+) -> str | None:
+    """test R-set 채점을 막는 사유. 통과하면 None.
+
+    동결 태그가 있고, 동결 파일 3개가 태그와 같고, 사전 등록한 모델·프롬프트이며, 이전에 채점한 적이
+    없어야 한다. 규칙·프롬프트를 고친 뒤 test를 다시 돌리는 일을 코드로 막는 것이 목적이다.
+    """
+    if (rset_dir / TEST_MARKER).exists():
+        return (
+            f"test R-set은 이미 채점했다({TEST_MARKER}). 채점 후 재실행은 test를 본 뒤의 튜닝이다."
+        )
+    if model_key != TEST_MODEL or prompt != TEST_PROMPT or run_tag is not None:
+        return (
+            f"사전 등록 설정만 허용한다: --sentinel-llm {TEST_MODEL} --prompt {TEST_PROMPT}, "
+            "--run-tag 없음"
+        )
+    if _git(root, "rev-parse", "--verify", f"refs/tags/{FREEZE_TAG}^{{commit}}") is None:
+        return f"동결 태그 {FREEZE_TAG}를 찾을 수 없다."
+    changed = _git(root, "diff", "--name-only", FREEZE_TAG, "--", *FROZEN_FILES)
+    staged = _git(root, "diff", "--name-only", "--cached", FREEZE_TAG, "--", *FROZEN_FILES)
+    if changed is None or staged is None:
+        return "git으로 동결 파일 상태를 확인하지 못했다."
+    if changed or staged:
+        return f"동결 파일이 {FREEZE_TAG} 이후 바뀌었다: {changed or staged}"
+    return None
+
+
+def marker_payload(
+    *, root: Path, model: str, prompt: str, rows: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """채점 표식 내용. 어떤 코드·설정으로 몇 건을 채점했는지만 남긴다(본문 없음)."""
+    return {
+        "scored_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "freeze_tag": FREEZE_TAG,
+        "tag_commit": _git(root, "rev-parse", f"{FREEZE_TAG}^{{commit}}"),
+        "head_commit": _git(root, "rev-parse", "HEAD"),
+        "model": model,
+        "prompt": prompt,
+        "items": len(rows),
+    }
 
 
 def estimate(assist: SentinelAssist, items: list[Item], model: str) -> tuple[int, float, float]:
@@ -165,7 +235,9 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="carenote.evaluation.sentinel_llm_run", description=__doc__
     )
     parser.add_argument("--sentinel-llm", choices=sorted(MODEL_IDS), required=True, dest="model")
-    parser.add_argument("--source", choices=["both", "golden-dev", "rset-dev"], default="both")
+    parser.add_argument(
+        "--source", choices=["both", "golden-dev", "rset-dev", "rset-test"], default="both"
+    )
     parser.add_argument("--golden", type=Path, default=Path("data/golden"))
     parser.add_argument("--rset-dir", type=Path, default=Path("data/golden/rset"))
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE)
@@ -173,6 +245,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--prompt", choices=sorted(PROMPTS), default=SENTINEL_LLM_PROMPT_VERSION)
     parser.add_argument("--run-tag", default=None)
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument(
+        "--final-report",
+        action="store_true",
+        help="test R-set 단 한 번 채점(--source rset-test와 함께, --out 필수)",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--approve-cost", type=float, default=None, metavar="USD")
     return parser
@@ -213,6 +290,23 @@ def main(
     if price is None:
         print(f"단가가 등록되지 않은 모델: {model}", file=sys.stderr)
         return EXIT_REFUSED
+    if (args.source == "rset-test") != args.final_report:
+        print("실행 거부: --source rset-test와 --final-report는 함께만 쓴다.", file=sys.stderr)
+        return EXIT_REFUSED
+    if args.final_report:
+        if args.out is None and not args.dry_run:
+            print("실행 거부: 최종 채점은 --out이 필요하다.", file=sys.stderr)
+            return EXIT_REFUSED
+        gate_error = final_gate_error(
+            model_key=args.model,
+            prompt=args.prompt,
+            run_tag=args.run_tag,
+            rset_dir=args.rset_dir,
+            root=Path.cwd(),
+        )
+        if gate_error is not None:
+            print(f"실행 거부: {gate_error}", file=sys.stderr)
+            return EXIT_REFUSED
     rules = load_rules()
     try:
         items = load_items(args.golden, args.rset_dir, args.source)
@@ -240,7 +334,7 @@ def main(
     pending, low, high = estimate(probe, items, model)
     print(
         f"[dry-run] Sentinel LLM 보조 {model} · 프롬프트 {args.prompt} · effort {args.effort}"
-        f" · dev {len(items)}건\n"
+        f" · {args.source} {len(items)}건\n"
         f"  캐시 적중 {len(items) - pending}건, API 호출 예정 {pending}건\n"
         f"  예상 비용 ${low:.3f} ~ ${high:.3f} (단가 기준일 {PRICES_AS_OF}, 글자 수 기반 추정)"
     )
@@ -287,6 +381,14 @@ def main(
         f" · 호출 실패(미실행): {unavailable or '없음'}"
     )
     print(f"사용량: {assist.usage_summary()}")
+    if args.final_report and not unavailable:
+        marker = marker_payload(root=Path.cwd(), model=model, prompt=args.prompt, rows=rows)
+        (args.rset_dir / TEST_MARKER).write_text(
+            json.dumps(marker, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        print(f"채점 표식 기록: {args.rset_dir / TEST_MARKER}")
+    elif args.final_report:
+        print("호출 실패가 있어 채점 표식을 쓰지 않았다. 결과는 --out에만 있고 재시도가 필요하다.")
     if args.out is not None:
         args.out.write_text(
             json.dumps(
