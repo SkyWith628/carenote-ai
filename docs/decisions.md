@@ -654,3 +654,80 @@
 - 비교: 필드 160개 값 일치 99.4%, flag 일치 100%. **특이사항(Sentinel 대상)은 20건 모두 스펙과 일치**(양성 10 risk, 음성 10 값 없음 또는 ok). 불일치는 K38 mood 1건(드라마 사연에 눈시울이 붉어짐 → 저조로 읽음)뿐이고 Sentinel과 무관하다.
 - 라벨러가 애매하다고 표시한 특이사항: K34(넘어질 뻔함 + 손목 뻐근: 낙상 후 통증 기준인지 모호해 ok), K36(어제 저녁 한 끼 결식). 둘 다 정답과 일치한다. 이 두 건은 채점 때 gray로 함께 표시한다.
 - 스펙 정답은 수정하지 않았다. 다음: test 채점 경로(동결 태그 확인 후 한 번) 구현·dry-run·승인. 승인 전 API 호출 없음.
+
+## 2026-10-27 — Sentinel test R-set 최종 채점 1회 (Haiku, 프롬프트 s2, 규칙 v2 태그, 승인 $0.05 · 실제 약 $0.0063)
+- 채점 경로: `sentinel_llm_run --source rset-test --final-report`. 동결 태그 `sentinel-rules-v2`와 동결 파일 3개 일치, Haiku+s2 사전 등록 설정, 1회 실행(`data/golden/rset/TEST_SCORED.json`)을 코드로 강제한다. 가드 테스트 `tests/test_sentinel_final_gate.py`. 호출 20회, 실패 0.
+- 결과(보고서 `docs/reports/20261027-sentinel-llm-test-haiku-s2.json`): 양성 어휘 근접 규칙 4/4·LLM 4/4, **양성 어휘 밖 규칙 0/5 → LLM 5/5(구간 57~100%)**, 정황 1/1, 음성 오발동 규칙 0/10·LLM 1/10(K34 "넘어질 뻔함"을 낙상 후로 읽음, 구간 2~40%), gray 제외 합집합 1/7. 채택 기준(recall ≥ 75%, 오경보 ≤ 2) 충족.
+- K18에서 과거 낙상 인용 1개를 V4가 거절했다(검증 코드가 의도대로 작동).
+- 한계: 양성 9건·음성 10건이라 구간이 넓다. 생성기·평가자가 같은 Claude 계열. 안전성의 근거로 쓰지 않는다. 이 시점부터 규칙·프롬프트 변경은 test를 본 뒤의 수정으로 표시한다.
+- 남은 일: 사람 확인 표본(LLM만 낸 신호: 어휘 밖 양성 5건·정황 1건·K34), 식사 규칙 이틀·사흘 정리(v3, 새 태그).
+
+## 2026-10-28 — Verifier 구현 (모델: Haiku 5.5 다른 티어, API 호출 없음)
+- `src/carenote/extraction/verifier.py`: 값이 있는 위험 필드를 필드당 1회 재검증(supported / unsupported / ambiguous + 결정 구간 인용). 코드 검사 V1(인용 실재)·V2(수치 일치) 위반 시 ambiguous로 강등. Consensus는 `ok → needs_confirm`으로 올리기만 하고 실패는 `unavailable`로 기록. 설계 `docs/verifier-design.md`, 테스트 `tests/test_verifier.py`(26개, 가짜 클라이언트).
+- 열린 결정 3 해결: "다른 모델 계열" = Claude 내 다른 티어(Extractor Sonnet 5.5 / Verifier Haiku 5.5). 타 제공사 키가 없고 비용이 낮다. 같은 제공사라 오류 상관이 있을 수 있어 독립성은 주장하지 않는다.
+- Extractor의 근거 인용은 Verifier에 주지 않는다(앵커링 방지). blueprint 4.1과 다른 점이며 ablation 후보로 남긴다.
+- 아직 평가 실행 없음. 다음: 러너 연결 → dry-run 비용 추정 → 승인 → dev 실행(gs-003 먼저). test 분할은 쓰지 않는다.
+
+## 2026-10-28 — Verifier dev 30건 첫 실행 (Haiku 5.5, vf1, 승인 $0.10 · 실제 $0.0135)
+- 러너에 `--verifier` 연결(dev·LLM 실행 전용, test 거부, 승인액을 두 모델 추정 상한으로 분할). 설정 `verifier_model/effort/cache_dir`. 테스트 `tests/test_cli_verifier.py`. 호출 101회, 실패 0, 강등 0.
+- 결과: 확인 recall 21→22/22, 과다 확인 0→2/202, 조용한 오답·수치 오류·위험 recall 불변, F1 구분 불가. 진짜 포착 1건(gs-013 낙상), 오경보 2건(gs-013 맥박·gs-028 혈압), 나머지 4건은 이미 잡혀 있었다. 상세 `docs/ablation.md` 부록.
+- 판단: Verifier의 이득은 이 분포에서 입증되지 않았다(기준선 Flagger가 수치 오류를 이미 올림). 폐기하지도 않는다: 오경보가 낮고 구조가 Re-listener·Consensus와 연결된다. 프롬프트 vf1은 이 결과를 보고 튜닝하지 않는다(dev 30건으로 맞추면 과적합).
+- 다음: ① 오경보 원인(방언 수사 "육십팔") 사람 확인 ② Verifier가 의미 있는 분포를 만들기 위한 STT 오류·번복 케이스 추가 여부 결정 ③ `/drafts` API 연결(`checks.verifier`와 unavailable 표시).
+
+## 2026-10-28 — Verifier를 /drafts API·검토 화면에 연결 (API 호출 없음)
+- 결정: 골든셋을 늘리지 않고 Verifier를 제품 경로에 연결한다(기능 동결 12/3 일정 우선). dev 결과상 이득은 입증되지 않았으므로 "검증을 거쳤다"는 표시와 구조를 갖추는 것이 목적이며 효과를 주장하지 않는다.
+- 변경: `get_extractor`가 `VerifyingExtractor(FlaggingExtractor(...))`를 반환, `DraftField.checks`(blueprint 4.2), 검토 화면 "재검증" 줄. 검증 실패는 `unavailable`로 표시하고 flag·초안 생성은 막지 않는다. 운영 호출당 Haiku 위험 필드 수(≈3~4)만큼 추가된다.
+- 테스트: `tests/test_drafts_api.py` 4개 추가(전체 731 통과).
+
+## 2026-10-28 — LangGraph 오케스트레이션 초안 (실행 미검증)
+- `orchestration/graph.py`: extract → verify(Send 병렬) → consensus → human_review(interrupt) → finalize. 설계 `docs/orchestration-design.md`, 테스트 `tests/test_orchestration.py`(10여 개). langgraph 1.2.18은 공식 문서로 API 확인.
+- **미검증**: 이 Windows PC에서 앱 제어 정책(Code Integrity 이벤트 3077/3033)이 `ormsgpack`의 DLL 로드를 차단해 langgraph를 import할 수 없다. 보안 설정이라 우회하지 않았다. ruff만 통과. Mac에서 `uv add langgraph` 후 테스트를 돌려 확인해야 한다(`pyproject.toml`·`uv.lock`은 아직 수정하지 않음).
+- 사람이 쓴 값은 evidence 없이 `source=stated`로 기록(계약 예외, 추후 `source=human` 검토).
+
+## 2026-10-28 — Verifier 오경보 2건 원인 분석 (캐시만 사용, API 호출 없음)
+- **gs-028 혈압(번복 아닌 재측정)**: "처음 150/95, 쉬고 다시 135/85". 모델 값 135/85는 정답(ok)인데 Verifier는 ambiguous. vf1 프롬프트의 "같은 항목에 숫자가 둘 이상 나오면 ambiguous" 규칙이 의도대로 작동한 것이다. 원인은 **규칙 설계와 라벨 정책의 충돌**이지 모델 오류가 아니다. 재측정 transcript는 모두 이렇게 올라간다. 선택지: 유지(보수적, 확인 한 번의 비용) / 재측정 표현("다시 재니")을 예외로 프롬프트 수정. 정책 결정이 필요하며 지금은 유지.
+- **gs-013 맥박("육십팔이래유")**: 판정 unsupported, 인용 빈 문자열. "한글 수사를 못 읽는다"는 가설은 근거가 약하다: 같은 구조의 gs-012("칠십오라고"), gs-015("칠십이고")는 정확한 인용과 함께 supported. dev 안 한글 수사 필드 5건 중 값이 맞은 3건에서 2 supported·1 unsupported, 틀린 2건(gs-015·053 혈압)은 정당하게 잡았다. 인용이 비어 있다는 것은 해당 문장을 찾지 못했다는 뜻이라 **체계적 오독보다 effort low의 일회성 실수**일 가능성이 높다. 단, 1건이라 구분 불가이며 같은 입력의 반복 호출로만 확인할 수 있다.
+
+
+## 2026-10-28 — gs-013 맥박 반복 호출 5회 (Haiku 5.5, vf1, run_tag rep1~5, 승인 $0.01 · 실제 $0.0006)
+- 결과: ambiguous 4, unsupported 1, **supported 0/5**. 4회는 정확한 인용("맥박은 육십팔이래유")을 찾고도 ambiguous, 1회는 인용 없이 unsupported. 위 분석의 "일회성 실수" 가설은 **틀렸다**. 이 입력에서는 일관되게 supported가 안 나온다(체계적).
+- 문장은 찾았으니 읽기 실패가 아니라 판정의 문제다. 이유(한글 수사 "육십팔" 표기, 전문 "이래유", 그 밖)는 모델의 추론이 저장되지 않아 모른다. gs-012("칠십오라고 하더만요")·gs-015("칠십이고")는 supported이므로 "한글 수사 일반"의 문제도 아니다. 원인은 미확정이다.
+- 프롬프트·코드는 수정하지 않았다(dev 케이스 한 건에 맞추는 튜닝이 된다). 선택지: ① 수용(오경보 1%대, 한계로 기록) ② 합성 변형 케이스(같은 문장의 수사·어미만 바꾼 것 8~10개)로 원인을 가르는 진단, 약 $0.01 ③ 후처리 코드 규칙(ambiguous라도 인용에 값의 숫자가 있고 같은 항목의 다른 숫자가 없으면 supported로 완화)은 안전 방향(flag를 낮춤)이 되어 비추천.
+
+## 2026-10-28 — Verifier 오경보 수용 (KR-2)
+- 결정: gs-013(원인 미확정)·gs-028(규칙 설계상 동작)의 오경보를 한계로 수용하고 프롬프트·코드를 고치지 않는다. 기록 `docs/known-risks.md` KR-2. 이유: 오경보는 안전한 방향이고 약 1%이며, 진단은 일정(기능 동결 12/3) 대비 이득이 작다.
+
+## 2026-10-28 — Re-listener 텍스트 폴백 구현 (API 호출 없음, 평가 미실행)
+- `extraction/relistener.py`: 주장을 숨기고 위험 필드를 원문에서 다시 읽게 한 뒤 코드가 Extractor 값과 비교(supported / unsupported / ambiguous / unavailable). `FieldChecker` 프로토콜을 추가해 `VerifyingExtractor(..., name="relistener")`로 Verifier 위에 겹친다. 설계 `docs/relistener-design.md`, 테스트 `tests/test_relistener.py`.
+- 아직 dev 평가를 하지 않았다. 이득은 미입증이며 STT가 지운 정보(gs-014·015)는 텍스트로 못 잡는다(오디오 필요).
+
+## 2026-10-28 — Re-listener 텍스트 폴백 dev 30건 실행 (Haiku 5.5, rl1, 승인 $0.10 · 실제 $0.0126)
+- 러너 `--relistener`(dev 전용, `--verifier`와 겹침 가능, 모델별 추정 상한으로 승인액 분할). 호출 101회, 실패 0. 결과·표는 `docs/ablation.md` 부록.
+- 결과 요약: Re-listener 단독은 조용한 오답 1→0(gs-015 맥박, Verifier가 놓친 것), 확인 recall 21/22 유지, 과다 확인 1/202. 겹치면 확인 recall 22/22, 조용한 오답 0/86, 과다 확인 2/202. 각 이득이 1건이라 통계적 구분 불가. 두 검사가 서로 다른 한 건씩을 잡는다.
+- **정정**: 이전 기록의 "남은 조용한 오답 = gs-016 특이사항"은 틀렸다. 실제는 gs-015 맥박(`칠십이고` → 70)이며 flagger-kr1-design의 "조용한 오답 3행 전부 gs-015 맥박 수사 모호성"과 일치한다. ablation.md 해당 줄을 고쳤다.
+- 판단: 텍스트 폴백은 폐기하지 않는다(블라인드 읽기가 확인 편향이 있는 Verifier와 다른 것을 잡았다). 운영 기본값으로 켤지는 비용·지연 측정 뒤에 정한다. rl1은 튜닝하지 않는다.
+
+## 2026-10-28 — 방문당 비용·지연 실측 (dev 10건, 승인 $0.55 · 실제 $0.1287)
+- 도구 `evaluation/costlatency.py`(호출별 시간 기록, 검증 단계 실제 병렬 실행, dev 전용, 비용 가드). 결과 `docs/cost-latency.md`, blueprint 8.1 표를 채웠다.
+- 결과: 전 구성 $0.0129/건, 호출 6.6회, 지연 순차 11.5초 vs 병렬 5.1초(p95 7.6초). 비용은 Extractor가 94%.
+- **발견**: 현재 `/drafts` API는 순차 구현이라 예상 지연 약 8초(미실측)다. 병렬화(검증 단계 스레드풀)가 필요하며 LangGraph 없이도 가능하다.
+- 도구 수정: 첫 출력의 "+ Verifier" 병렬 지연이 Re-listener까지 포함한 실측값이라 잘못 표시됐다. 추정식("1단계 + 가장 느린 호출")으로 고치고 실측 여부 플래그를 추가했다(전체 구성 추정 5.07초 대 실측 5.08초로 식 검증).
+
+## 2026-10-28 — /drafts 병렬화 + Re-listener 연결 (운영 코드 경로 실측 승인 $0.55 · 실제 $0.1287)
+- `FlaggingExtractor`: Extractor‖Sentinel 보조. `VerifyingExtractor`: 검사기 여러 개를 받아 (검사기×위험 필드)를 한 단계에서 동시 실행, flag는 판정을 합쳐 올리기만 함(`all_verdicts_for`, 기존 단일 검사기 사용은 호환). Verifier·Re-listener·CostGuard 통계에 잠금. `/drafts`가 둘을 병렬로 돌리고 응답 `checks.verifier`·`checks.relistener`, 검토 화면 "재검증"·"독립 재읽기" 표시.
+- 실측(`costlatency --production`, dev 10건): 벽시계 평균 4.87초(p95 7.4초), 순차 합 11.05초 대비 2.3배, 6.6호출·$0.01287/건. 구성 요소 모델 예측(5.08초)과 일치. 병렬화 전 "약 8초 예상"은 추정이었다.
+- 테스트 `tests/test_parallel.py` 7개 + production 모드 1개(전체 763 통과). 병렬성은 sleep 대역으로, 통계 정확도는 32스레드×50회로 검증.
+- 알려진 제약: 병렬 호출 중 하나가 예외를 내면 나머지 호출은 풀 종료까지 끝나 비용이 이미 발생한다.
+
+## 2026-10-28 — 사람 결정 엔드포인트 (POST /drafts/{id}/decision, API 호출 없음)
+- `approve`는 flag가 ok가 아닌 필드를 모두 `edits`로 고치거나 `confirmed`로 확인해야만 받는다(아니면 422+미해결 목록). 수정은 새 revision(author=user, diff), AI 초안(rev 1)은 보존(append-only). 결정은 원자적이며 이미 결정된 초안은 409. 감사 기록에는 필드 키만 남기고 값·사유 내용은 남기지 않는다. 설계 `docs/decision-endpoint-design.md`, 테스트 `tests/test_decisions.py`.
+- 검토 화면에 수정 입력·"확인함"·승인·거절을 추가하고 임시 서버(가짜 추출기)로 브라우저에서 실제 흐름을 확인했다.
+- **제약**: 인증 없음(행위자 `reviewer` 고정), 인메모리 저장, 사람이 쓴 값은 evidence 없이 `source=stated`(원칙의 예외), 수정 값 형식 검증 없음. 외부 공개 전 인증 필수.
+
+## 2026-10-28 — STT: 서버 Whisper(자체 호스팅) 채택 및 구현 (실제 Whisper 미실행, API 호출 없음)
+- 선택지 3개(서버 Whisper / 브라우저 Web Speech / 외부 STT API)를 비교해 사용자가 서버 Whisper를 선택. 근거: 오디오가 서버를 벗어나지 않음, 합성 음성으로 정확도 직접 측정, Re-listener 오디오 확장 가능. 설계 `docs/stt-design.md`.
+- 조사 결과: Anthropic API 오디오 입력은 확인되지 않음(blueprint의 오디오 네이티브 Re-listener는 전제 없음, 텍스트 폴백 유지). Web Speech는 Chrome이 오디오를 서버로 보내고 Android `processLocally` 미지원. 한국어 Whisper 정확도의 신뢰할 공개 비교는 못 찾음.
+- 구현: `POST /transcribe`(raw 오디오, 415·413·400·422·503, no-store, 메모리 처리), `FasterWhisperEngine`(VAD·환각 억제·직렬화·길이 선검사), `privacy.mask_pii`(주민번호·전화·인정번호 형식, `/transcribe`와 `POST /drafts` 양쪽, 감사에는 횟수만), CER·수치 보존율, `tts_mac`(dev만), `stt_eval`, 검토 화면 녹음 버튼(전사 후 사람이 고친 뒤 초안 생성). 테스트 52개(전체 838 통과).
+- 화면은 임시 서버(가짜 엔진)에서 실제 `MediaRecorder` 경로(오실레이터 스트림)로 녹음→전사→마스킹→입력창 채움, 권한 거부 메시지를 브라우저로 확인했다. 실제 마이크·실기기는 미확인.
+- **미검증**: 실제 faster-whisper 로드·정확도·지연(이 PC는 앱 제어 정책으로 로드 불가 가능성, 모델 미다운로드). Mac에서 `uv add --optional stt faster-whisper` 후 설계 문서의 순서로 확인. `pyproject.toml`·`uv.lock`은 수정하지 않음.
+- 알려진 한계: 합성 음성은 낙관적, 한글 수사 번호·이름은 마스킹 못 함, 인증·호출 제한 없음.
