@@ -47,6 +47,7 @@ from carenote.extraction.prompts import (
     PromptVersion,
     Variant,
 )
+from carenote.extraction.sentinel import load_rules
 
 DEFAULT_GOLDEN = Path("data/golden")
 EXIT_REFUSED = 2
@@ -182,6 +183,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "--final-report",
         action="store_true",
         help="test 분할을 포함한 LLM 실행을 허용한다 (최종 ablation 보고 때만 쓴다)",
+    )
+    parser.add_argument(
+        "--sentinel",
+        action="store_true",
+        help="Sentinel·수치 Rule Engine(rules/sentinel.yaml)을 켠다. dev 분할 LLM 실행에만 허용"
+        " (test는 규칙의 독립 평가가 아니다: docs/rule-engine-sentinel-design.md 6장)",
     )
     parser.add_argument("--out", type=Path, default=None, help="JSON 보고서 저장 경로")
     parser.add_argument("--model", default=None, help="기본값은 설정(CARENOTE_EXTRACTOR_MODEL)")
@@ -349,7 +356,8 @@ def _run_llm(
         run_tag=args.run_tag,
         prompt_edits=edits,
     )
-    extractor: Extractor = FlaggingExtractor(llm)
+    rules = load_rules() if args.sentinel else None
+    extractor: Extractor = FlaggingExtractor(llm, rules)
     try:
         report = evaluate(extractor, cases, args.split)
     except BudgetExceeded as exc:
@@ -377,6 +385,13 @@ def main(
 ) -> int:
     """CLI 진입점. settings·client_factory는 테스트에서 바꿔 끼운다."""
     args = _build_parser().parse_args(argv)
+    if args.sentinel and (args.split != "dev" or args.extractor not in LLM_CHOICES):
+        print(
+            "--sentinel은 dev 분할의 LLM 실행에만 쓸 수 있다. test 케이스는 이 규칙의 설계 근거와 "
+            "겹쳐 독립 평가가 되지 못한다 (docs/rule-engine-sentinel-design.md 6장).",
+            file=sys.stderr,
+        )
+        return EXIT_REFUSED
     if args.extractor in LLM_CHOICES:
         return _run_llm(args, settings or get_settings(), client_factory)
 

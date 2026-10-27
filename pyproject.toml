@@ -10,6 +10,7 @@ dependencies = [
     "anthropic>=2.1.0",
     "fastapi>=0.161.1",
     "pydantic-settings>=2.16.1",
+    "pyyaml>=6.0",
     "uvicorn[standard]>=0.54.0",
 ]
 

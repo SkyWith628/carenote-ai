@@ -1,0 +1,409 @@
+"""특이사항 risk Sentinel · 수치 Rule Engine · Consensus 단위 테스트.
+
+문장은 모두 합성이다(규칙 정합성만 증명한다). 정책 표의 어휘를 옮긴 규칙이라 일반화 recall의 증거가
+아니다. test 분할은 이 규칙의 독립 평가가 아니므로 어떤 테스트도 test 케이스를 읽지 않는다.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+from carenote.evaluation.__main__ import EXIT_REFUSED, main
+from carenote.evaluation.extractor import PredictedField
+from carenote.evaluation.loader import load_golden
+from carenote.evaluation.schema import Evidence, FieldKey, Flag, Source
+from carenote.extraction.flagger import FlaggingExtractor, flag_field
+from carenote.extraction.sentinel import (
+    DEFAULT_RULES_PATH,
+    RuleError,
+    RuleSet,
+    load_rules,
+    numeric_signals,
+    parse_rules,
+    scan_text,
+    split_sentences,
+)
+
+GOLDEN = Path(__file__).parent.parent / "data" / "golden"
+RULES = load_rules()
+
+
+def ids(text: str) -> set[str]:
+    return {s.rule_id for s in scan_text(text, RULES)}
+
+
+# ---- 양성: 분류별 위험 신호 -------------------------------------------------------------------
+
+POSITIVES = [
+    ("chest_resp", "오늘은 가슴이 답답하다고 하셨어요."),
+    ("chest_resp", "가슴이 너무 아프다고 자꾸 말씀하세요."),
+    ("chest_resp", "계단을 조금 올랐더니 숨이 차서 쉬셨어요."),
+    ("chest_resp", "호흡 곤란을 호소하셨습니다."),
+    ("neuro", "말씀이 평소보다 어눌하셨어요."),
+    ("neuro", "발음이 이상하게 들렸습니다."),
+    ("neuro", "왼쪽 팔에 힘이 없다고 하셨어요."),
+    ("neuro", "오른손에 힘이 빠져서 컵을 놓치셨어요."),
+    ("intake_days", "사흘째 식사를 거부하세요."),
+    ("intake_days", "이틀 동안 밥을 안 드셨다고 합니다."),
+    ("intake_days", "물도 사흘째 안 드시려고 해요."),
+    ("body_change", "발이 퉁퉁 부어 있었어요."),
+    ("body_change", "얼굴이 갑자기 부었습니다."),
+    ("body_change", "다리에 부종이 심했어요."),
+    ("body_change", "상처가 곪아 있었습니다."),
+    ("circumstance", "팔에 멍이 여러 군데 있었어요."),
+    ("circumstance", "누가 때렸다는 말을 하셨습니다."),
+    ("circumstance", "아드님이 오시면 말을 안 하고 위축되세요."),
+    ("post_fall", "어제 화장실에서 넘어지셨어요. 엉덩이가 많이 아프다고 하세요."),
+    ("post_fall", "넘어지신 뒤로 걷기 힘들어하세요."),
+    ("post_fall", "지난밤에 쓰러지셨다고 해요. 잠시 후 팔이 붓고 아파했어요."),
+]
+
+
+@pytest.mark.parametrize(("rule_id", "text"), POSITIVES)
+def test_positive_signal(rule_id: str, text: str) -> None:
+    assert rule_id in ids(text)
+
+
+# ---- 어려운 음성: 가드가 오탐을 막는다 --------------------------------------------------------
+
+NEGATIVES = [
+    # 부정
+    "가슴이 답답하지는 않으셨어요.",
+    "숨이 차지 않는다고 하셨어요.",
+    "말씀이 어눌하지도 않고 또렷하셨어요.",
+    "왼쪽 팔에 힘이 없지는 않았어요.",
+    "발이 붓지 않았습니다.",
+    # 조언·가정
+    "혹시 가슴이 답답하면 바로 연락 달라고 안내드렸어요.",
+    "숨이 차면 센터로 전화하라고 말씀드렸습니다.",
+    # 제3자
+    "남편분이 가슴이 답답하다고 하셨어요.",
+    "옆집 분은 숨이 차서 병원에 가셨대요.",
+    "아드님이 발이 부었다고 하더라고요.",
+    # 만성 통증
+    "무릎이 쑤시고 아프다고 하셨어요.",
+    "허리가 늘 아프다고 하셨어요.",
+    # 안경: '맞'이 폭행으로 읽히면 안 된다
+    "새로 맞춘 안경이 잘 맞는다고 좋아하셨어요.",
+    # 낙상 부정형
+    "넘어지신 적은 없다고 하셨고 무릎이 조금 아프다고 했어요.",
+    # 기간 없는 식사
+    "오늘 점심은 반쯤 드셨어요.",
+    "아침에는 식사를 안 드셨어요.",
+    # 과거 사건
+    "작년에 사흘째 식사를 거부하신 적이 있다고 해요.",
+    "예전에 발이 퉁퉁 부은 적이 있었다고 하세요.",
+    # 낙상 맥락이 없는 통증
+    "엉덩이가 아프다고 하셨어요.",
+    # 무관한 문장
+    "오늘 날씨가 좋아서 산책을 하셨어요.",
+]
+
+
+@pytest.mark.parametrize("text", NEGATIVES)
+def test_negative_no_signal(text: str) -> None:
+    assert scan_text(text, RULES) == []
+
+
+def test_post_fall_requires_fall_within_two_sentences() -> None:
+    text = "넘어지셨어요. 괜찮으셨어요. 차를 드셨어요. 엉덩이가 아프다고 하세요."
+    assert "post_fall" not in ids(text)
+
+
+def test_post_fall_links_across_sentences() -> None:
+    assert "post_fall" in ids("어제 넘어지셨어요. 그리고 차를 드셨어요. 엉덩이가 아프다고 하세요.")
+
+
+def test_post_fall_pain_negated_is_not_signal() -> None:
+    assert "post_fall" not in ids("어제 넘어지셨어요. 다행히 엉덩이가 아프지는 않대요.")
+
+
+# ---- 신호 계약 ----------------------------------------------------------------------------------
+
+
+def test_signal_quote_is_substring_of_transcript() -> None:
+    text = "오늘 방문했어요. 발이 퉁퉁 부어 있었어요. 점심은 드셨어요."
+    signals = scan_text(text, RULES)
+    assert signals
+    assert all(s.quote in text for s in signals)
+    assert signals[0].quote == "발이 퉁퉁 부어 있었어요."
+
+
+def test_one_signal_per_rule_per_sentence() -> None:
+    signals = scan_text("가슴이 답답하고 호흡 곤란도 있어요.", RULES)
+    assert [s.rule_id for s in signals] == ["chest_resp"]
+
+
+def test_signals_are_provisional_and_circumstance_needs_expert() -> None:
+    signals = scan_text("멍이 여러 군데 있고 발이 부었어요.", RULES)
+    by_id = {s.rule_id: s for s in signals}
+    assert all(s.provisional for s in signals)
+    assert by_id["circumstance"].needs_expert is True
+    assert by_id["body_change"].needs_expert is False
+
+
+def test_all_default_rules_are_provisional_risk() -> None:
+    assert all(r.provisional and r.severity is Flag.RISK for r in RULES.text_rules)
+    assert all(r.provisional for r in RULES.numeric_rules)
+
+
+def test_empty_and_whitespace_transcripts() -> None:
+    assert scan_text("", RULES) == []
+    assert scan_text("   \n ", RULES) == []
+
+
+def test_split_sentences_keeps_substrings() -> None:
+    text = "첫째 문장이에요. 둘째 문장이에요! 셋째요?"
+    parts = split_sentences(text)
+    assert len(parts) == 3
+    assert all(p in text for p in parts)
+
+
+# ---- 로더 ---------------------------------------------------------------------------------------
+
+
+def test_default_rules_file_loads() -> None:
+    assert DEFAULT_RULES_PATH.exists()
+    assert RULES.version == 1
+    assert {r.rule_id for r in RULES.text_rules} == {
+        "chest_resp",
+        "neuro",
+        "intake_days",
+        "body_change",
+        "circumstance",
+        "post_fall",
+    }
+    assert [r.rule_id for r in RULES.numeric_rules] == ["bp_high"]
+
+
+MINIMAL = """
+version: 2
+text_rules:
+  - id: a
+    patterns: ['가슴']
+"""
+
+
+def test_minimal_rules_parse_with_defaults() -> None:
+    rules = parse_rules(MINIMAL)
+    rule = rules.text_rules[0]
+    assert rule.severity is Flag.RISK
+    assert rule.provisional is True
+    assert rule.guards == frozenset({"negation"})
+
+
+@pytest.mark.parametrize(
+    ("text", "message"),
+    [
+        ("[1, 2]", "매핑"),
+        ("text_rules: [", "YAML"),
+        ("text_rules:\n  - patterns: ['x']\n", "id"),
+        ("text_rules:\n  - id: a\n", "패턴|patterns"),
+        ("text_rules:\n  - id: a\n    patterns: []\n", "patterns"),
+        ("text_rules:\n  - id: a\n    patterns: ['(']\n", "정규식"),
+        ("text_rules:\n  - id: a\n    patterns: ['x']\n    guards: [oops]\n", "가드"),
+        ("text_rules:\n  - id: a\n    patterns: ['x']\n    severity: ok\n", "ok"),
+        ("text_rules:\n  - id: a\n    patterns: ['x']\n    severity: boom\n", "severity"),
+        (
+            "text_rules:\n  - id: a\n    patterns: ['x']\n  - id: a\n    patterns: ['y']\n",
+            "중복",
+        ),
+        (
+            "text_rules:\n  - id: a\n    patterns: ['x']\n    context_patterns: ['y']\n",
+            "context_window",
+        ),
+        ("numeric_rules:\n  - id: n\n    field: nope\n    systolic_gte: 1\n", "field"),
+        ("numeric_rules:\n  - id: n\n    field: pulse\n    systolic_gte: 1\n", "blood_pressure"),
+        ("numeric_rules:\n  - id: n\n    field: blood_pressure\n", "systolic_gte"),
+        ("advice_words: '('\n", "advice_words"),
+    ],
+)
+def test_invalid_rules_raise(text: str, message: str) -> None:
+    with pytest.raises(RuleError, match=message):
+        parse_rules(text)
+
+
+def test_load_rules_from_custom_path(tmp_path: Path) -> None:
+    path = tmp_path / "r.yaml"
+    path.write_text(MINIMAL, encoding="utf-8")
+    assert load_rules(path).version == 2
+
+
+def test_custom_rule_fires_and_guard_applies() -> None:
+    rules = parse_rules(MINIMAL)
+    assert scan_text("가슴이 답답해요.", rules)
+    assert scan_text("가슴이 답답하지 않아요.", rules) == []
+
+
+# ---- 수치 Rule Engine ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("160/90", True),
+        ("159/99", False),
+        ("159/100", True),
+        ("120/80", False),
+        ("170/105", True),
+        ("100/60", False),
+        ("160/100", True),
+    ],
+)
+def test_bp_threshold_boundaries(value: str, expected: bool) -> None:
+    assert bool(numeric_signals(FieldKey.BLOOD_PRESSURE, value, RULES)) is expected
+
+
+@pytest.mark.parametrize("value", [None, "", "고혈압", "160", "160-100"])
+def test_bp_threshold_ignores_unparseable(value: str | None) -> None:
+    assert numeric_signals(FieldKey.BLOOD_PRESSURE, value, RULES) == []
+
+
+def test_numeric_rules_ignore_other_fields() -> None:
+    assert numeric_signals(FieldKey.PULSE, "200", RULES) == []
+
+
+# ---- Consensus(FlaggingExtractor) -------------------------------------------------------------
+
+
+class Fixed:
+    """고정된 필드를 돌려주는 extractor."""
+
+    def __init__(self, fields: list[PredictedField]) -> None:
+        self._fields = fields
+
+    def extract(self, transcript: str) -> list[PredictedField]:
+        return self._fields
+
+
+def stated(key: FieldKey, value: str, quote: str = "근거") -> PredictedField:
+    return PredictedField(
+        key=key, value=value, source=Source.STATED, evidence=(Evidence(text=quote),)
+    )
+
+
+def flags_of(fields: list[PredictedField]) -> dict[FieldKey, Flag]:
+    return {f.key: f.flag for f in fields}
+
+
+NOTE_TEXT = "방문했어요. 발이 퉁퉁 부어 있었어요."
+
+
+def test_sentinel_raises_special_notes_to_risk() -> None:
+    inner = Fixed([stated(FieldKey.SPECIAL_NOTES, "발 부종")])
+    out = FlaggingExtractor(inner, RULES).extract(NOTE_TEXT)
+    assert flags_of(out)[FieldKey.SPECIAL_NOTES] is Flag.RISK
+
+
+def test_unrecorded_signal_raises_flag_without_inventing_value() -> None:
+    out = FlaggingExtractor(Fixed([]), RULES).extract(NOTE_TEXT)
+    notes = next(f for f in out if f.key is FieldKey.SPECIAL_NOTES)
+    assert notes.flag is Flag.RISK
+    assert notes.value is None
+    assert notes.source is Source.MISSING
+
+
+def test_without_rules_behavior_is_unchanged() -> None:
+    inner = Fixed([stated(FieldKey.SPECIAL_NOTES, "발 부종")])
+    out = FlaggingExtractor(inner).extract(NOTE_TEXT)
+    assert flags_of(out)[FieldKey.SPECIAL_NOTES] is Flag.OK
+
+
+def test_no_signal_leaves_special_notes_ok() -> None:
+    inner = Fixed([stated(FieldKey.SPECIAL_NOTES, "무릎 통증")])
+    out = FlaggingExtractor(inner, RULES).extract("무릎이 쑤신다고 하셨어요.")
+    assert flags_of(out)[FieldKey.SPECIAL_NOTES] is Flag.OK
+
+
+def test_signals_for_returns_quotes() -> None:
+    extractor = FlaggingExtractor(Fixed([]), RULES)
+    extractor.extract(NOTE_TEXT)
+    signals = extractor.signals_for(NOTE_TEXT)
+    assert [s.rule_id for s in signals] == ["body_change"]
+    assert extractor.signals_for("다른 문장") == []
+
+
+def test_signals_for_empty_without_rules() -> None:
+    extractor = FlaggingExtractor(Fixed([]))
+    extractor.extract(NOTE_TEXT)
+    assert extractor.signals_for(NOTE_TEXT) == []
+
+
+def test_high_bp_is_risk_with_rules_and_ok_without() -> None:
+    field = stated(FieldKey.BLOOD_PRESSURE, "170/105")
+    assert flag_field(field) is Flag.OK
+    assert flag_field(field, None, RULES) is Flag.RISK
+
+
+def test_normal_bp_stays_ok_with_rules() -> None:
+    assert flag_field(stated(FieldKey.BLOOD_PRESSURE, "120/80"), None, RULES) is Flag.OK
+
+
+def test_needs_confirm_outranks_rule_risk() -> None:
+    ambiguous = PredictedField(key=FieldKey.BLOOD_PRESSURE, candidates=("170/105", "130/80"))
+    assert flag_field(ambiguous, None, RULES) is Flag.NEEDS_CONFIRM
+
+
+def test_implausible_bp_stays_needs_confirm_with_rules() -> None:
+    assert flag_field(stated(FieldKey.BLOOD_PRESSURE, "300/100"), None, RULES) is Flag.NEEDS_CONFIRM
+
+
+def test_rules_do_not_change_values() -> None:
+    inner = Fixed([stated(FieldKey.BLOOD_PRESSURE, "170/105")])
+    base = FlaggingExtractor(inner).extract(NOTE_TEXT)
+    with_rules = FlaggingExtractor(inner, RULES).extract(NOTE_TEXT)
+    assert [(f.key, f.value, f.source) for f in base] == [
+        (f.key, f.value, f.source) for f in with_rules
+    ]
+
+
+def test_other_flags_unchanged_by_rules_on_clean_transcript() -> None:
+    inner = Fixed([stated(FieldKey.MEDICATION_TAKEN, "미복용")])
+    clean = "오늘은 약을 안 드셨어요."
+    assert flags_of(FlaggingExtractor(inner, RULES).extract(clean)) == flags_of(
+        FlaggingExtractor(inner).extract(clean)
+    )
+
+
+def test_ruleset_type_exported() -> None:
+    assert isinstance(RULES, RuleSet)
+
+
+# ---- dev 회귀 (test 분할은 읽지 않는다) -------------------------------------------------------
+
+
+def test_dev_special_notes_risk_recall_and_false_alarms() -> None:
+    """프로토타입 v2 재현: 위험 3건 포착, 오발동 0 (튜닝에 쓴 dev라 독립 증거 아님)."""
+    cases = load_golden(GOLDEN, "dev")
+    caught = missed = false_alarm = 0
+    for case in cases:
+        gold = case.field(FieldKey.SPECIAL_NOTES)
+        is_risk = gold.value is not None and gold.flag is Flag.RISK
+        fired = bool(scan_text(case.transcript, RULES))
+        caught += is_risk and fired
+        missed += is_risk and not fired
+        false_alarm += (not is_risk) and fired
+    assert (caught, missed, false_alarm) == (3, 0, 0)
+
+
+def test_dev_bp_threshold_matches_gold_flags() -> None:
+    cases = load_golden(GOLDEN, "dev")
+    for case in cases:
+        gold = case.field(FieldKey.BLOOD_PRESSURE)
+        predicted = bool(numeric_signals(FieldKey.BLOOD_PRESSURE, gold.value, RULES))
+        assert predicted is (gold.value is not None and gold.flag is Flag.RISK), case.id
+
+
+# ---- CLI: test 분할 거부 ------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("split", ["test", "all"])
+def test_cli_refuses_sentinel_on_non_dev(split: str) -> None:
+    code = main(["--extractor", "llm-b0", "--sentinel", "--split", split, "--dry-run"])
+    assert code == EXIT_REFUSED
+
+
+def test_cli_refuses_sentinel_for_non_llm_extractor() -> None:
+    assert main(["--extractor", "oracle", "--sentinel"]) == EXIT_REFUSED

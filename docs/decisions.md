@@ -569,3 +569,10 @@
 - 프로토타입(dev만, 호출 0): 정책 표 어휘 v0은 dev 3/3 포착, 오발동 3(무릎 통증 ×2, "맞춘" 안경); 두 패턴 제거 v1은 2/3(낙상과 통증이 다른 문장), 0 오발동; v2(앞선 2문장의 낙상 긍정형 연결, 부정은 서술어 바로 뒤로 한정, 조언·가정 가드)는 3/3, 오발동 0, 합성 25문장 불일치 0(합성은 보강용이라 독립 증거 아님). 혈압 임시 임계값(수축기 ≥160 또는 이완기 ≥100)은 골든셋 45개와 45/45 일치하지만 고혈압 값이 두 개뿐이라 데이터로 정해지지 않는다(전문가 확인 필요).
 - **중요: test는 이 규칙의 독립 평가가 아니다.** 정책의 특이사항 risk 기준표 행(사흘 식사 거부, 발 부종, 멍·보호자 위축)이 test R2·R3 스펙에서 나왔다. 이번 설계는 test transcript를 열지 않았고 평가는 dev에서만 했다. 독립 평가를 위해 새 위험 신호 배치(R-set 40건)를 제안했고 비용은 스펙 작성 후 dry-run으로 낸다(대략 $1.5~3.7 생성 + 라벨러 약 $1).
 - 안전 원칙: 규칙은 flag를 올리기만 한다, 진단 표현 금지, 정황(학대) 규칙은 전문가 확정 전 `needs_expert`로 자동 보고·알림 연결 금지, 전 항목 `provisional`.
+
+## 2026-10-27 — Sentinel·수치 Rule Engine 구현 (API 없음, test 미사용)
+- 구현: `rules/sentinel.yaml`(텍스트 규칙 6, 수치 규칙 1, 전부 provisional, 정황은 needs_expert), `extraction/sentinel.py`, `FlaggingExtractor(inner, rules)` Consensus, CLI `--sentinel`(dev LLM 실행 전용), `tests/test_sentinel.py` 100개. 전체 570개 통과, ruff·pyright·freeze 일치. pyyaml을 직접 의존성으로 올림(이미 잠금 파일에 있던 전이 의존성).
+- 결정: Consensus는 확인 필요 > risk > ok (설계 문서의 max를 정정). 규칙은 값을 바꾸지 않고 ok만 risk로 올린다. 모델이 특이사항을 비워도 transcript 신호가 있으면 값 없이 flag만 risk("기록되지 않은 위험 신호").
+- 가드 `past_event` 추가(설계에 없던 것). 테스트가 낸 결함 1건 수정("빠져" 활용형).
+- test 처리: 코드·테스트가 test 분할을 읽지 않고, CLI는 `--sentinel`을 test·all에서 거부한다. dev 회귀 테스트는 프로토타입 결과(3/3, 오발동 0)를 재현하지만 튜닝에 쓴 dev라 일반화 증거가 아니다.
+- 남은 일: 설계 4번(dev 캐시 재채점)은 승인 시 dev만, 5번 R-set은 스펙과 비용 dry-run이 먼저.

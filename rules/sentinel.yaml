@@ -1,0 +1,92 @@
+# 특이사항 risk Sentinel · 수치 Rule Engine 규칙 (설계: docs/rule-engine-sentinel-design.md)
+# 전 항목 provisional: docs/label-policy.md "특이사항 risk 기준" 임시 표에서 옮긴 보고 우선순위용 목록이며
+# 임상 기준이 아니다. 현장 확인으로 바뀌면 version을 올리고 골든셋 개정 절차를 따른다.
+version: 1
+
+# 부정·가정·제3자·과거 가드 설정 (코드의 guards 모듈 상수와 짝)
+advice_words: '연락|전화|알려|말씀'
+past_words: '작년|지난해|몇\s?달\s?전|오래\s?전|예전|옛날|지난달'
+
+text_rules:
+  - id: chest_resp
+    category: 흉부·호흡
+    severity: risk
+    provisional: true
+    guards: [negation, conditional_advice, third_party]
+    patterns:
+      - '가슴[이가]?\s?(?:너무\s|많이\s)?(?:답답|아프|아파|조이|쥐어)'
+      - '흉통'
+      - '흉부\s?(?:답답|통증)'
+      - '숨[이을]?\s?(?:차|찬|가쁘|쉬기\s?힘|못\s?쉬)'
+      - '호흡\s?곤란'
+      - '숨쉬기\s?(?:힘들|어렵)'
+
+  - id: neuro
+    category: 신경·의식
+    severity: risk
+    provisional: true
+    guards: [negation, conditional_advice, third_party]
+    patterns:
+      - '말[이씀]?[이은]?\s?(?:평소보다\s)?(?:어눌|꼬이|꼬여|잘\s?안\s?나|막히)'
+      - '발음[이]?\s?(?:어눌|이상|안\s?좋)'
+      - '(?:한쪽|왼쪽|오른쪽)\s?(?:팔|다리|손|발)[에이]?\s?힘이?\s?(?:없|빠[지져]|안\s?들어)'
+      - '(?:팔|다리|손|발)[에이가]?\s?힘이?\s?(?:없|빠[지져]|안\s?들어|약)'
+      - '의식이?\s?(?:흐리|없)'
+      - '(?:얼굴|입)[이가]?\s?(?:한쪽|돌아|처지)'
+      - '마비'
+
+  - id: intake_days
+    category: 식사·수분
+    severity: risk
+    provisional: true
+    guards: [negation, conditional_advice, third_party, past_event]
+    patterns:
+      - '(?:이틀|사흘|나흘|[2-9]\s?일)\s?(?:째|동안|연속)[^.]{0,20}?(?:식사|밥|물|음식|죽)[^.]{0,10}?(?:거부|안\s?드|못\s?드|안\s?먹|못\s?먹)'
+      - '(?:식사|밥|물)[^.]{0,12}?(?:이틀|사흘|나흘)\s?째[^.]{0,10}?(?:거부|안\s?드|못\s?드|안\s?먹)'
+
+  - id: body_change
+    category: 신체 변화
+    severity: risk
+    provisional: true
+    guards: [negation, conditional_advice, third_party, past_event]
+    patterns:
+      - '(?:발|다리|얼굴|손|종아리)[이가]?\s?(?:퉁퉁|갑자기\s)?\s?(?:부어|부었|붓|부종)'
+      - '부종'
+      - '(?:피가|출혈|피를)\s?(?:나|많이|토|쏟)'
+      - '상처[가]?\s?(?:깊|곪|벌어)'
+
+  # 정황(학대 의심 등): 법적 보고 의무·기관 절차와 얽혀 있다. 전문가(R3 검토자)가 기준을 확정하기
+  # 전에는 needs_expert로 표시하고 자동 보고·알림에 연결하지 않는다.
+  - id: circumstance
+    category: 정황
+    severity: risk
+    provisional: true
+    needs_expert: true
+    guards: [negation, conditional_advice, third_party]
+    patterns:
+      - '멍[이]?\s?(?:여러|곳곳|많)'
+      - '(?:때리|때렸|폭행|밀쳤)'
+      - '(?:아드님|보호자|자제분|며느리)[^.]{0,10}?(?:오시면|오면|있으면)[^.]{0,15}?(?:말을?\s?잘?\s?안|위축|무서워|움츠)'
+
+  # 낙상 후: 앞선 2문장 안에 낙상 긍정형이 있고 같은 문장에 통증·부기·거동 불편이 있을 때.
+  # 낙상 부정형("넘어지신 적은 없다")은 context_patterns에 걸리지 않는다.
+  - id: post_fall
+    category: 낙상 후
+    severity: risk
+    provisional: true
+    guards: [negation]
+    context_window: 2
+    context_patterns:
+      - '넘어지셨|넘어지신\s?(?:뒤|후|다음)|넘어졌|쓰러지셨|쓰러졌|떨어지셨|미끄러져\s?넘어'
+    patterns:
+      - '(?:엉덩이|허리|골반|고관절|팔|다리|머리|손목|어깨)[이가]?\s?(?:많이\s)?(?:아프|아파|붓|부었|못\s?움직)'
+      - '(?:못\s?걷|걷기\s?힘들|거동이?\s?불편)'
+
+# 수치 임계값. 데이터로 정해지지 않았다(골든셋 고혈압 값 2개): 임상 기준은 전문가 확인 필요.
+numeric_rules:
+  - id: bp_high
+    field: blood_pressure
+    severity: risk
+    provisional: true
+    systolic_gte: 160
+    diastolic_gte: 100
