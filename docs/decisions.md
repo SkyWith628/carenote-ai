@@ -576,3 +576,7 @@
 - 가드 `past_event` 추가(설계에 없던 것). 테스트가 낸 결함 1건 수정("빠져" 활용형).
 - test 처리: 코드·테스트가 test 분할을 읽지 않고, CLI는 `--sentinel`을 test·all에서 거부한다. dev 회귀 테스트는 프로토타입 결과(3/3, 오발동 0)를 재현하지만 튜닝에 쓴 dev라 일반화 증거가 아니다.
 - 남은 일: 설계 4번(dev 캐시 재채점)은 승인 시 dev만, 5번 R-set은 스펙과 비용 dry-run이 먼저.
+
+## 2026-10-27 — Sentinel·Rule Engine dev 캐시 재채점 (비용 0, test 미사용)
+- 16구성(v1~v4 × Haiku·Sonnet × B0·B1) 전부 dev 위험 recall 8/13 → 13/13, F1·과다 확인·확인 recall 불변, 위험이 아닌 필드의 risk flag 0. 상세는 `docs/rule-engine-sentinel-design.md` 마지막 절.
+- 한계: 규칙을 dev에 맞춰 만들었으므로 in-sample이다. 일반화 주장은 R-set 이후에만 한다.

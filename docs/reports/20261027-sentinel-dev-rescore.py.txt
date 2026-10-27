@@ -1,0 +1,31 @@
+"""dev 분할 캐시 재채점: Sentinel·Rule Engine 전후. API 없음, test 미사용."""
+from pathlib import Path
+from carenote.config import get_settings
+from carenote.evaluation.final_table import MODEL_IDS, _NoClient
+from carenote.evaluation.loader import load_golden
+from carenote.evaluation.runner import evaluate
+from carenote.extraction.flagger import FlaggingExtractor
+from carenote.extraction.llm_extractor import LLMExtractor
+from carenote.extraction.sentinel import load_rules
+
+cases = load_golden(Path("data/golden"), "dev")
+assert all(c.split == "dev" or c.split is None for c in cases) and len(cases) == 30
+cache = Path(get_settings().extraction_cache_dir)
+rules = load_rules()
+def r(x): return f"{x.num}/{x.den}"
+print("구성 | 전체 위험recall 전→후 | 조용한오답 전→후 | 과다확인 전→후 | 확인recall 전→후 | F1 불변")
+for prompt in ("v1","v2","v3","v4"):
+  for model in MODEL_IDS:
+    for variant in ("b0","b1"):
+        inner = LLMExtractor(_NoClient(), variant=variant, model=MODEL_IDS[model],
+            effort=get_settings().extractor_effort, cache_dir=cache, prompt_version=prompt)
+        if not all(inner.is_cached(c.transcript) for c in cases):
+            continue
+        b = evaluate(FlaggingExtractor(inner), cases, "dev")
+        a = evaluate(FlaggingExtractor(inner, rules), cases, "dev")
+        hb, ha = b.headline, a.headline
+        print(prompt, model, variant, "|", r(hb.risk_recall), "→", r(ha.risk_recall), "|",
+              r(hb.silent_wrong), "→", r(ha.silent_wrong), "|", r(hb.over_confirm), "→", r(ha.over_confirm),
+              "|", r(hb.confirm_recall), "→", r(ha.confirm_recall), "|", hb.f1 == ha.f1)
+        if (prompt, model, variant) == ("v4","haiku","b0") or True:
+            pf_b = {k: v for k, v in b.to_dict().get("per_field", {}).items()} if hasattr(b,"to_dict") else {}
