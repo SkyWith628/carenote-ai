@@ -106,3 +106,14 @@ transcript ─┬→ Extractor ───────────────→ 
 - **비결정성**: 같은 입력도 달라질 수 있다. 캐시로 재현하고 반복으로 변동을 잰다.
 - **개인정보**: 실제 운영에서는 방문 발화가 API로 나간다. 추출기와 같은 경로이며 별도 동의·마스킹 정책이 필요하다(범위 밖, 운영 전 확인).
 - **임상 타당성**: 6분류는 여전히 임시 목록이다. 정황은 전문가 확인 전이라 자동 알림에 연결하지 않는다.
+
+## 구현 메모 (2026-10-27, API 호출 0)
+- 코드: `src/carenote/extraction/sentinel_llm.py`(프롬프트 s1, 스키마, `verify_signals` V1~V6, `merge_signals`, `SentinelAssist`), `flagger.py`(`FlaggingExtractor(inner, rules, assist=None)`, `assist_result_for`), `sentinel.py`(`Signal.source`, 구간 단위 `guarded_span`), `src/carenote/evaluation/sentinel_llm_run.py`(CLI). 테스트 `tests/test_sentinel_llm.py` 65개(전체 658개).
+- CLI: `python -m carenote.evaluation.sentinel_llm_run --sentinel-llm {haiku,sonnet} [--dry-run | --approve-cost USD --out OUT.json]`. 읽는 자료는 골든 dev 30건과 R-set dev 20건뿐이다(`--split` 인자가 없고, 로더는 `load_golden(..., "dev")`만 부르며 테스트가 이를 감시한다). 기존 평가 CLI의 `--sentinel`은 그대로 규칙 단독이다.
+- 구현 중 정한 것:
+  - V5는 인용 **바깥** 문맥만 본다(앞쪽 제3자·과거, 뒤쪽 부정·조건). 인용 안쪽 부정은 V4의 `negated`에 맡긴다. 인용 안의 "지 않"을 거르면 "식사를 드시지 않으세요" 같은 진짜 신호를 버리기 때문이다.
+  - 캐시에는 검증 전 원본 응답을 저장한다. 검증 규칙을 고쳐도 재호출 없이 다시 적용된다.
+  - 실패(API 오류, 거절, 출력 한도, 파싱 불가)는 `unavailable`이고 flag에는 영향이 없다. 결과는 `assist_result_for`로 읽는다.
+  - 프롬프트 s1은 sha256으로 고정했다(테스트). 프롬프트 예시 3개는 가상 문장이며, dev 자료와 10자 조각 겹침이 없음을 테스트한다.
+- 실측 전 dry-run(캐시 없음, dev 50건): Haiku **$0.011 ~ $0.047**, Sonnet $0.228 ~ $0.949. 프롬프트가 설계 추정(2,500자)보다 짧아 설계 문서의 §6 하한보다 낮다. 승인은 추정 최대 이상이어야 한다(Haiku $0.05 이상, 설계 문서의 $0.06도 충분).
+- 아직 안 한 것: API를 쓰는 dev 실행, 프롬프트 튜닝, 동결 태그(`sentinel-llm-v1`), test R-set. s1은 한 번도 모델에 보낸 적이 없는 초안이다.

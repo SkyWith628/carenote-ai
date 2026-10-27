@@ -60,6 +60,7 @@ class Signal:
     matched: str
     provisional: bool
     needs_expert: bool
+    source: str = "rule"  # rule | llm | rule+llm
 
 
 @dataclass(frozen=True)
@@ -228,23 +229,30 @@ def split_sentences(text: str) -> list[str]:
     return [s for s in _SENTENCE_SPLIT.split(text) if s.strip()]
 
 
-def _guarded(rules: RuleSet, rule: TextRule, sentence: str, match: re.Match[str]) -> bool:
-    """가드 중 하나라도 걸리면 True (신호를 버린다)."""
-    tail = sentence[match.end() : match.end() + _TAIL]
-    head = sentence[: match.start()]
+def guarded_span(rules: RuleSet, rule: TextRule, sentence: str, start: int, end: int) -> bool:
+    """문장 안 [start, end) 구간에 규칙의 가드 중 하나라도 걸리면 True (신호를 버린다).
+
+    부정·조건은 구간 뒤쪽 문맥, 제3자·과거는 앞쪽 문맥을 본다. 구간 안쪽은 보지 않는다.
+    """
+    tail = sentence[end : end + _TAIL]
+    head = sentence[:start]
     if "negation" in rule.guards and (
-        _NEGATION.search(tail) or _NEGATION_LIST.search(sentence[match.end() :])
+        _NEGATION.search(tail) or _NEGATION_LIST.search(sentence[end:])
     ):
         return True
     if (
         "conditional_advice" in rule.guards
-        and _CONDITIONAL.search(sentence[match.end() : match.end() + _COND_TAIL])
-        and rules.advice.search(sentence[match.end() :])
+        and _CONDITIONAL.search(sentence[end : end + _COND_TAIL])
+        and rules.advice.search(sentence[end:])
     ):
         return True
     if "third_party" in rule.guards and _THIRD_PARTY.search(head[-_TAIL:]):
         return True
     return "past_event" in rule.guards and bool(rules.past.search(head[-_PAST_HEAD:]))
+
+
+def _guarded(rules: RuleSet, rule: TextRule, sentence: str, match: re.Match[str]) -> bool:
+    return guarded_span(rules, rule, sentence, match.start(), match.end())
 
 
 def scan_text(transcript: str, rules: RuleSet) -> list[Signal]:

@@ -614,3 +614,9 @@
 - 비용(단가 2026-10-26): dev 50건 Haiku $0.015~$0.052, Sonnet $0.299~$1.041. 운영 1,000건 Haiku $0.30~$1.04.
 - 사전 등록: 어휘 밖 양성 Haiku ≥ 3/4, 음성 오경보 ≤ 1(gray 제외), 채택 기준 recall ≥ 75% & 오경보 ≤ 2. 프롬프트 수정 dev에서 최대 2회 후 sha256 동결, test R-set 1회.
 - 한계: V1~V6는 인용의 실재와 형식만 증명하고 의미는 증명하지 못한다 → 사람 확인 표본. 같은 Claude 계열, 표본 작음.
+
+## 2026-10-27 — Sentinel LLM 보조 단계 구현 (fake client만, API 호출 0, test 미사용)
+- 구현: `sentinel_llm.py`(s1 프롬프트, V1~V6 검증, 병합, 캐시, 실패는 `unavailable`), `FlaggingExtractor(..., assist=)`, `sentinel_llm_run.py` CLI(`--sentinel-llm`, dev 50건만, dry-run·승인 게이트). 테스트 65개 추가, 전체 658개, ruff·pyright·freeze 통과.
+- 결정: V5는 인용 바깥 문맥만 보고 인용 안쪽 부정은 `negated`에 맡긴다(안쪽 "지 않"이 진짜 신호일 수 있음). 캐시는 검증 전 원본. 프롬프트 s1은 해시 고정, dev 자료와 겹침 검사.
+- 신규 의존: 없음. `pyproject.toml`에 `sentinel_llm.py`의 E501 예외 추가(프롬프트 본문).
+- dev 50건 dry-run: Haiku $0.011~$0.047, Sonnet $0.228~$0.949. 다음은 승인 후 Haiku 한 번($0.05 이상).

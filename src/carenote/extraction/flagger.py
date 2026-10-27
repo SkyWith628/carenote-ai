@@ -11,6 +11,7 @@ import re
 from carenote.evaluation.extractor import Extractor, PredictedField, SupportsUsage
 from carenote.evaluation.schema import RISK_FIELDS, FieldKey, Flag, Source
 from carenote.extraction.sentinel import RuleSet, Signal, numeric_signals, scan_text
+from carenote.extraction.sentinel_llm import AssistResult, SentinelAssist, merge_signals
 from carenote.generation.numerals import extract_numbers, parse_sino
 
 RISK_MEDICATION = frozenset({"미복용", "중복 복용 의심"})
@@ -155,19 +156,36 @@ class FlaggingExtractor:
     Consensus는 올리기만 한다: 확인 필요는 risk에 밀리지 않고, ok만 risk로 올라간다.
     """
 
-    def __init__(self, inner: Extractor, rules: RuleSet | None = None) -> None:
+    def __init__(
+        self,
+        inner: Extractor,
+        rules: RuleSet | None = None,
+        assist: SentinelAssist | None = None,
+    ) -> None:
+        if assist is not None and rules is None:
+            raise ValueError("assist(LLM 보조)는 검증에 규칙(rules)이 필요하다")
         self._inner = inner
         self._rules = rules
+        self._assist = assist
         self._signals: dict[str, list[Signal]] = {}
+        self._assist_results: dict[str, AssistResult] = {}
 
     def signals_for(self, transcript: str) -> list[Signal]:
         """마지막 extract에서 이 transcript에 대해 Sentinel이 낸 신호 (규칙이 없으면 빈 목록)."""
         return list(self._signals.get(transcript, []))
 
+    def assist_result_for(self, transcript: str) -> AssistResult | None:
+        """마지막 extract에서 LLM 보조 단계의 결과 (보조 단계가 없으면 None)."""
+        return self._assist_results.get(transcript)
+
     def extract(self, transcript: str) -> list[PredictedField]:
         """추출 후 모든 키에 대해 flag를 계산해 반환한다."""
         by_key = {f.key: f for f in self._inner.extract(transcript)}
         found = scan_text(transcript, self._rules) if self._rules is not None else []
+        if self._assist is not None:
+            assisted = self._assist.assess(transcript)
+            self._assist_results[transcript] = assisted
+            found = merge_signals(found, assisted.signals)
         self._signals[transcript] = found
         result: list[PredictedField] = []
         for key in FieldKey:
