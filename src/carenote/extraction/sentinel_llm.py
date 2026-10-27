@@ -25,7 +25,8 @@ from carenote.extraction.llm_extractor import ParseClient
 from carenote.extraction.pricing import CostGuard, cost_usd, price_for
 from carenote.extraction.sentinel import RuleSet, Signal, guarded_span, split_sentences
 
-SENTINEL_LLM_PROMPT_VERSION = "s1"
+PromptVersion = Literal["s1", "s2"]
+SENTINEL_LLM_PROMPT_VERSION: PromptVersion = "s2"
 MAX_TOKENS = 1500
 MAX_SIGNALS = 5
 QUOTE_MIN, QUOTE_MAX = 4, 120
@@ -42,7 +43,7 @@ CATEGORIES: tuple[str, ...] = (
 )
 ACCEPTED_SUBJECTS = frozenset({"client", "unclear"})
 
-SYSTEM_PROMPT = """\
+SYSTEM_PROMPT_S1 = """\
 당신은 요양보호사의 방문 구술 기록에서 "사람이 확인해야 할 위험 신호 후보"를 찾아 원문 그대로 인용하는 보조자입니다.
 진단하지 않습니다. 원인을 추정하거나 조치를 권하지 않습니다. 최종 판단은 사람이 합니다.
 
@@ -79,6 +80,41 @@ signals 배열에 항목을 냅니다. 위험 신호가 없으면 빈 배열이 
 - "옆방 어르신이 어지러워서 쓰러지셨대요." → 다른 사람의 일이므로 신호 없음
 - "오늘은 어디 불편한 데 없이 잘 지내셨어요." → 신호 없음
 """
+
+
+def _edit(base: str, old: str, new: str) -> str:
+    if base.count(old) != 1:
+        raise ValueError(f"s2 편집 대상이 정확히 한 번 나와야 한다: {old[:20]!r}")
+    return base.replace(old, new)
+
+
+# s2: 첫 dev 실행(s1)의 오경보 유형에서 나온 4가지 편집. 정책 문구(식사·수분은 기간, 복약은
+# 복약 필드의 몫, 사소한 일화 제외)를 분명히 했을 뿐 특정 문장을 예로 들지 않는다.
+SYSTEM_PROMPT_S2 = _edit(
+    _edit(
+        _edit(
+            _edit(
+                SYSTEM_PROMPT_S1,
+                '- 식사·수분: 식사나 물을 며칠 이상(사흘 이상으로 이어지는 기간을 날짜·요일·"일주일 가까이" 같은 말로 해도 포함) 거의 못 하거나 거부함',
+                '- 식사·수분: 식사나 물을 **며칠 이상 이어서**(사흘 이상, 날짜·요일·"일주일 가까이" 같은 말로 기간이 확인될 때만) 거의 못 하거나 거부함. 한 끼나 하루 동안 적게 드신 것, 양이 적다는 말만으로는 신호가 아닙니다.',
+            ),
+            "- 신경·의식: 말의 이상, 한쪽 얼굴·팔·다리의 이상, 힘 빠짐, 반응이 둔하거나 의식·판단이 흐려 보임",
+            "- 신경·의식: 말의 이상, 한쪽 얼굴·팔·다리의 이상, 힘 빠짐, 반응이 평소와 달리 눈에 띄게 둔하거나 의식·판단이 흐려 보임(단순한 건망증은 제외)",
+        ),
+        "- 비유나 마음의 표현(드라마를 보며 가슴이 아팠다 등)",
+        "- 비유나 마음의 표현(드라마를 보며 가슴이 아팠다 등)\n"
+        "- 약을 먹었는지 기억하지 못하거나 두 번 드셨다는 이야기: 복약 기록이 따로 담는 내용입니다\n"
+        "- 물건을 어디 뒀는지 몰라 찾는 일 같은 사소한 일화\n"
+        "- 방·날씨·공기처럼 몸이 아닌 것에 대한 표현",
+    ),
+    '- "오늘은 어디 불편한 데 없이 잘 지내셨어요." → 신호 없음\n',
+    '- "오늘은 어디 불편한 데 없이 잘 지내셨어요." → 신호 없음\n'
+    '- "점심은 입맛이 없다고 반쯤만 드셨어요." → 기간이 없으므로 신호 없음\n'
+    '- "약을 드셨는지 기억이 안 나신다고 해서 따님께 여쭤봤어요." → 복약 기록의 몫이므로 신호 없음\n',
+)
+
+PROMPTS: dict[str, str] = {"s1": SYSTEM_PROMPT_S1, "s2": SYSTEM_PROMPT_S2}
+SYSTEM_PROMPT = PROMPTS[SENTINEL_LLM_PROMPT_VERSION]
 
 
 def build_user_message(transcript: str) -> str:
@@ -260,8 +296,11 @@ class SentinelAssist:
         cache_dir: Path | None = None,
         guard: CostGuard | None = None,
         run_tag: str | None = None,
+        prompt_version: PromptVersion = SENTINEL_LLM_PROMPT_VERSION,
     ) -> None:
         self._client = client
+        self._prompt_version: PromptVersion = prompt_version
+        self._system = PROMPTS[prompt_version]
         self._model = model
         self._effort = effort
         self._rules = rules
@@ -272,8 +311,8 @@ class SentinelAssist:
 
     @property
     def system_prompt(self) -> str:
-        """시스템 프롬프트."""
-        return SYSTEM_PROMPT
+        """이 인스턴스가 쓰는 시스템 프롬프트."""
+        return self._system
 
     def is_cached(self, transcript: str) -> bool:
         """이 transcript의 원본 응답이 캐시에 있는가 (dry-run 추정용)."""
@@ -291,7 +330,7 @@ class SentinelAssist:
             "estimated_cost_usd": cost,
             "model": self._model,
             "effort": self._effort,
-            "prompt_version": SENTINEL_LLM_PROMPT_VERSION,
+            "prompt_version": self._prompt_version,
             "run_tag": self._run_tag,
             **asdict(self.stats),
         }
@@ -324,7 +363,7 @@ class SentinelAssist:
             response = self._client.messages.parse(
                 model=self._model,
                 max_tokens=MAX_TOKENS,
-                system=SYSTEM_PROMPT,
+                system=self._system,
                 messages=[{"role": "user", "content": build_user_message(transcript)}],
                 output_format=LLMSentinelOutput,
                 output_config={"effort": self._effort},
@@ -346,7 +385,7 @@ class SentinelAssist:
         return None, "구조화 출력을 읽지 못했다"
 
     def _cache_key(self, transcript: str) -> str:
-        parts = [SENTINEL_LLM_PROMPT_VERSION, self._model, self._effort, transcript]
+        parts = [self._prompt_version, self._model, self._effort, transcript]
         if self._run_tag is not None:
             parts.append(self._run_tag)
         return hashlib.sha256(json.dumps(parts, ensure_ascii=False).encode("utf-8")).hexdigest()

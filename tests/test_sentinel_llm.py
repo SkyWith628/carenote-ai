@@ -30,6 +30,7 @@ from carenote.extraction.sentinel import Signal, load_rules, parse_rules, scan_t
 from carenote.extraction.sentinel_llm import (
     CATEGORIES,
     MAX_SIGNALS,
+    PROMPTS,
     SENTINEL_LLM_PROMPT_VERSION,
     SYSTEM_PROMPT,
     LLMSentinelOutput,
@@ -472,13 +473,65 @@ def test_rule_and_llm_overlap_is_marked_rule_plus_llm() -> None:
 # ---- 프롬프트 -----------------------------------------------------------------------------------
 
 
-def test_prompt_is_pinned_by_hash() -> None:
-    """프롬프트를 바꾸면 이 해시와 SENTINEL_LLM_PROMPT_VERSION을 함께 올린다."""
-    digest = hashlib.sha256(SYSTEM_PROMPT.encode("utf-8")).hexdigest()
-    assert (SENTINEL_LLM_PROMPT_VERSION, digest) == (
-        "s1",
-        "3bd62a938dc54a21c5e44e86cc53ddb8b51800ede833d1344f641e27d115bd53",
-    )
+PINNED = {
+    "s1": "3bd62a938dc54a21c5e44e86cc53ddb8b51800ede833d1344f641e27d115bd53",
+    "s2": "10572be54686566fe25ba801ab43350507f2ee2afee953fb16026657d0d89be0",
+}
+
+
+def test_prompts_are_pinned_by_hash() -> None:
+    """프롬프트를 바꾸면 새 버전을 만들어 해시를 추가한다. 기존 버전 본문은 바꾸지 않는다."""
+    digests = {v: hashlib.sha256(t.encode("utf-8")).hexdigest() for v, t in PROMPTS.items()}
+    assert digests == PINNED
+
+
+def test_default_prompt_is_s2() -> None:
+    assert SENTINEL_LLM_PROMPT_VERSION == "s2" and SYSTEM_PROMPT is PROMPTS["s2"]
+
+
+S2_MARKERS = [
+    "며칠 이상 이어서",
+    "한 끼나 하루 동안 적게 드신 것",
+    "단순한 건망증은 제외",
+    "복약 기록이 따로 담는 내용",
+    "사소한 일화",
+    "몸이 아닌 것에 대한 표현",
+    "기간이 없으므로 신호 없음",
+    "복약 기록의 몫이므로 신호 없음",
+]
+
+
+@pytest.mark.parametrize("marker", S2_MARKERS)
+def test_s2_adds_each_exclusion_and_s1_lacks_it(marker: str) -> None:
+    assert marker in PROMPTS["s2"] and marker not in PROMPTS["s1"]
+
+
+def test_s2_changes_only_three_s1_lines_and_adds_lines() -> None:
+    s1, s2 = PROMPTS["s1"].splitlines(), PROMPTS["s2"].splitlines()
+    removed = [line for line in s1 if line not in s2]
+    assert len(removed) == 2 and all(line.startswith("- ") for line in removed)
+    assert all(line in s2 for line in s1 if line not in removed)
+
+
+def test_s2_keeps_every_category_and_the_output_contract() -> None:
+    for c in CATEGORIES:
+        assert f"- {c}:" in PROMPTS["s2"]
+    assert "한 글자도 바꾸지 않고 복사한" in PROMPTS["s2"] and "빈 배열" in PROMPTS["s2"]
+
+
+def test_prompt_version_selects_system_prompt() -> None:
+    for version in ("s1", "s2"):
+        assist, fake = make(ok_response(), prompt_version=version)
+        assist.assess(TEXT)
+        assert fake.calls[0]["system"] == PROMPTS[version]
+        assert assist.usage_summary()["prompt_version"] == version
+
+
+def test_prompt_versions_do_not_share_cache(tmp_path: Path) -> None:
+    s1, _ = make(ok_response(), tmp_path, prompt_version="s1")
+    s2, _ = make(ok_response(), tmp_path, prompt_version="s2")
+    s1.assess(TEXT)
+    assert s1.is_cached(TEXT) and not s2.is_cached(TEXT)
 
 
 def test_categories_match_rule_file() -> None:
@@ -503,9 +556,10 @@ def test_prompt_has_no_overlap_with_dev_transcripts() -> None:
         if spec_id["split"] == "dev":
             path = RSET / "candidates" / f"{spec_id['spec_id']}.json"
             corpus.append(str(json.loads(path.read_text(encoding="utf-8"))["transcript"]))
-    prompt = shingles(SYSTEM_PROMPT)
-    leaked = [t[:30] for t in corpus if prompt & shingles(t)]
-    assert leaked == []
+    for version, text in PROMPTS.items():
+        prompt = shingles(text)
+        leaked = [t[:30] for t in corpus if prompt & shingles(t)]
+        assert leaked == [], version
 
 
 # ---- CLI (가짜 클라이언트, dev만) ----
@@ -652,3 +706,39 @@ def test_summarize_labels_groups() -> None:
 
 def test_rules_object_is_reusable_between_modules() -> None:
     assert parse_rules("text_rules: []\n").text_rules == ()
+
+
+def test_cli_dry_run_shows_prompt_version(
+    settings: Settings, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    run.main(cli_args(tmp_path, "--dry-run"), settings=settings, client_factory=no_client)
+    assert "프롬프트 s2" in capsys.readouterr().out
+    run.main(
+        cli_args(tmp_path, "--dry-run", "--prompt", "s1"),
+        settings=settings,
+        client_factory=no_client,
+    )
+    assert "프롬프트 s1" in capsys.readouterr().out
+
+
+def test_cli_rejects_unknown_prompt_version(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        run.main(cli_args(tmp_path, "--prompt", "s9", "--dry-run"))
+
+
+def test_cli_s1_and_s2_runs_do_not_share_cache(settings: Settings, tmp_path: Path) -> None:
+    client = _CountingClient()
+
+    def factory(_: Settings) -> ParseClient:
+        return cast(ParseClient, client)
+
+    run.main(
+        cli_args(tmp_path, "--approve-cost", "0.06", "--prompt", "s1"),
+        settings=settings,
+        client_factory=factory,
+    )
+    assert client.calls == 50
+    run.main(
+        cli_args(tmp_path, "--approve-cost", "0.06"), settings=settings, client_factory=factory
+    )
+    assert client.calls == 100

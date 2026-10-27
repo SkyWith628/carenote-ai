@@ -27,7 +27,8 @@ from carenote.extraction.llm_extractor import ParseClient, build_client
 from carenote.extraction.pricing import PRICES_AS_OF, BudgetExceeded, CostGuard, cost_usd, price_for
 from carenote.extraction.sentinel import RuleSet, load_rules, scan_text
 from carenote.extraction.sentinel_llm import (
-    SYSTEM_PROMPT,
+    PROMPTS,
+    SENTINEL_LLM_PROMPT_VERSION,
     AssistResult,
     SentinelAssist,
     build_user_message,
@@ -113,7 +114,7 @@ def estimate(assist: SentinelAssist, items: list[Item], model: str) -> tuple[int
         raise ValueError(f"단가가 등록되지 않은 모델: {model}")
     pending = [i for i in items if not assist.is_cached(i.transcript)]
     low_in = sum(
-        int((len(SYSTEM_PROMPT) + len(build_user_message(i.transcript))) / CHARS_PER_TOKEN)
+        int((len(assist.system_prompt) + len(build_user_message(i.transcript))) / CHARS_PER_TOKEN)
         + SCHEMA_OVERHEAD_TOKENS
         for i in pending
     )
@@ -169,6 +170,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--rset-dir", type=Path, default=Path("data/golden/rset"))
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE)
     parser.add_argument("--effort", default="low")
+    parser.add_argument("--prompt", choices=sorted(PROMPTS), default=SENTINEL_LLM_PROMPT_VERSION)
     parser.add_argument("--run-tag", default=None)
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--dry-run", action="store_true")
@@ -233,10 +235,12 @@ def main(
         rules=rules,
         cache_dir=args.cache_dir,
         run_tag=args.run_tag,
+        prompt_version=args.prompt,
     )
     pending, low, high = estimate(probe, items, model)
     print(
-        f"[dry-run] Sentinel LLM 보조 {model} · effort {args.effort} · dev {len(items)}건\n"
+        f"[dry-run] Sentinel LLM 보조 {model} · 프롬프트 {args.prompt} · effort {args.effort}"
+        f" · dev {len(items)}건\n"
         f"  캐시 적중 {len(items) - pending}건, API 호출 예정 {pending}건\n"
         f"  예상 비용 ${low:.3f} ~ ${high:.3f} (단가 기준일 {PRICES_AS_OF}, 글자 수 기반 추정)"
     )
@@ -266,6 +270,7 @@ def main(
         cache_dir=args.cache_dir,
         guard=guard,
         run_tag=args.run_tag,
+        prompt_version=args.prompt,
     )
     rows: list[dict[str, Any]] = []
     try:
