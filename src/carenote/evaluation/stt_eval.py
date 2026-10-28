@@ -35,6 +35,7 @@ AUDIO_TYPES = {
     ".ogg": "audio/ogg",
 }
 EXIT_REFUSED = 2
+EXIT_ALL_FAILED = 3
 
 
 def find_audio(audio_dir: Path, case_id: str) -> Path | None:
@@ -67,6 +68,7 @@ def evaluate(
     hypotheses: dict[str, str] = {}
     missing: list[str] = []
     failed: list[str] = []
+    failures: dict[str, str] = {}
     distance = length = kept = total_numbers = 0
     started = time.perf_counter()
     for case_id, category, reference in cases:
@@ -78,8 +80,9 @@ def evaluate(
             result = engine.transcribe(path.read_bytes(), AUDIO_TYPES[path.suffix])
         except SttUnavailable:
             raise
-        except SttError:
+        except SttError as exc:
             failed.append(case_id)
+            failures[case_id] = str(exc)  # 오디오 내용은 담기지 않는 메시지다
             continue
         c = cer(reference, result.text)
         k, n = numbers_preserved(reference, result.text)
@@ -108,6 +111,7 @@ def evaluate(
         "cases": len(rows),
         "missing_audio": missing,
         "failed": failed,
+        "failures": failures,
         "cer_micro": round(distance / length, 4) if length else None,
         "cer_mean": round(statistics.fmean(r["cer"] for r in rows), 4) if rows else None,
         "numbers_preserved": [kept, total_numbers],
@@ -150,13 +154,20 @@ def main(
         return EXIT_REFUSED
     summary = {k: v for k, v in report.items() if k not in ("rows", "hypotheses")}
     print(json.dumps(summary, ensure_ascii=False, indent=2))
+    exit_code = 0
+    if not report["cases"] and report["failed"]:
+        reasons = sorted(set(report["failures"].values()))
+        print(
+            f"실패: 모든 케이스({len(report['failed'])}건)가 실패했다: {reasons}", file=sys.stderr
+        )
+        exit_code = EXIT_ALL_FAILED
     if args.out is not None:
         args.out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     if args.hyp_out is not None:
         args.hyp_out.write_text(
             json.dumps(report["hypotheses"], ensure_ascii=False, indent=2), encoding="utf-8"
         )
-    return 0
+    return exit_code
 
 
 if __name__ == "__main__":

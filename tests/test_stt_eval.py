@@ -86,6 +86,7 @@ def test_evaluate_scores_cases_and_reports_missing_and_failed(tmp_path: Path) ->
     ]
     report = evaluate(engine, cases, tmp_path)
     assert report["cases"] == 2 and report["missing_audio"] == ["c"] and report["failed"] == ["d"]
+    assert report["failures"] == {"d": "음성이 감지되지 않았다"}  # 실패 원인이 남는다
     assert report["rows"][0]["cer"] == 0.0 and report["numbers_preserved"] == [3, 3]
     assert set(report["by_category"]) == {"normal", "dialect"}
     assert report["rtf"] == pytest.approx(0.2)  # 0.6초 / 3.0초
@@ -134,6 +135,20 @@ def test_cli_end_to_end_with_fake_engine_writes_reports(tmp_path: Path) -> None:
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["cases"] == 3 and report["cer_micro"] == 0.0
     assert json.loads(hyp.read_text(encoding="utf-8")) == {c.id: c.transcript for c in cases}
+
+
+def test_cli_exits_nonzero_and_names_the_reason_when_every_case_fails(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    cases = load_golden(GOLDEN, "dev")[:2]
+    for case in cases:
+        (tmp_path / f"{case.id}.wav").write_bytes(b"X")
+    code = main(
+        ["--golden", str(GOLDEN), "--audio-dir", str(tmp_path), "--limit", "2"],
+        engine_factory=lambda _: EchoEngine({}, fail=b"X"),
+    )
+    assert code == 3
+    assert "모든 케이스(2건)가 실패" in capsys.readouterr().err
 
 
 # -- TTS (Mac say) -------------------------------------------------------------------
