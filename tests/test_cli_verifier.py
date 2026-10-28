@@ -149,7 +149,10 @@ def test_second_run_uses_verifier_cache(
     settings: Settings, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     client = _Client(load_golden(GOLDEN_DIR))
-    factory = lambda _: cast(ParseClient, client)  # noqa: E731
+
+    def factory(_: Settings) -> ParseClient:
+        return cast(ParseClient, client)
+
     main(
         _args(tmp_path, "--limit", "3", "--approve-cost", "5"),
         settings=settings,

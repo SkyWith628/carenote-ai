@@ -24,6 +24,7 @@ import sys
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 
 from carenote.config import Settings, get_settings
 from carenote.evaluation.extractor import Extractor, NullExtractor, OracleExtractor
@@ -180,9 +181,10 @@ def format_report(report: EvalReport) -> str:
             f"cost≈${u.get('estimated_cost_usd')}"
         )
         for name in ("verifier", "relistener"):
-            v = u.get(name)
-            if not isinstance(v, dict):
+            raw = u.get(name)
+            if not isinstance(raw, dict):
                 continue
+            v = cast(dict[str, object], raw)
             lines.append(
                 f"{name}: calls={v.get('calls')} cache_hits={v.get('cache_hits')} "
                 f"failures={v.get('failures')} downgraded={v.get('downgraded')} "

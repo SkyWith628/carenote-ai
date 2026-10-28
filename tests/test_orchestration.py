@@ -18,7 +18,7 @@ from carenote.extraction.flagger import FlaggingExtractor
 from carenote.extraction.llm_extractor import ParseClient, ParseResponse
 from carenote.extraction.sentinel import load_rules
 from carenote.extraction.verifier import LLMVerdict, Verifier
-from carenote.orchestration.graph import build_graph
+from carenote.orchestration.graph import build_graph, resume_command
 
 TRANSCRIPT = "어르신 혈압 130에 80이고 약은 드셨어요. 기분은 좋으셨어요."
 
@@ -176,7 +176,7 @@ def test_reject() -> None:
 def test_unknown_decision_is_rejected_not_approved(answer: dict[str, str]) -> None:
     graph, _, _ = make([_bp()], SUPPORTED)
     graph.invoke({"transcript": TRANSCRIPT}, cfg())
-    assert graph.invoke(Command(resume=answer), cfg())["status"] == "rejected"
+    assert graph.invoke(resume_command(answer), cfg())["status"] == "rejected"
 
 
 def test_resume_works_from_a_new_graph_sharing_the_checkpointer() -> None:
