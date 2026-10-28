@@ -25,10 +25,12 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
+from langgraph.checkpoint.memory import InMemorySaver
 from pydantic import BaseModel
 
 from carenote.config import Settings, get_settings
 from carenote.drafts.api import SENTINEL_EFFORT, SENTINEL_MODEL
+from carenote.drafts.pipeline import DraftPipeline
 from carenote.evaluation.extractor import PredictedField
 from carenote.evaluation.loader import load_golden
 from carenote.evaluation.schema import GoldenCase
@@ -336,7 +338,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--production",
         action="store_true",
-        help="구성 요소별 모델 대신 운영 코드 경로(VerifyingExtractor)의 end-to-end 지연을 잰다",
+        help="구성 요소별 모델 대신 운영 경로(DraftPipeline, LangGraph)의 end-to-end 지연을 잰다",
     )
     parser.add_argument("--dry-run", action="store_true", help="API 호출 없이 예상 비용만 출력")
     parser.add_argument("--approve-cost", type=float, default=None, metavar="USD")
@@ -503,17 +505,21 @@ def _run_production(
     verifier: Verifier,
     relistener: TextRelistener,
 ) -> int:
-    """운영 코드(FlaggingExtractor + VerifyingExtractor)를 방문마다 한 번 실행해 벽시계를 잰다."""
+    """운영 경로(`/drafts`와 같은 DraftPipeline, LangGraph)를 방문마다 한 번 실행해 벽시계를 잰다.
+
+    그래프는 사람 검토 interrupt까지 실행하므로 결정 대기 상태까지 포함한 시간이다.
+    """
     extractor = VerifyingExtractor(
         FlaggingExtractor(llm, load_rules(), assist),
         {"verifier": verifier, "relistener": relistener},
     )
+    pipeline = DraftPipeline(extractor, InMemorySaver())
     walls: list[float] = []
     try:
         for case in cases:
             timed.case_id = case.id
             started = time.perf_counter()
-            extractor.extract(case.transcript)
+            pipeline.create(case.transcript)
             walls.append(time.perf_counter() - started)
     except BudgetExceeded as exc:
         print(f"\n중단: {exc}", file=sys.stderr)
@@ -522,6 +528,7 @@ def _run_production(
     sequential = sum(r.seconds for r in timed.records) / visits
     summary = {
         "mode": "production",
+        "path": "DraftPipeline(LangGraph)",
         "visits": visits,
         "wall_mean_s": round(statistics.fmean(walls), 2),
         "wall_p95_s": round(_percentile(walls, 0.95), 2),

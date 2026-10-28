@@ -1,0 +1,622 @@
+{
+  "summary": {
+    "mode": "production",
+    "path": "DraftPipeline(LangGraph)",
+    "visits": 10,
+    "wall_mean_s": 5.08,
+    "wall_p95_s": 7.75,
+    "wall_max_s": 7.75,
+    "sequential_sum_s": 11.07,
+    "calls_per_visit": 6.6,
+    "cost_per_visit_usd": 0.01296,
+    "total_cost_usd": 0.12959,
+    "walls_s": [
+      5.96,
+      5.68,
+      7.75,
+      2.96,
+      5.62,
+      4.2,
+      2.49,
+      4.3,
+      5.79,
+      6.03
+    ]
+  },
+  "calls": [
+    {
+      "case_id": "gs-001",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.6059742920042481,
+      "input_tokens": 2645,
+      "output_tokens": 10,
+      "cost": 0.0002695
+    },
+    {
+      "case_id": "gs-001",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 3.520440000007511,
+      "input_tokens": 3804,
+      "output_tokens": 388,
+      "cost": 0.011488
+    },
+    {
+      "case_id": "gs-001",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.0333932909998111,
+      "input_tokens": 1002,
+      "output_tokens": 34,
+      "cost": 0.0001172
+    },
+    {
+      "case_id": "gs-001",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.035583165998105,
+      "input_tokens": 993,
+      "output_tokens": 40,
+      "cost": 0.00011930000000000001
+    },
+    {
+      "case_id": "gs-001",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.1274553330003982,
+      "input_tokens": 1079,
+      "output_tokens": 29,
+      "cost": 0.0001224
+    },
+    {
+      "case_id": "gs-001",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.2131660409941105,
+      "input_tokens": 996,
+      "output_tokens": 30,
+      "cost": 0.00011460000000000001
+    },
+    {
+      "case_id": "gs-001",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.3215097499924013,
+      "input_tokens": 1078,
+      "output_tokens": 34,
+      "cost": 0.00012480000000000002
+    },
+    {
+      "case_id": "gs-001",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.6290337499958696,
+      "input_tokens": 980,
+      "output_tokens": 34,
+      "cost": 0.000115
+    },
+    {
+      "case_id": "gs-001",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.8632426250114804,
+      "input_tokens": 1079,
+      "output_tokens": 26,
+      "cost": 0.00012090000000000001
+    },
+    {
+      "case_id": "gs-001",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 2.4260589590121526,
+      "input_tokens": 1086,
+      "output_tokens": 30,
+      "cost": 0.0001236
+    },
+    {
+      "case_id": "gs-002",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.3859280000033323,
+      "input_tokens": 2610,
+      "output_tokens": 10,
+      "cost": 0.000266
+    },
+    {
+      "case_id": "gs-002",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 5.671187458006898,
+      "input_tokens": 3769,
+      "output_tokens": 795,
+      "cost": 0.015488
+    },
+    {
+      "case_id": "gs-003",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.6704133749881294,
+      "input_tokens": 2629,
+      "output_tokens": 10,
+      "cost": 0.00026790000000000006
+    },
+    {
+      "case_id": "gs-003",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 5.593595333004487,
+      "input_tokens": 3788,
+      "output_tokens": 837,
+      "cost": 0.015946
+    },
+    {
+      "case_id": "gs-003",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.8249995000078343,
+      "input_tokens": 1063,
+      "output_tokens": 26,
+      "cost": 0.00011930000000000001
+    },
+    {
+      "case_id": "gs-003",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.9471141669928329,
+      "input_tokens": 964,
+      "output_tokens": 34,
+      "cost": 0.0001134
+    },
+    {
+      "case_id": "gs-003",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.1054302920092596,
+      "input_tokens": 1063,
+      "output_tokens": 30,
+      "cost": 0.00012130000000000001
+    },
+    {
+      "case_id": "gs-003",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.2413212090032175,
+      "input_tokens": 1062,
+      "output_tokens": 25,
+      "cost": 0.0001187
+    },
+    {
+      "case_id": "gs-003",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.5377826670010109,
+      "input_tokens": 977,
+      "output_tokens": 30,
+      "cost": 0.0001127
+    },
+    {
+      "case_id": "gs-003",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 2.1498478330031503,
+      "input_tokens": 980,
+      "output_tokens": 30,
+      "cost": 0.000113
+    },
+    {
+      "case_id": "gs-004",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.604536958009703,
+      "input_tokens": 2607,
+      "output_tokens": 10,
+      "cost": 0.0002657
+    },
+    {
+      "case_id": "gs-004",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 2.9531876670080237,
+      "input_tokens": 3766,
+      "output_tokens": 316,
+      "cost": 0.010692
+    },
+    {
+      "case_id": "gs-005",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.9569832499983022,
+      "input_tokens": 2651,
+      "output_tokens": 10,
+      "cost": 0.0002701
+    },
+    {
+      "case_id": "gs-005",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 3.2809685000102036,
+      "input_tokens": 3810,
+      "output_tokens": 409,
+      "cost": 0.01171
+    },
+    {
+      "case_id": "gs-005",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.8993689579947386,
+      "input_tokens": 986,
+      "output_tokens": 32,
+      "cost": 0.00011460000000000001
+    },
+    {
+      "case_id": "gs-005",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.9961130419978872,
+      "input_tokens": 1092,
+      "output_tokens": 36,
+      "cost": 0.0001272
+    },
+    {
+      "case_id": "gs-005",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.067741874998319,
+      "input_tokens": 999,
+      "output_tokens": 41,
+      "cost": 0.0001204
+    },
+    {
+      "case_id": "gs-005",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.2360248750046594,
+      "input_tokens": 1085,
+      "output_tokens": 36,
+      "cost": 0.0001265
+    },
+    {
+      "case_id": "gs-005",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.520041833005962,
+      "input_tokens": 1084,
+      "output_tokens": 36,
+      "cost": 0.0001264
+    },
+    {
+      "case_id": "gs-005",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.525995417003287,
+      "input_tokens": 1008,
+      "output_tokens": 32,
+      "cost": 0.0001168
+    },
+    {
+      "case_id": "gs-005",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 2.3136128329933854,
+      "input_tokens": 1085,
+      "output_tokens": 28,
+      "cost": 0.0001225
+    },
+    {
+      "case_id": "gs-005",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 2.3220490839885315,
+      "input_tokens": 1002,
+      "output_tokens": 39,
+      "cost": 0.00011970000000000001
+    },
+    {
+      "case_id": "gs-006",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.223601999998209,
+      "input_tokens": 2624,
+      "output_tokens": 10,
+      "cost": 0.00026740000000000005
+    },
+    {
+      "case_id": "gs-006",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 2.7872064580005826,
+      "input_tokens": 3783,
+      "output_tokens": 376,
+      "cost": 0.011326
+    },
+    {
+      "case_id": "gs-006",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.8350397500034887,
+      "input_tokens": 1065,
+      "output_tokens": 27,
+      "cost": 0.00012
+    },
+    {
+      "case_id": "gs-006",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.0054674170096405,
+      "input_tokens": 1058,
+      "output_tokens": 30,
+      "cost": 0.00012080000000000001
+    },
+    {
+      "case_id": "gs-006",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.210503084002994,
+      "input_tokens": 1057,
+      "output_tokens": 25,
+      "cost": 0.0001182
+    },
+    {
+      "case_id": "gs-006",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.227218832995277,
+      "input_tokens": 975,
+      "output_tokens": 28,
+      "cost": 0.0001115
+    },
+    {
+      "case_id": "gs-006",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.2395348749996629,
+      "input_tokens": 972,
+      "output_tokens": 28,
+      "cost": 0.0001112
+    },
+    {
+      "case_id": "gs-006",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.3619694160006475,
+      "input_tokens": 981,
+      "output_tokens": 31,
+      "cost": 0.00011360000000000001
+    },
+    {
+      "case_id": "gs-006",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.3686374999961117,
+      "input_tokens": 959,
+      "output_tokens": 33,
+      "cost": 0.00011240000000000001
+    },
+    {
+      "case_id": "gs-006",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.4018824579979992,
+      "input_tokens": 1058,
+      "output_tokens": 24,
+      "cost": 0.00011780000000000002
+    },
+    {
+      "case_id": "gs-007",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.9098059589887271,
+      "input_tokens": 2594,
+      "output_tokens": 10,
+      "cost": 0.00026440000000000003
+    },
+    {
+      "case_id": "gs-007",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 2.4834773750044405,
+      "input_tokens": 3753,
+      "output_tokens": 340,
+      "cost": 0.010906
+    },
+    {
+      "case_id": "gs-008",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.3515549589938018,
+      "input_tokens": 2612,
+      "output_tokens": 10,
+      "cost": 0.00026619999999999997
+    },
+    {
+      "case_id": "gs-008",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 2.6186919580068206,
+      "input_tokens": 3771,
+      "output_tokens": 378,
+      "cost": 0.011322
+    },
+    {
+      "case_id": "gs-008",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.0822009159892332,
+      "input_tokens": 1045,
+      "output_tokens": 26,
+      "cost": 0.0001175
+    },
+    {
+      "case_id": "gs-008",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.1606286669994006,
+      "input_tokens": 1046,
+      "output_tokens": 30,
+      "cost": 0.00011960000000000001
+    },
+    {
+      "case_id": "gs-008",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.3244275830074912,
+      "input_tokens": 960,
+      "output_tokens": 30,
+      "cost": 0.000111
+    },
+    {
+      "case_id": "gs-008",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.657729582992033,
+      "input_tokens": 947,
+      "output_tokens": 34,
+      "cost": 0.0001117
+    },
+    {
+      "case_id": "gs-009",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.7762824170058593,
+      "input_tokens": 2620,
+      "output_tokens": 10,
+      "cost": 0.000267
+    },
+    {
+      "case_id": "gs-009",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 3.4731569579889765,
+      "input_tokens": 3779,
+      "output_tokens": 382,
+      "cost": 0.011378
+    },
+    {
+      "case_id": "gs-009",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.7154975830053445,
+      "input_tokens": 971,
+      "output_tokens": 28,
+      "cost": 0.0001111
+    },
+    {
+      "case_id": "gs-009",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.8270649999903981,
+      "input_tokens": 1054,
+      "output_tokens": 26,
+      "cost": 0.0001184
+    },
+    {
+      "case_id": "gs-009",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.3369454579951707,
+      "input_tokens": 1054,
+      "output_tokens": 27,
+      "cost": 0.0001189
+    },
+    {
+      "case_id": "gs-009",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.7051023750100285,
+      "input_tokens": 968,
+      "output_tokens": 31,
+      "cost": 0.0001123
+    },
+    {
+      "case_id": "gs-009",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.9313151669921353,
+      "input_tokens": 1053,
+      "output_tokens": 26,
+      "cost": 0.00011830000000000002
+    },
+    {
+      "case_id": "gs-009",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 2.2993472090020077,
+      "input_tokens": 955,
+      "output_tokens": 31,
+      "cost": 0.000111
+    },
+    {
+      "case_id": "gs-010",
+      "component": "sentinel",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.7693129999970552,
+      "input_tokens": 2629,
+      "output_tokens": 10,
+      "cost": 0.00026790000000000006
+    },
+    {
+      "case_id": "gs-010",
+      "component": "extractor",
+      "model": "claude-sonnet-5-5",
+      "seconds": 4.384312333000707,
+      "input_tokens": 3788,
+      "output_tokens": 367,
+      "cost": 0.011246
+    },
+    {
+      "case_id": "gs-010",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 0.9818732499988982,
+      "input_tokens": 1063,
+      "output_tokens": 27,
+      "cost": 0.00011980000000000001
+    },
+    {
+      "case_id": "gs-010",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.1373679590033134,
+      "input_tokens": 977,
+      "output_tokens": 47,
+      "cost": 0.0001212
+    },
+    {
+      "case_id": "gs-010",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.1767551670054672,
+      "input_tokens": 1062,
+      "output_tokens": 33,
+      "cost": 0.0001227
+    },
+    {
+      "case_id": "gs-010",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.193643125006929,
+      "input_tokens": 986,
+      "output_tokens": 36,
+      "cost": 0.00011660000000000002
+    },
+    {
+      "case_id": "gs-010",
+      "component": "verifier",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.486488416994689,
+      "input_tokens": 1070,
+      "output_tokens": 30,
+      "cost": 0.000122
+    },
+    {
+      "case_id": "gs-010",
+      "component": "relistener",
+      "model": "claude-haiku-5-5",
+      "seconds": 1.6291002499929164,
+      "input_tokens": 964,
+      "output_tokens": 30,
+      "cost": 0.00011140000000000001
+    }
+  ]
+}
