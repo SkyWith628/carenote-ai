@@ -118,7 +118,7 @@ def test_runs_to_human_review_and_fans_out_per_risk_field() -> None:
     result = graph.invoke({"transcript": TRANSCRIPT}, cfg())
     payload = interrupt_payload(result)
     assert client.calls == 2  # 혈압·복약만 검증한다
-    assert set(payload["verdicts"]) == {"blood_pressure", "medication_taken"}
+    assert set(payload["verdicts"]["verifier"]) == {"blood_pressure", "medication_taken"}
     fields = by_key(payload["fields"])
     assert [f["key"] for f in payload["fields"]] == [k.value for k in FieldKey]
     assert fields["blood_pressure"]["flag"] == "needs_confirm"  # Consensus가 올렸다
@@ -142,7 +142,7 @@ def test_verifier_failure_still_reaches_review_as_unavailable() -> None:
     error = anthropic.APIConnectionError(request=httpx2.Request("POST", "https://x"))
     graph, _, _ = make([_bp()], error)
     payload = interrupt_payload(graph.invoke({"transcript": TRANSCRIPT}, cfg()))
-    assert payload["verdicts"]["blood_pressure"]["status"] == "unavailable"
+    assert payload["verdicts"]["verifier"]["blood_pressure"]["status"] == "unavailable"
     assert by_key(payload["fields"])["blood_pressure"]["flag"] == "ok"
 
 

@@ -731,3 +731,11 @@
 - 화면은 임시 서버(가짜 엔진)에서 실제 `MediaRecorder` 경로(오실레이터 스트림)로 녹음→전사→마스킹→입력창 채움, 권한 거부 메시지를 브라우저로 확인했다. 실제 마이크·실기기는 미확인.
 - **미검증**: 실제 faster-whisper 로드·정확도·지연(이 PC는 앱 제어 정책으로 로드 불가 가능성, 모델 미다운로드). Mac에서 `uv add --optional stt faster-whisper` 후 설계 문서의 순서로 확인. `pyproject.toml`·`uv.lock`은 수정하지 않음.
 - 알려진 한계: 합성 음성은 낙관적, 한글 수사 번호·이름은 마스킹 못 함, 인증·호출 제한 없음.
+
+## 2026-10-28 — LangGraph 그래프를 /drafts·/decision에 연결 (API 호출 없음)
+- 결정: 결정 규칙은 `service.decide()`에 두고 그래프는 오케스트레이션(병렬 팬아웃·interrupt 대기·체크포인트)만 맡는다. 그래프의 `human_review`·`finalize`가 규칙(확인해야 승인, append-only revision, 감사 기록)을 다시 구현하지 않는다.
+- 구현: `drafts/pipeline.py`의 `DraftPipeline`. `POST /drafts`는 그래프를 interrupt까지 돌려 초안을 만들고(draft id = thread_id), `POST /drafts/{id}/decision`은 `decide()`를 통과한 결정만 `resume_command`로 그래프에 넘긴다(422·409에서는 재개하지 않는다). `get_extractor` 의존성은 그대로라 기존 테스트의 교체 지점이 유지된다(`VerifyingExtractor`는 `inner`·`checkers`를 노출).
+- 그래프: 검사기 여러 개를 받아 (검사기 × 위험 필드)를 한 단계에서 병렬로 보낸다. 상태의 판정은 검사기별로 중첩({검사기: {필드: {status, quote, reason}}}), 체크포인트에 enum을 넣지 않도록 JSON 호환 값만 둔다. Consensus는 검사기마다 flag를 올리기만 한다.
+- 발견: LangGraph는 빈 resume 값(`{}`)을 "값 없음"으로 보고 interrupt에 다시 멈춘다 → `resume_command`로 비어 있지 않은 값으로 바꿔 거절 처리.
+- 검증: 전체 858 통과(신규 `tests/test_pipeline.py` 9개), ruff·pyright 0. 기존 `/drafts` 병렬 테스트가 그래프 경로로 통과한다. **실제 모델로 지연을 다시 재지 않았다**(실측 4.87초는 그래프 도입 전 값).
+- 한계: 체크포인터가 인메모리라 재시작하면 대기 중인 그래프가 사라진다(저장소도 인메모리). 영속 체크포인터(SQLite·Postgres)는 DB 도입 때. 그래프에는 `confirmed`가 전달만 되고 쓰이지 않는다.

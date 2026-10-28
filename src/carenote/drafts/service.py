@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from typing import Protocol
 
@@ -18,7 +18,7 @@ from carenote.drafts.models import (
     SignalOut,
 )
 from carenote.evaluation.extractor import PredictedField
-from carenote.evaluation.schema import Flag, Source
+from carenote.evaluation.schema import FieldKey, Flag, Source
 from carenote.extraction.sentinel import Signal
 from carenote.extraction.verifier import FieldVerdict, VerifyingExtractor
 
@@ -69,24 +69,28 @@ def to_signal(signal: Signal) -> SignalOut:
     )
 
 
-def create_draft(transcript: str, extractor: DraftExtractor, *, masked_count: int = 0) -> Draft:
-    """추출기를 한 번 실행해 검토 대기 초안을 만든다. masked_count는 마스킹 횟수(감사용)."""
-    fields = extractor.extract(transcript)
-    verdicts = (
-        extractor.all_verdicts_for(transcript) if isinstance(extractor, VerifyingExtractor) else {}
-    )
+def assemble_draft(
+    draft_id: str,
+    transcript: str,
+    fields: Sequence[PredictedField],
+    signals: Sequence[SignalOut],
+    verdicts: Mapping[str, Mapping[FieldKey, FieldVerdict]],
+    *,
+    masked_count: int = 0,
+) -> Draft:
+    """추출·검증 결과로 검토 대기 초안(rev 1, author=ai)을 만든다. verdicts는 검사기 이름별이다."""
     draft_fields = tuple(
         to_draft_field(transcript, f, {n: v[f.key] for n, v in verdicts.items() if f.key in v})
         for f in fields
     )
     now = datetime.now(UTC)
     return Draft(
-        id=uuid.uuid4().hex,
+        id=draft_id,
         status=DraftStatus.IN_REVIEW,
         created_at=now,
         transcript=transcript,
         fields=draft_fields,
-        signals=tuple(to_signal(s) for s in extractor.signals_for(transcript)),
+        signals=tuple(signals),
         revisions=(RevisionRecord(rev=1, author="ai", at=now, fields=draft_fields),),
         audit=(
             AuditEntry(
@@ -96,6 +100,22 @@ def create_draft(transcript: str, extractor: DraftExtractor, *, masked_count: in
                 detail=f"masked={masked_count}" if masked_count else "",
             ),
         ),
+    )
+
+
+def create_draft(transcript: str, extractor: DraftExtractor, *, masked_count: int = 0) -> Draft:
+    """추출기를 한 번 실행해 검토 대기 초안을 만든다. masked_count는 마스킹 횟수(감사용)."""
+    fields = extractor.extract(transcript)
+    verdicts = (
+        extractor.all_verdicts_for(transcript) if isinstance(extractor, VerifyingExtractor) else {}
+    )
+    return assemble_draft(
+        uuid.uuid4().hex,
+        transcript,
+        fields,
+        [to_signal(s) for s in extractor.signals_for(transcript)],
+        verdicts,
+        masked_count=masked_count,
     )
 
 

@@ -8,10 +8,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
+from langgraph.checkpoint.memory import InMemorySaver
 
 from carenote.config import get_settings
 from carenote.drafts.models import DecisionRequest, Draft, DraftCreate, DraftOut, DraftSummary
-from carenote.drafts.service import DecisionError, DraftExtractor, create_draft, decide
+from carenote.drafts.pipeline import DraftPipeline
+from carenote.drafts.service import DecisionError, DraftExtractor, decide
 from carenote.drafts.store import InMemoryDraftStore
 from carenote.extraction.flagger import FlaggingExtractor
 from carenote.extraction.llm_extractor import LLMExtractor, build_client
@@ -72,8 +74,22 @@ def get_extractor() -> VerifyingExtractor:
     )
 
 
+@lru_cache
+def get_checkpointer() -> InMemorySaver:
+    """그래프 체크포인트 저장소. 저장소(InMemoryDraftStore)와 같은 수명이다."""
+    return InMemorySaver()
+
+
 Store = Annotated[InMemoryDraftStore, Depends(get_store)]
 Extractor = Annotated[DraftExtractor, Depends(get_extractor)]
+
+
+def get_pipeline(extractor: Extractor) -> DraftPipeline:
+    """요청마다 주입된 extractor로 그래프를 만든다 (체크포인터만 공유)."""
+    return DraftPipeline(extractor, get_checkpointer())
+
+
+Pipeline = Annotated[DraftPipeline, Depends(get_pipeline)]
 
 
 def to_out(draft: Draft) -> DraftOut:
@@ -93,11 +109,11 @@ def to_out(draft: Draft) -> DraftOut:
 
 
 @router.post("/drafts", response_model=DraftOut, status_code=201)
-def post_draft(body: DraftCreate, store: Store, extractor: Extractor) -> DraftOut:
+def post_draft(body: DraftCreate, store: Store, pipeline: Pipeline) -> DraftOut:
     """transcript로 초안을 만든다. 추출은 동기 호출이라 스레드풀에서 돈다."""
     try:
         masked = mask_pii(body.transcript)
-        draft = create_draft(masked.text, extractor, masked_count=masked.total)
+        draft = pipeline.create(masked.text, masked_count=masked.total)
     except HTTPException:
         raise
     except Exception as exc:  # 모델·네트워크 오류. 본문은 로그에 남기지 않는다.
@@ -125,7 +141,9 @@ def get_draft(draft_id: str, store: Store) -> DraftOut:
 
 
 @router.post("/drafts/{draft_id}/decision", response_model=DraftOut)
-def post_decision(draft_id: str, body: DecisionRequest, store: Store) -> DraftOut:
+def post_decision(
+    draft_id: str, body: DecisionRequest, store: Store, pipeline: Pipeline
+) -> DraftOut:
     """사람의 승인·거절을 반영한다. 이미 결정된 초안은 409, 미해결 필드가 있으면 422.
 
     인증이 아직 없어 행위자는 고정값(reviewer)이다. 인증 도입 전에는 외부에 열면 안 된다.
@@ -141,6 +159,7 @@ def post_decision(draft_id: str, body: DecisionRequest, store: Store) -> DraftOu
         ) from exc
     if draft is None:
         raise HTTPException(status_code=404, detail="초안이 없다")
+    pipeline.resume(draft_id, body)  # 규칙 검증을 통과한 결정만 그래프를 재개한다
     return to_out(draft)
 
 

@@ -349,6 +349,16 @@ class VerifyingExtractor:
         self._max_workers = max_workers
         self._records: dict[str, dict[str, dict[FieldKey, FieldVerdict]]] = {}
 
+    @property
+    def inner(self) -> Extractor:
+        """감싼 내부 extractor."""
+        return self._inner
+
+    @property
+    def checkers(self) -> dict[str, FieldChecker]:
+        """이름별 검사기 (복사본)."""
+        return dict(self._checkers)
+
     def signals_for(self, transcript: str) -> list[Signal]:
         """내부 extractor의 Sentinel 신호를 그대로 전달한다 (없으면 빈 목록)."""
         if isinstance(self._inner, SupportsSignals):

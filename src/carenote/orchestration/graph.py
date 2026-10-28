@@ -9,7 +9,7 @@ extract → verify(위험 필드마다 병렬) → consensus → 사람 검토(i
 
 from __future__ import annotations
 
-from dataclasses import asdict
+from collections.abc import Mapping
 from typing import Annotated, Any, Literal, Protocol, TypedDict, cast
 
 from langgraph.checkpoint.base import BaseCheckpointSaver
@@ -21,8 +21,8 @@ from carenote.evaluation.extractor import PredictedField
 from carenote.evaluation.schema import FieldKey, Flag
 from carenote.extraction.sentinel import Signal
 from carenote.extraction.verifier import (
+    FieldChecker,
     FieldVerdict,
-    Verifier,
     apply_verdicts,
     needs_verification,
 )
@@ -31,9 +31,14 @@ Decision = Literal["approve", "reject"]
 Status = Literal["approved", "rejected"]
 
 
-def _merge_dicts(left: dict[str, Any], right: dict[str, Any]) -> dict[str, Any]:
-    """병렬 verify 노드의 결과를 키별로 합친다 (리듀서)."""
-    return {**left, **right}
+def _merge_verdicts(
+    left: dict[str, dict[str, Any]], right: dict[str, dict[str, Any]]
+) -> dict[str, dict[str, Any]]:
+    """병렬 verify 노드의 결과를 검사기·필드 키별로 합친다 (리듀서)."""
+    merged = {name: dict(by_key) for name, by_key in left.items()}
+    for name, by_key in right.items():
+        merged.setdefault(name, {}).update(by_key)
+    return merged
 
 
 class DraftState(TypedDict, total=False):
@@ -42,15 +47,17 @@ class DraftState(TypedDict, total=False):
     transcript: str
     fields: list[dict[str, Any]]
     signals: list[dict[str, Any]]
-    verdicts: Annotated[dict[str, Any], _merge_dicts]
+    # 검사기 이름 → 필드 키 → {status, quote, reason}
+    verdicts: Annotated[dict[str, dict[str, Any]], _merge_verdicts]
     decision: Decision
     edits: dict[str, str]
     status: Status
 
 
 class VerifyInput(TypedDict):
-    """Send로 verify 노드에 넘기는 입력 (필드 하나)."""
+    """Send로 verify 노드에 넘기는 입력 (검사기 하나 × 필드 하나)."""
 
+    checker: str
     transcript: str
     field: dict[str, Any]
 
@@ -81,6 +88,16 @@ def _field(data: dict[str, Any]) -> PredictedField:
     return PredictedField.model_validate(data)
 
 
+def verdicts_from_state(by_key: Mapping[str, Mapping[str, Any]]) -> dict[FieldKey, FieldVerdict]:
+    """상태에 저장된 한 검사기의 판정(JSON 호환 dict)을 FieldVerdict로 되돌린다."""
+    return {
+        FieldKey(key): FieldVerdict(
+            key=FieldKey(key), status=raw["status"], quote=raw["quote"], reason=raw["reason"]
+        )
+        for key, raw in by_key.items()
+    }
+
+
 def resume_command(answer: dict[str, Any] | None) -> Command[Any]:
     """사람의 답으로 interrupt를 재개하는 Command를 만든다.
 
@@ -92,10 +109,17 @@ def resume_command(answer: dict[str, Any] | None) -> Command[Any]:
 
 def build_graph(
     extractor: GraphExtractor,
-    verifier: Verifier,
+    checkers: FieldChecker | Mapping[str, FieldChecker],
     checkpointer: BaseCheckpointSaver[Any],
 ) -> CompiledStateGraph[DraftState, None, DraftState, DraftState]:
-    """그래프를 만든다. interrupt를 쓰므로 체크포인터가 필수다."""
+    """그래프를 만든다. interrupt를 쓰므로 체크포인터가 필수다.
+
+    검사기가 여럿이면 (검사기 × 위험 필드) 호출을 한 단계에서 동시에 보낸다. 검사기 하나만 주면
+    이름은 "verifier"다.
+    """
+    named: dict[str, FieldChecker] = (
+        dict(checkers) if isinstance(checkers, Mapping) else {"verifier": checkers}
+    )
 
     def extract(state: DraftState) -> DraftState:
         transcript = state.get("transcript", "")
@@ -106,7 +130,7 @@ def build_graph(
         }
 
     def fan_out(state: DraftState) -> list[Send] | str:
-        """검증 대상 위험 필드마다 verify를 병렬로 보낸다. 대상이 없으면 바로 consensus."""
+        """(검사기 × 위험 필드)마다 verify를 병렬로 보낸다. 대상이 없으면 바로 consensus."""
         targets = [f for f in map(_field, state.get("fields", [])) if needs_verification(f)]
         if not targets:
             return "consensus"
@@ -114,28 +138,26 @@ def build_graph(
             Send(
                 "verify",
                 VerifyInput(
-                    transcript=state.get("transcript", ""), field=f.model_dump(mode="json")
+                    checker=name,
+                    transcript=state.get("transcript", ""),
+                    field=f.model_dump(mode="json"),
                 ),
             )
+            for name in named
             for f in targets
         ]
 
     def verify(state: VerifyInput) -> DraftState:
         field = _field(state["field"])
-        verdict = verifier.verify(state["transcript"], field)
-        return {"verdicts": {field.key.value: asdict(verdict)}}
+        verdict = named[state["checker"]].verify(state["transcript"], field)
+        # 체크포인트에는 JSON 호환 값만 둔다 (키는 바깥 dict가 가진다)
+        raw = {"status": verdict.status, "quote": verdict.quote, "reason": verdict.reason}
+        return {"verdicts": {state["checker"]: {field.key.value: raw}}}
 
     def consensus(state: DraftState) -> DraftState:
-        verdicts = {
-            FieldKey(key): FieldVerdict(
-                key=FieldKey(key),
-                status=raw["status"],
-                quote=raw["quote"],
-                reason=raw["reason"],
-            )
-            for key, raw in state.get("verdicts", {}).items()
-        }
-        fields = apply_verdicts([_field(f) for f in state.get("fields", [])], verdicts)
+        fields = [_field(f) for f in state.get("fields", [])]
+        for by_key in state.get("verdicts", {}).values():
+            fields = apply_verdicts(fields, verdicts_from_state(by_key))
         return {"fields": [f.model_dump(mode="json") for f in fields]}
 
     def human_review(state: DraftState) -> Command[Literal["finalize"]]:
